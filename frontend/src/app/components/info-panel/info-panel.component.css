@@ -1,0 +1,152 @@
+.info-panel {
+  padding: 16px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  max-height: calc(100vh - 200px);
+  overflow-y: auto;
+}
+
+.panel-title {
+  margin: 0 0 16px 0;
+  font-size: 18px;
+  color: #333;
+  border-bottom: 2px solid #eee;
+  padding-bottom: 8px;
+}
+
+.info-section {
+  margin-bottom: 20px;
+}
+
+.info-section:last-child {
+  margin-bottom: 0;
+}
+
+.section-title {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stat-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.stat-row:last-child {
+  border-bottom: none;
+}
+
+.stat-row.total {
+  border-top: 2px solid #eee;
+  padding-top: 12px;
+  margin-top: 4px;
+  font-weight: 600;
+}
+
+.stat-row.highlight {
+  background-color: #E8F5E9;
+  padding: 12px;
+  border-radius: 6px;
+  margin-top: 8px;
+}
+
+.stat-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #555;
+}
+
+.stat-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+}
+
+.stat-value.length {
+  font-size: 16px;
+  color: #2E7D32;
+}
+
+.dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.terminal-dot {
+  background-color: #2196F3;
+}
+
+.steiner-dot {
+  background-color: #FF5722;
+}
+
+.points-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 150px;
+  overflow-y: auto;
+}
+
+.point-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 10px;
+  background-color: #E3F2FD;
+  border-radius: 4px;
+  font-size: 13px;
+}
+
+.point-item.steiner {
+  background-color: #FBE9E7;
+}
+
+.point-label {
+  font-weight: 600;
+  color: #1565C0;
+}
+
+.point-item.steiner .point-label {
+  color: #D84315;
+}
+
+.point-coords {
+  color: #666;
+  font-family: 'Courier New', monospace;
+}
+
+.legend {
+  background-color: #f9f9f9;
+  padding: 12px;
+  border-radius: 6px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
+  font-size: 13px;
+  color: #555;
+}
+
+.line {
+  width: 20px;
+  height: 3px;
+  display: inline-block;
+}
+
+.edge-line {
+  background-color: #4CAF50;
+}

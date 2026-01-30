@@ -1,0 +1,68 @@
+﻿<div class="info-panel">
+  <h3 class="panel-title">Statistics</h3>
+  <div class="info-section">
+    <h4 class="section-title">Points</h4>
+    <div class="stat-row">
+      <span class="stat-label">
+        <span class="dot terminal-dot"></span>
+        Terminal Points (Cities)
+      </span>
+      <span class="stat-value">{{ terminalCount }}</span>
+    </div>
+    <div class="stat-row" *ngIf="hasSolution">
+      <span class="stat-label">
+        <span class="dot steiner-dot"></span>
+        Steiner Points
+      </span>
+      <span class="stat-value">{{ steinerCount }}</span>
+    </div>
+    <div class="stat-row total" *ngIf="hasSolution">
+      <span class="stat-label">Total Points</span>
+      <span class="stat-value">{{ terminalCount + steinerCount }}</span>
+    </div>
+  </div>
+  <div class="info-section" *ngIf="hasSolution">
+    <h4 class="section-title">Solution</h4>
+    <div class="stat-row">
+      <span class="stat-label">Number of Edges</span>
+      <span class="stat-value">{{ edgeCount }}</span>
+    </div>
+    <div class="stat-row highlight">
+      <span class="stat-label">Total Network Length</span>
+      <span class="stat-value length">{{ formattedLength }} px</span>
+    </div>
+  </div>
+  <div class="info-section" *ngIf="terminalCount > 0">
+    <h4 class="section-title">Terminal Points List</h4>
+    <div class="points-list">
+      <div class="point-item" *ngFor="let point of terminalPoints; let i = index">
+        <span class="point-label">P{{ i + 1 }}</span>
+        <span class="point-coords">({{ point.x }}, {{ point.y }})</span>
+      </div>
+    </div>
+  </div>
+  <div class="info-section" *ngIf="steinerCount > 0">
+    <h4 class="section-title">Steiner Points List</h4>
+    <div class="points-list">
+      <div class="point-item steiner" *ngFor="let point of steinerPoints; let i = index">
+        <span class="point-label">S{{ i + 1 }}</span>
+        <span class="point-coords">({{ point.x.toFixed(1) }}, {{ point.y.toFixed(1) }})</span>
+      </div>
+    </div>
+  </div>
+  <div class="info-section legend">
+    <h4 class="section-title">Legend</h4>
+    <div class="legend-item">
+      <span class="dot terminal-dot"></span>
+      <span>Terminal Point (City)</span>
+    </div>
+    <div class="legend-item">
+      <span class="dot steiner-dot"></span>
+      <span>Steiner Point</span>
+    </div>
+    <div class="legend-item">
+      <span class="line edge-line"></span>
+      <span>Edge (Connection)</span>
+    </div>
+  </div>
+</div>

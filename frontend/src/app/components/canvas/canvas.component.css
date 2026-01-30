@@ -1,0 +1,126 @@
+/* ==========================================================================
+   CANVAS COMPONENT - Algorithm Visualization Area
+   ========================================================================== */
+
+.canvas-container {
+  position: relative;
+  display: inline-block;
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+
+  /* Glassmorphism effect */
+  background: var(--bg-glass);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+
+  /* Glowing border effect */
+  border: 1px solid var(--border-default);
+  box-shadow:
+    var(--shadow-lg),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    0 0 40px rgba(0, 191, 255, 0.1);
+
+  /* Subtle animation on load */
+  animation: fade-in 0.6s ease-out;
+}
+
+/* Corner accents - futuristic frame */
+.canvas-container::before,
+.canvas-container::after {
+  content: '';
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--primary-500);
+  opacity: 0.5;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.canvas-container::before {
+  top: 8px;
+  left: 8px;
+  border-right: none;
+  border-bottom: none;
+  border-radius: var(--radius-sm) 0 0 0;
+}
+
+.canvas-container::after {
+  bottom: 8px;
+  right: 8px;
+  border-left: none;
+  border-top: none;
+  border-radius: 0 0 var(--radius-sm) 0;
+}
+
+/* The actual canvas element */
+.steiner-canvas {
+  display: block;
+  transition: opacity var(--transition-base);
+}
+
+/* Hover state - subtle glow enhancement */
+.canvas-container:hover {
+  box-shadow:
+    var(--shadow-xl),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    0 0 60px rgba(0, 191, 255, 0.15);
+  border-color: var(--border-glow);
+}
+
+/* ==========================================================================
+   CANVAS INSTRUCTIONS - Empty state overlay
+   ========================================================================== */
+
+.canvas-instructions {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  /* Glassmorphism card */
+  background: var(--bg-glass-light);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+
+  padding: var(--space-6) var(--space-8);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-lg);
+
+  pointer-events: none;
+  animation: fade-in 0.5s ease-out 0.3s backwards;
+}
+
+.canvas-instructions p {
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  text-align: center;
+  letter-spacing: var(--letter-spacing-wide);
+}
+
+/* Pulsing cursor indicator */
+.canvas-instructions::after {
+  content: '';
+  display: block;
+  width: 8px;
+  height: 8px;
+  background: var(--primary-500);
+  border-radius: 50%;
+  margin: var(--space-4) auto 0;
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* ==========================================================================
+   RESPONSIVE DESIGN
+   ========================================================================== */
+
+@media (max-width: 900px) {
+  .canvas-container {
+    max-width: 100%;
+  }
+
+  .canvas-instructions {
+    padding: var(--space-4) var(--space-6);
+  }
+}

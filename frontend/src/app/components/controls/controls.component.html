@@ -1,0 +1,43 @@
+﻿<div class="controls-container">
+  <h3 class="controls-title">Controls</h3>
+  <div class="button-group">
+    <!-- Solve Button -->
+    <button 
+      class="btn btn-primary"
+      [disabled]="!canSolve"
+      [class.loading]="isLoading"
+      (click)="onSolve()">
+      <span class="btn-icon" *ngIf="!isLoading">🔍</span>
+      <span class="btn-icon spinner" *ngIf="isLoading">⏳</span>
+      {{ solveButtonText }}
+    </button>
+    <!-- Clear Solution Button (only shown when there's a solution) -->
+    <button 
+      class="btn btn-secondary"
+      *ngIf="hasSolution"
+      (click)="onClearSolution()">
+      <span class="btn-icon">🔄</span>
+      Clear Solution
+    </button>
+    <!-- Clear All Button -->
+    <button 
+      class="btn btn-danger"
+      [disabled]="pointCount === 0"
+      (click)="onClear()">
+      <span class="btn-icon">🗑️</span>
+      Clear All
+    </button>
+  </div>
+  <!-- Help text -->
+  <div class="help-text">
+    <p *ngIf="pointCount < 2" class="warning">
+      Add at least 2 points to solve
+    </p>
+    <p *ngIf="pointCount >= 2 && !hasSolution" class="info">
+      Ready to compute Steiner tree
+    </p>
+    <p *ngIf="hasSolution" class="success">
+      Solution displayed on canvas
+    </p>
+  </div>
+</div>

@@ -1,0 +1,15 @@
+<div class="canvas-container">
+  <!-- Main drawing canvas -->
+  <canvas
+    #canvas
+    class="steiner-canvas"
+    [style.cursor]="cursorStyle"
+    (click)="onCanvasClick($event)">
+    Your browser does not support the HTML5 canvas element.
+  </canvas>
+
+  <!-- Instructions overlay when no points exist -->
+  <div class="canvas-instructions" *ngIf="terminalPoints.length === 0 && isAddingEnabled">
+    <p>Click anywhere on the canvas to add points</p>
+  </div>
+</div>
