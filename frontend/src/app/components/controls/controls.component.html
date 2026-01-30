@@ -1,43 +1,51 @@
-﻿<div class="controls-container">
+﻿﻿<div class="controls-container">
   <h3 class="controls-title">Controls</h3>
   <div class="button-group">
     <!-- Solve Button -->
-    <button 
+    <button
       class="btn btn-primary"
       [disabled]="!canSolve"
       [class.loading]="isLoading"
       (click)="onSolve()">
-      <span class="btn-icon" *ngIf="!isLoading">🔍</span>
-      <span class="btn-icon spinner" *ngIf="isLoading">⏳</span>
+      <span class="btn-icon" *ngIf="!isLoading">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+      </span>
+      <span class="btn-icon spinner" *ngIf="isLoading">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line></svg>
+      </span>
       {{ solveButtonText }}
     </button>
     <!-- Clear Solution Button (only shown when there's a solution) -->
-    <button 
+    <button
       class="btn btn-secondary"
       *ngIf="hasSolution"
       (click)="onClearSolution()">
-      <span class="btn-icon">🔄</span>
+      <span class="btn-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
+      </span>
       Clear Solution
     </button>
     <!-- Clear All Button -->
-    <button 
+    <button
       class="btn btn-danger"
       [disabled]="pointCount === 0"
       (click)="onClear()">
-      <span class="btn-icon">🗑️</span>
+      <span class="btn-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+      </span>
       Clear All
     </button>
   </div>
-  <!-- Help text -->
+  <!-- Status Messages -->
   <div class="help-text">
     <p *ngIf="pointCount < 2" class="warning">
-      Add at least 2 points to solve
+      [!] Add at least 2 points to solve
     </p>
     <p *ngIf="pointCount >= 2 && !hasSolution" class="info">
-      Ready to compute Steiner tree
+      [i] Ready to compute Steiner tree
     </p>
     <p *ngIf="hasSolution" class="success">
-      Solution displayed on canvas
+      [+] Solution displayed on canvas
     </p>
   </div>
 </div>

@@ -29,9 +29,16 @@
 }
 
 .logo-icon {
-  font-size: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary-500);
   filter: drop-shadow(0 0 8px rgba(0, 191, 255, 0.5));
-  animation: pulse-glow 3s ease-in-out infinite;
+}
+
+.logo-icon svg {
+  width: 32px;
+  height: 32px;
 }
 
 .app-title {

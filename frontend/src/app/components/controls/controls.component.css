@@ -95,8 +95,14 @@
 }
 
 .btn-icon {
-  font-size: var(--font-size-base);
-  filter: drop-shadow(0 0 2px currentColor);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-icon svg {
+  width: 16px;
+  height: 16px;
 }
 
 /* ==========================================================================

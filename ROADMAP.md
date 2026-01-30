@@ -1,30 +1,31 @@
-# 🌳 Steiner Tree Solver - Project Roadmap
+# Steiner Tree Solver - Project Roadmap
 
-## 📋 Milestones Overview
+## Milestones Overview
 
-| Milestone | Description | Priority | Status |
-|-----------|-------------|----------|--------|
-| **M1** | Core Algorithm Implementation | 🔴 High | 🟡 In Progress |
-| **M2** | UI/UX Enhancements | 🟠 Medium | ⬜ Not Started |
-| **M3** | Step-by-Step Visualization | 🟠 Medium | ⬜ Not Started |
-| **M4** | Educational Features | 🟢 Low | ⬜ Not Started |
-| **M5** | Testing & Quality | 🔴 High | ⬜ Not Started |
-| **M6** | Deployment & Documentation | 🟢 Low | ⬜ Not Started |
+| ID | Milestone | Priority | Status |
+|----|-----------|----------|--------|
+| M1 | Core Algorithm Implementation | HIGH | IN PROGRESS |
+| M2 | UI/UX Enhancements | MEDIUM | NOT STARTED |
+| M3 | Step-by-Step Visualization | MEDIUM | NOT STARTED |
+| M4 | Educational Features | LOW | NOT STARTED |
+| M5 | Testing & Quality | HIGH | NOT STARTED |
+| M6 | Deployment & Documentation | LOW | NOT STARTED |
 
 ---
 
-## 🎯 Milestone 1: Core Algorithm Implementation
+## [M1] Core Algorithm Implementation
 
-### ✅ Completed
+### Completed
 - [x] Basic 2-point solution (straight line)
 - [x] 3-point solution with Fermat point (Weiszfeld algorithm)
 - [x] Simple MST for 4+ points (Prim's algorithm)
 
-### 📝 Issues
+### Issues
 
-#### Issue #1: Implement true Steiner Tree algorithm for 4+ points
-**Priority:** 🔴 High  
-**Labels:** `enhancement`, `algorithm`, `backend`  
+#### #1 - Implement true Steiner Tree algorithm for 4+ points
+**Priority:** HIGH  
+**Labels:** `enhancement` `algorithm` `backend`  
+
 **Description:**  
 The current implementation uses MST (Minimum Spanning Tree) for 4+ points, which is NOT optimal. We need to implement a proper Steiner Tree algorithm that adds Steiner points to minimize total network length.
 
@@ -40,9 +41,10 @@ The current implementation uses MST (Minimum Spanning Tree) for 4+ points, which
 
 ---
 
-#### Issue #2: Optimize Fermat point computation
-**Priority:** 🟡 Medium  
-**Labels:** `optimization`, `algorithm`, `backend`  
+#### #2 - Optimize Fermat point computation
+**Priority:** MEDIUM  
+**Labels:** `optimization` `algorithm` `backend`  
+
 **Description:**  
 The current Weiszfeld algorithm works but could be improved with:
 - Better initial guess (not just centroid)
@@ -56,9 +58,10 @@ The current Weiszfeld algorithm works but could be improved with:
 
 ---
 
-#### Issue #3: Handle edge cases and validation
-**Priority:** 🔴 High  
-**Labels:** `bug`, `backend`  
+#### #3 - Handle edge cases and validation
+**Priority:** HIGH  
+**Labels:** `bug` `backend`  
+
 **Description:**  
 Add proper handling for edge cases:
 
@@ -71,13 +74,14 @@ Add proper handling for edge cases:
 
 ---
 
-## 🎨 Milestone 2: UI/UX Enhancements
+## [M2] UI/UX Enhancements
 
-### 📝 Issues
+### Issues
 
-#### Issue #4: Add point deletion functionality
-**Priority:** 🔴 High  
-**Labels:** `enhancement`, `frontend`, `UX`  
+#### #4 - Add point deletion functionality
+**Priority:** HIGH  
+**Labels:** `enhancement` `frontend` `UX`  
+
 **Description:**  
 Users should be able to delete individual points.
 
@@ -89,9 +93,10 @@ Users should be able to delete individual points.
 
 ---
 
-#### Issue #5: Add point dragging functionality
-**Priority:** 🟠 Medium  
-**Labels:** `enhancement`, `frontend`, `UX`  
+#### #5 - Add point dragging functionality
+**Priority:** MEDIUM  
+**Labels:** `enhancement` `frontend` `UX`  
+
 **Description:**  
 Allow users to drag points to new positions and see the solution update in real-time.
 
@@ -103,9 +108,10 @@ Allow users to drag points to new positions and see the solution update in real-
 
 ---
 
-#### Issue #6: Add zoom and pan functionality
-**Priority:** 🟡 Medium  
-**Labels:** `enhancement`, `frontend`  
+#### #6 - Add zoom and pan functionality
+**Priority:** MEDIUM  
+**Labels:** `enhancement` `frontend`  
+
 **Description:**  
 For large point sets, users need to zoom and pan the canvas.
 
@@ -118,9 +124,10 @@ For large point sets, users need to zoom and pan the canvas.
 
 ---
 
-#### Issue #7: Add coordinate input form
-**Priority:** 🟡 Medium  
-**Labels:** `enhancement`, `frontend`, `UX`  
+#### #7 - Add coordinate input form
+**Priority:** MEDIUM  
+**Labels:** `enhancement` `frontend` `UX`  
+
 **Description:**  
 Allow users to input precise coordinates instead of clicking.
 
@@ -132,9 +139,10 @@ Allow users to input precise coordinates instead of clicking.
 
 ---
 
-#### Issue #8: Improve mobile responsiveness
-**Priority:** 🟢 Low  
-**Labels:** `enhancement`, `frontend`, `responsive`  
+#### #8 - Improve mobile responsiveness
+**Priority:** LOW  
+**Labels:** `enhancement` `frontend` `responsive`  
+
 **Description:**  
 Make the app fully usable on tablets and mobile devices.
 
@@ -146,13 +154,14 @@ Make the app fully usable on tablets and mobile devices.
 
 ---
 
-## 🎬 Milestone 3: Step-by-Step Visualization
+## [M3] Step-by-Step Visualization
 
-### 📝 Issues
+### Issues
 
-#### Issue #9: Implement algorithm animation system
-**Priority:** 🟠 Medium  
-**Labels:** `enhancement`, `frontend`, `animation`  
+#### #9 - Implement algorithm animation system
+**Priority:** MEDIUM  
+**Labels:** `enhancement` `frontend` `animation`  
+
 **Description:**  
 Create a system to animate the algorithm step-by-step for educational purposes.
 
@@ -166,9 +175,10 @@ Create a system to animate the algorithm step-by-step for educational purposes.
 
 ---
 
-#### Issue #10: Visualize Fermat point construction
-**Priority:** 🟠 Medium  
-**Labels:** `enhancement`, `frontend`, `educational`  
+#### #10 - Visualize Fermat point construction
+**Priority:** MEDIUM  
+**Labels:** `enhancement` `frontend` `educational`  
+
 **Description:**  
 Show the geometric construction of the Fermat point:
 1. Draw equilateral triangles on each side
@@ -178,14 +188,15 @@ Show the geometric construction of the Fermat point:
 **Tasks:**
 - [ ] Draw construction lines (dashed, different color)
 - [ ] Animate step-by-step
-- [ ] Show angle measurements (120°)
+- [ ] Show angle measurements (120 deg)
 - [ ] Toggle visibility of construction
 
 ---
 
-#### Issue #11: Visualize MST construction (Prim's algorithm)
-**Priority:** 🟡 Medium  
-**Labels:** `enhancement`, `frontend`, `educational`  
+#### #11 - Visualize MST construction (Prim's algorithm)
+**Priority:** MEDIUM  
+**Labels:** `enhancement` `frontend` `educational`  
+
 **Description:**  
 Animate the MST building process showing:
 - Current frontier
@@ -200,13 +211,14 @@ Animate the MST building process showing:
 
 ---
 
-## 📚 Milestone 4: Educational Features
+## [M4] Educational Features
 
-### 📝 Issues
+### Issues
 
-#### Issue #12: Add algorithm explanation panel
-**Priority:** 🟡 Medium  
-**Labels:** `enhancement`, `frontend`, `educational`  
+#### #12 - Add algorithm explanation panel
+**Priority:** MEDIUM  
+**Labels:** `enhancement` `frontend` `educational`  
+
 **Description:**  
 Create a collapsible panel explaining the algorithm being used.
 
@@ -218,9 +230,10 @@ Create a collapsible panel explaining the algorithm being used.
 
 ---
 
-#### Issue #13: Add comparison mode (MST vs Steiner)
-**Priority:** 🟠 Medium  
-**Labels:** `enhancement`, `frontend`, `educational`  
+#### #13 - Add comparison mode (MST vs Steiner)
+**Priority:** MEDIUM  
+**Labels:** `enhancement` `frontend` `educational`  
+
 **Description:**  
 Show side-by-side or overlay comparison of MST vs Steiner Tree.
 
@@ -232,9 +245,10 @@ Show side-by-side or overlay comparison of MST vs Steiner Tree.
 
 ---
 
-#### Issue #14: Add interactive quiz/challenges
-**Priority:** 🟢 Low  
-**Labels:** `enhancement`, `frontend`, `gamification`  
+#### #14 - Add interactive quiz/challenges
+**Priority:** LOW  
+**Labels:** `enhancement` `frontend` `gamification`  
+
 **Description:**  
 Create interactive challenges for students:
 - "Guess where the Steiner point should be"
@@ -249,9 +263,10 @@ Create interactive challenges for students:
 
 ---
 
-#### Issue #15: Add history/examples gallery
-**Priority:** 🟢 Low  
-**Labels:** `enhancement`, `frontend`  
+#### #15 - Add history/examples gallery
+**Priority:** LOW  
+**Labels:** `enhancement` `frontend`  
+
 **Description:**  
 Showcase interesting Steiner Tree examples:
 - Historical problems
@@ -266,13 +281,14 @@ Showcase interesting Steiner Tree examples:
 
 ---
 
-## 🧪 Milestone 5: Testing & Quality
+## [M5] Testing & Quality
 
-### 📝 Issues
+### Issues
 
-#### Issue #16: Add backend unit tests
-**Priority:** 🔴 High  
-**Labels:** `testing`, `backend`  
+#### #16 - Add backend unit tests
+**Priority:** HIGH  
+**Labels:** `testing` `backend`  
+
 **Description:**  
 Comprehensive unit tests for the algorithm service.
 
@@ -286,9 +302,10 @@ Comprehensive unit tests for the algorithm service.
 
 ---
 
-#### Issue #17: Add frontend unit tests
-**Priority:** 🔴 High  
-**Labels:** `testing`, `frontend`  
+#### #17 - Add frontend unit tests
+**Priority:** HIGH  
+**Labels:** `testing` `frontend`  
+
 **Description:**  
 Unit tests for Angular components and services.
 
@@ -301,9 +318,10 @@ Unit tests for Angular components and services.
 
 ---
 
-#### Issue #18: Add E2E tests
-**Priority:** 🟡 Medium  
-**Labels:** `testing`, `e2e`  
+#### #18 - Add E2E tests
+**Priority:** MEDIUM  
+**Labels:** `testing` `e2e`  
+
 **Description:**  
 End-to-end tests with Cypress or Playwright.
 
@@ -316,9 +334,10 @@ End-to-end tests with Cypress or Playwright.
 
 ---
 
-#### Issue #19: Add input validation and error handling
-**Priority:** 🔴 High  
-**Labels:** `bug`, `backend`, `frontend`  
+#### #19 - Add input validation and error handling
+**Priority:** HIGH  
+**Labels:** `bug` `backend` `frontend`  
+
 **Description:**  
 Robust error handling throughout the application.
 
@@ -331,13 +350,14 @@ Robust error handling throughout the application.
 
 ---
 
-## 🚀 Milestone 6: Deployment & Documentation
+## [M6] Deployment & Documentation
 
-### 📝 Issues
+### Issues
 
-#### Issue #20: Create Docker setup
-**Priority:** 🟡 Medium  
-**Labels:** `devops`, `docker`  
+#### #20 - Create Docker setup
+**Priority:** MEDIUM  
+**Labels:** `devops` `docker`  
+
 **Description:**  
 Containerize the application for easy deployment.
 
@@ -350,9 +370,10 @@ Containerize the application for easy deployment.
 
 ---
 
-#### Issue #21: Write comprehensive README
-**Priority:** 🟠 Medium  
+#### #21 - Write comprehensive README
+**Priority:** MEDIUM  
 **Labels:** `documentation`  
+
 **Description:**  
 Update README with:
 - Project description
@@ -364,9 +385,10 @@ Update README with:
 
 ---
 
-#### Issue #22: Add API documentation (OpenAPI/Swagger)
-**Priority:** 🟢 Low  
-**Labels:** `documentation`, `backend`  
+#### #22 - Add API documentation (OpenAPI/Swagger)
+**Priority:** LOW  
+**Labels:** `documentation` `backend`  
+
 **Description:**  
 Auto-generate API documentation.
 
@@ -378,9 +400,10 @@ Auto-generate API documentation.
 
 ---
 
-#### Issue #23: Create user guide
-**Priority:** 🟢 Low  
+#### #23 - Create user guide
+**Priority:** LOW  
 **Labels:** `documentation`  
+
 **Description:**  
 Step-by-step guide for users (students, teachers).
 
@@ -392,9 +415,10 @@ Step-by-step guide for users (students, teachers).
 
 ---
 
-#### Issue #24: Setup CI/CD pipeline
-**Priority:** 🟡 Medium  
-**Labels:** `devops`, `CI/CD`  
+#### #24 - Setup CI/CD pipeline
+**Priority:** MEDIUM  
+**Labels:** `devops` `CI/CD`  
+
 **Description:**  
 Automated testing and deployment.
 
@@ -407,59 +431,59 @@ Automated testing and deployment.
 
 ---
 
-## 📊 Summary
+## Summary
 
-| Category | Total Issues | High Priority | Medium Priority | Low Priority |
-|----------|-------------|---------------|-----------------|--------------|
+| Category | Total | High | Medium | Low |
+|----------|-------|------|--------|-----|
 | Algorithm | 3 | 2 | 1 | 0 |
 | UI/UX | 5 | 1 | 3 | 1 |
-| Visualization | 3 | 0 | 2 | 1 |
+| Visualization | 3 | 0 | 3 | 0 |
 | Educational | 4 | 0 | 2 | 2 |
-| Testing | 4 | 2 | 1 | 1 |
+| Testing | 4 | 3 | 1 | 0 |
 | DevOps/Docs | 5 | 0 | 3 | 2 |
-| **Total** | **24** | **5** | **12** | **7** |
+| **Total** | **24** | **6** | **13** | **5** |
 
 ---
 
-## 🏃 Suggested Sprint Plan
+## Sprint Plan
 
 ### Sprint 1 (Week 1-2): Core Improvements
-- Issue #1: True Steiner Tree for 4+ points
-- Issue #3: Edge cases handling
-- Issue #16: Backend unit tests
-- Issue #19: Error handling
+- #1: True Steiner Tree for 4+ points
+- #3: Edge cases handling
+- #16: Backend unit tests
+- #19: Error handling
 
 ### Sprint 2 (Week 3-4): UX Essentials
-- Issue #4: Point deletion
-- Issue #5: Point dragging
-- Issue #7: Coordinate input
-- Issue #17: Frontend unit tests
+- #4: Point deletion
+- #5: Point dragging
+- #7: Coordinate input
+- #17: Frontend unit tests
 
 ### Sprint 3 (Week 5-6): Educational Features
-- Issue #9: Animation system
-- Issue #10: Fermat point visualization
-- Issue #12: Algorithm explanations
-- Issue #13: MST vs Steiner comparison
+- #9: Animation system
+- #10: Fermat point visualization
+- #12: Algorithm explanations
+- #13: MST vs Steiner comparison
 
 ### Sprint 4 (Week 7-8): Polish & Deploy
-- Issue #6: Zoom and pan
-- Issue #20: Docker setup
-- Issue #21: README
-- Issue #24: CI/CD pipeline
+- #6: Zoom and pan
+- #20: Docker setup
+- #21: README
+- #24: CI/CD pipeline
 
 ---
 
-## 🏷️ Labels Reference
+## Labels Reference
 
-| Label | Color | Description |
-|-------|-------|-------------|
-| `enhancement` | 🟢 Green | New feature |
-| `bug` | 🔴 Red | Bug fix |
-| `algorithm` | 🟣 Purple | Algorithm related |
-| `frontend` | 🔵 Blue | Frontend changes |
-| `backend` | 🟠 Orange | Backend changes |
-| `testing` | 🟡 Yellow | Testing related |
-| `documentation` | ⚪ White | Documentation |
-| `devops` | 🟤 Brown | DevOps/Infrastructure |
-| `educational` | 🩵 Cyan | Educational features |
-| `UX` | 🩷 Pink | User experience |
+| Label | Description |
+|-------|-------------|
+| `enhancement` | New feature or improvement |
+| `bug` | Bug fix or defect |
+| `algorithm` | Algorithm related changes |
+| `frontend` | Frontend/Angular changes |
+| `backend` | Backend/Spring Boot changes |
+| `testing` | Testing related |
+| `documentation` | Documentation updates |
+| `devops` | DevOps/Infrastructure |
+| `educational` | Educational features |
+| `UX` | User experience improvements |

@@ -1,69 +1,71 @@
-# ✅ TODO - Steiner Tree Solver
+# TODO - Steiner Tree Solver
 
-## 🔴 Priorité Haute (À faire immédiatement)
+## [P0] Critical - Immediate Action Required
 
 ### Backend
-- [ ] **Algorithme Steiner Tree pour 4+ points** - Implémenter un vrai algorithme (pas juste MST)
-- [ ] **Gestion des cas limites** - Points dupliqués, colinéaires, très proches
-- [ ] **Tests unitaires backend** - Couvrir tous les cas de l'algorithme
-- [ ] **Validation des entrées** - Vérifier les données reçues de l'API
+- [ ] Implement true Steiner Tree algorithm for 4+ points (not MST)
+- [ ] Handle edge cases: duplicate points, collinear points, epsilon proximity
+- [ ] Add comprehensive unit tests for algorithm service
+- [ ] Implement input validation and meaningful error responses
 
 ### Frontend
-- [ ] **Suppression de points** - Permettre de supprimer des points individuels
-- [ ] **Tests unitaires frontend** - Tester les composants et services
+- [ ] Add point deletion functionality (right-click, keyboard shortcut)
+- [ ] Add unit tests for components and services
 
 ---
 
-## 🟠 Priorité Moyenne (Sprint suivant)
+## [P1] High Priority - Next Sprint
 
-### Fonctionnalités UX
-- [ ] **Glisser-déposer les points** - Modifier la position des points
-- [ ] **Zoom et pan** - Pour les grands ensembles de points
-- [ ] **Saisie de coordonnées** - Formulaire pour entrer X, Y manuellement
-- [ ] **Import/Export** - Charger/sauvegarder des configurations (JSON, CSV)
+### Features
+- [ ] Point drag-and-drop with real-time solution update
+- [ ] Zoom and pan controls for canvas
+- [ ] Coordinate input form (manual X, Y entry)
+- [ ] Import/Export configurations (JSON, CSV)
 
-### Visualisation
-- [ ] **Animation pas-à-pas** - Montrer l'algorithme étape par étape
-- [ ] **Construction du point de Fermat** - Visualiser la construction géométrique
-- [ ] **Comparaison MST vs Steiner** - Afficher les deux solutions
+### Visualization
+- [ ] Step-by-step algorithm animation system
+- [ ] Fermat point geometric construction visualization
+- [ ] MST vs Steiner Tree comparison mode
 
 ### DevOps
-- [ ] **Docker** - Conteneuriser l'application
-- [ ] **CI/CD** - Pipeline GitHub Actions
-- [ ] **README** - Documentation complète du projet
+- [ ] Docker containerization (backend + frontend)
+- [ ] CI/CD pipeline with GitHub Actions
+- [ ] Comprehensive README documentation
 
 ---
 
-## 🟢 Priorité Basse (Plus tard)
+## [P2] Medium Priority - Backlog
 
-### Fonctionnalités éducatives
-- [ ] **Panel d'explications** - Expliquer l'algorithme utilisé
-- [ ] **Quiz interactifs** - Challenges pour les étudiants
-- [ ] **Galerie d'exemples** - Configurations prédéfinies intéressantes
+### Educational Features
+- [ ] Algorithm explanation panel with LaTeX formulas
+- [ ] Interactive quiz/challenges for students
+- [ ] Example gallery with real-world applications
 
-### Amélirations
-- [ ] **Responsive mobile** - Support tablettes et téléphones
-- [ ] **Documentation API** - Swagger/OpenAPI
-- [ ] **Guide utilisateur** - Tutoriels pour étudiants/enseignants
-
----
-
-## ✅ Terminé
-
-- [x] Frontend Angular avec thème sombre futuriste
-- [x] Composant Canvas avec dessin des points et arêtes
-- [x] Composants Controls et InfoPanel
-- [x] Service API pour communiquer avec le backend
-- [x] Backend Spring Boot avec API REST
-- [x] Solution pour 2 points (ligne droite)
-- [x] Solution pour 3 points (point de Fermat)
-- [x] Solution MST pour 4+ points (temporaire)
-- [x] Configuration CORS pour le développement
+### Improvements
+- [ ] Mobile responsive design
+- [ ] API documentation (OpenAPI/Swagger)
+- [ ] User guide for students and teachers
 
 ---
 
-## 📅 Prochaines étapes suggérées
+## [DONE] Completed
 
-1. **Cette semaine**: Issues #1, #3, #16 (Algorithme + Tests backend)
-2. **Semaine prochaine**: Issues #4, #17 (Suppression points + Tests frontend)
-3. **Dans 2 semaines**: Issues #9, #10 (Animation + Visualisation)
+- [x] Angular frontend with dark futuristic theme
+- [x] Canvas component with point/edge rendering
+- [x] Controls and InfoPanel components
+- [x] SteinerService for backend API communication
+- [x] Spring Boot REST API with CORS configuration
+- [x] 2-point solution (direct line)
+- [x] 3-point solution (Fermat point via Weiszfeld algorithm)
+- [x] 4+ point solution (MST via Prim's algorithm) - temporary
+
+---
+
+## Timeline
+
+| Week | Focus | Issues |
+|------|-------|--------|
+| 1-2 | Core Algorithm + Tests | #1, #3, #16, #19 |
+| 3-4 | UX Essentials | #4, #5, #7, #17 |
+| 5-6 | Educational Features | #9, #10, #12, #13 |
+| 7-8 | Polish & Deploy | #6, #20, #21, #24 |

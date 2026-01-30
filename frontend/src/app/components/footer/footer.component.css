@@ -49,12 +49,22 @@
   transition: all var(--transition-base);
 }
 
+.footer-links a svg {
+  width: 14px;
+  height: 14px;
+  transition: transform var(--transition-fast);
+}
+
 .footer-links a:hover {
   color: var(--primary-300);
   border-color: var(--primary-500);
   background: rgba(0, 191, 255, 0.1);
   text-decoration: none;
   box-shadow: var(--glow-primary);
+}
+
+.footer-links a:hover svg {
+  transform: translate(2px, -2px);
 }
 
 /* Responsive */
