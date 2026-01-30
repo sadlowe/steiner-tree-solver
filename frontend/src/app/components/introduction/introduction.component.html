@@ -1,0 +1,366 @@
+<div class="introduction-overlay" *ngIf="isVisible">
+  <div class="introduction-modal">
+    <!-- Header -->
+    <div class="modal-header">
+      <h2>Understanding the Steiner Tree Problem</h2>
+      <button class="close-btn" (click)="close()" aria-label="Close">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+    </div>
+
+    <!-- Slide Content -->
+    <div class="slide-container">
+
+      <!-- Slide 1: The Problem -->
+      <div class="slide" *ngIf="currentSlide === 0">
+        <div class="slide-content">
+          <div class="illustration">
+            <svg viewBox="0 0 400 300" class="diagram">
+              <!-- Background grid -->
+              <defs>
+                <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+                  <path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+                </pattern>
+              </defs>
+              <rect width="400" height="300" fill="url(#grid)"/>
+
+              <!-- Cities -->
+              <g class="cities">
+                <!-- City A -->
+                <circle cx="80" cy="80" r="20" fill="var(--primary-500)" class="city-node"/>
+                <text x="80" y="85" text-anchor="middle" fill="white" font-size="14" font-weight="bold">A</text>
+                <text x="80" y="120" text-anchor="middle" fill="var(--text-secondary)" font-size="11">Paris</text>
+
+                <!-- City B -->
+                <circle cx="320" cy="80" r="20" fill="var(--primary-500)" class="city-node"/>
+                <text x="320" y="85" text-anchor="middle" fill="white" font-size="14" font-weight="bold">B</text>
+                <text x="320" y="120" text-anchor="middle" fill="var(--text-secondary)" font-size="11">Berlin</text>
+
+                <!-- City C -->
+                <circle cx="200" cy="240" r="20" fill="var(--primary-500)" class="city-node"/>
+                <text x="200" y="245" text-anchor="middle" fill="white" font-size="14" font-weight="bold">C</text>
+                <text x="200" y="280" text-anchor="middle" fill="var(--text-secondary)" font-size="11">Rome</text>
+              </g>
+
+              <!-- Question mark -->
+              <text x="200" y="150" text-anchor="middle" fill="var(--primary-400)" font-size="48" font-weight="bold" class="question-mark">?</text>
+            </svg>
+          </div>
+          <div class="explanation">
+            <h3>{{ slides[0].title }}</h3>
+            <p class="subtitle">{{ slides[0].subtitle }}</p>
+            <div class="description">
+              <p>Imagine you need to build a road network connecting three cities. Your goal is to <strong>minimize the total length of roads</strong> while ensuring all cities are connected.</p>
+              <p>This is the essence of the <strong>Steiner Tree Problem</strong>, named after mathematician Jakob Steiner (1796-1863).</p>
+              <div class="key-point">
+                <span class="icon">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                </span>
+                <span>Real applications: telecommunications, circuit design, pipeline networks</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 2: Naive Solution -->
+      <div class="slide" *ngIf="currentSlide === 1">
+        <div class="slide-content">
+          <div class="illustration">
+            <svg viewBox="0 0 400 300" class="diagram">
+              <defs>
+                <pattern id="grid2" width="20" height="20" patternUnits="userSpaceOnUse">
+                  <path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+                </pattern>
+              </defs>
+              <rect width="400" height="300" fill="url(#grid2)"/>
+
+              <!-- Connections (triangle) -->
+              <g class="edges naive-edges">
+                <line x1="80" y1="80" x2="320" y2="80" stroke="var(--error)" stroke-width="3" class="edge-line"/>
+                <line x1="320" y1="80" x2="200" y2="240" stroke="var(--error)" stroke-width="3" class="edge-line"/>
+                <line x1="200" y1="240" x2="80" y2="80" stroke="var(--error)" stroke-width="3" class="edge-line"/>
+              </g>
+
+              <!-- Length labels -->
+              <g class="length-labels">
+                <text x="200" y="65" text-anchor="middle" fill="var(--error)" font-size="12">240 km</text>
+                <text x="280" y="175" text-anchor="middle" fill="var(--error)" font-size="12">200 km</text>
+                <text x="120" y="175" text-anchor="middle" fill="var(--error)" font-size="12">200 km</text>
+              </g>
+
+              <!-- Cities -->
+              <g class="cities">
+                <circle cx="80" cy="80" r="18" fill="var(--primary-500)"/>
+                <text x="80" y="85" text-anchor="middle" fill="white" font-size="14" font-weight="bold">A</text>
+                <circle cx="320" cy="80" r="18" fill="var(--primary-500)"/>
+                <text x="320" y="85" text-anchor="middle" fill="white" font-size="14" font-weight="bold">B</text>
+                <circle cx="200" cy="240" r="18" fill="var(--primary-500)"/>
+                <text x="200" y="245" text-anchor="middle" fill="white" font-size="14" font-weight="bold">C</text>
+              </g>
+
+              <!-- Total -->
+              <g class="total-label">
+                <rect x="140" y="130" width="120" height="30" rx="4" fill="rgba(239, 68, 68, 0.2)" stroke="var(--error)" stroke-width="1"/>
+                <text x="200" y="150" text-anchor="middle" fill="var(--error)" font-size="14" font-weight="bold">Total: 640 km</text>
+              </g>
+            </svg>
+          </div>
+          <div class="explanation">
+            <h3>{{ slides[1].title }}</h3>
+            <p class="subtitle">{{ slides[1].subtitle }}</p>
+            <div class="description">
+              <p>The most obvious solution is to connect every city directly to every other city, forming a <strong>complete graph</strong>.</p>
+              <p>This works, but it's <strong>wasteful</strong> - we're building more roads than necessary!</p>
+              <div class="comparison bad">
+                <span class="label">Total length:</span>
+                <span class="value">640 km</span>
+                <span class="verdict">Inefficient</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 3: MST Solution -->
+      <div class="slide" *ngIf="currentSlide === 2">
+        <div class="slide-content">
+          <div class="illustration">
+            <svg viewBox="0 0 400 300" class="diagram">
+              <defs>
+                <pattern id="grid3" width="20" height="20" patternUnits="userSpaceOnUse">
+                  <path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+                </pattern>
+              </defs>
+              <rect width="400" height="300" fill="url(#grid3)"/>
+
+              <!-- MST edges (V shape) -->
+              <g class="edges mst-edges">
+                <line x1="80" y1="80" x2="200" y2="240" stroke="var(--warning)" stroke-width="3" class="edge-line"/>
+                <line x1="320" y1="80" x2="200" y2="240" stroke="var(--warning)" stroke-width="3" class="edge-line"/>
+              </g>
+
+              <!-- Removed edge (dashed) -->
+              <line x1="80" y1="80" x2="320" y2="80" stroke="var(--text-muted)" stroke-width="2" stroke-dasharray="8,4" opacity="0.3"/>
+
+              <!-- Length labels -->
+              <g class="length-labels">
+                <text x="120" y="175" text-anchor="middle" fill="var(--warning)" font-size="12">200 km</text>
+                <text x="280" y="175" text-anchor="middle" fill="var(--warning)" font-size="12">200 km</text>
+              </g>
+
+              <!-- Cities -->
+              <g class="cities">
+                <circle cx="80" cy="80" r="18" fill="var(--primary-500)"/>
+                <text x="80" y="85" text-anchor="middle" fill="white" font-size="14" font-weight="bold">A</text>
+                <circle cx="320" cy="80" r="18" fill="var(--primary-500)"/>
+                <text x="320" y="85" text-anchor="middle" fill="white" font-size="14" font-weight="bold">B</text>
+                <circle cx="200" cy="240" r="18" fill="var(--primary-500)"/>
+                <text x="200" y="245" text-anchor="middle" fill="white" font-size="14" font-weight="bold">C</text>
+              </g>
+
+              <!-- Total -->
+              <g class="total-label">
+                <rect x="140" y="130" width="120" height="30" rx="4" fill="rgba(245, 158, 11, 0.2)" stroke="var(--warning)" stroke-width="1"/>
+                <text x="200" y="150" text-anchor="middle" fill="var(--warning)" font-size="14" font-weight="bold">Total: 400 km</text>
+              </g>
+            </svg>
+          </div>
+          <div class="explanation">
+            <h3>{{ slides[2].title }}</h3>
+            <p class="subtitle">{{ slides[2].subtitle }}</p>
+            <div class="description">
+              <p>A <strong>Minimum Spanning Tree (MST)</strong> connects all cities without forming cycles, using the shortest possible edges.</p>
+              <p>This is much better! We removed the A-B edge since we can go A → C → B.</p>
+              <div class="comparison medium">
+                <span class="label">Total length:</span>
+                <span class="value">400 km</span>
+                <span class="verdict">Better (-37%)</span>
+              </div>
+              <p class="hint">But can we do even better?</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 4: Steiner Solution -->
+      <div class="slide" *ngIf="currentSlide === 3">
+        <div class="slide-content">
+          <div class="illustration">
+            <svg viewBox="0 0 400 300" class="diagram">
+              <defs>
+                <pattern id="grid4" width="20" height="20" patternUnits="userSpaceOnUse">
+                  <path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+                </pattern>
+              </defs>
+              <rect width="400" height="300" fill="url(#grid4)"/>
+
+              <!-- Steiner edges -->
+              <g class="edges steiner-edges">
+                <line x1="80" y1="80" x2="200" y2="140" stroke="var(--success)" stroke-width="3" class="edge-line"/>
+                <line x1="320" y1="80" x2="200" y2="140" stroke="var(--success)" stroke-width="3" class="edge-line"/>
+                <line x1="200" y1="240" x2="200" y2="140" stroke="var(--success)" stroke-width="3" class="edge-line"/>
+              </g>
+
+              <!-- Glow effect on Steiner point -->
+              <circle cx="200" cy="140" r="25" fill="rgba(168, 85, 247, 0.2)" class="steiner-glow"/>
+
+              <!-- Length labels -->
+              <g class="length-labels">
+                <text x="125" y="100" text-anchor="middle" fill="var(--success)" font-size="11">130 km</text>
+                <text x="275" y="100" text-anchor="middle" fill="var(--success)" font-size="11">130 km</text>
+                <text x="220" y="195" text-anchor="middle" fill="var(--success)" font-size="11">100 km</text>
+              </g>
+
+              <!-- Cities -->
+              <g class="cities">
+                <circle cx="80" cy="80" r="18" fill="var(--primary-500)"/>
+                <text x="80" y="85" text-anchor="middle" fill="white" font-size="14" font-weight="bold">A</text>
+                <circle cx="320" cy="80" r="18" fill="var(--primary-500)"/>
+                <text x="320" y="85" text-anchor="middle" fill="white" font-size="14" font-weight="bold">B</text>
+                <circle cx="200" cy="240" r="18" fill="var(--primary-500)"/>
+                <text x="200" y="245" text-anchor="middle" fill="white" font-size="14" font-weight="bold">C</text>
+              </g>
+
+              <!-- Steiner Point -->
+              <circle cx="200" cy="140" r="12" fill="var(--secondary-500)" class="steiner-point"/>
+              <text x="200" y="144" text-anchor="middle" fill="white" font-size="10" font-weight="bold">S</text>
+
+              <!-- Total -->
+              <g class="total-label">
+                <rect x="130" y="40" width="140" height="30" rx="4" fill="rgba(16, 185, 129, 0.2)" stroke="var(--success)" stroke-width="1"/>
+                <text x="200" y="60" text-anchor="middle" fill="var(--success)" font-size="14" font-weight="bold">Total: 360 km</text>
+              </g>
+            </svg>
+          </div>
+          <div class="explanation">
+            <h3>{{ slides[3].title }}</h3>
+            <p class="subtitle">{{ slides[3].subtitle }}</p>
+            <div class="description">
+              <p>The <strong>Steiner Tree</strong> adds a new junction point (called a <strong>Steiner point</strong>) that doesn't correspond to any city.</p>
+              <p>By placing this point strategically, we can reduce the total road length even further!</p>
+              <div class="comparison good">
+                <span class="label">Total length:</span>
+                <span class="value">360 km</span>
+                <span class="verdict">Optimal (-44%)</span>
+              </div>
+              <div class="key-point">
+                <span class="icon">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                </span>
+                <span>The purple point S is the Steiner point - a junction we added!</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 5: Fermat Point -->
+      <div class="slide" *ngIf="currentSlide === 4">
+        <div class="slide-content">
+          <div class="illustration">
+            <svg viewBox="0 0 400 300" class="diagram">
+              <defs>
+                <pattern id="grid5" width="20" height="20" patternUnits="userSpaceOnUse">
+                  <path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+                </pattern>
+              </defs>
+              <rect width="400" height="300" fill="url(#grid5)"/>
+
+              <!-- Angle arcs -->
+              <g class="angle-arcs">
+                <path d="M 185 145 A 20 20 0 0 1 200 125" fill="none" stroke="var(--primary-400)" stroke-width="2"/>
+                <path d="M 200 125 A 20 20 0 0 1 215 145" fill="none" stroke="var(--primary-400)" stroke-width="2"/>
+                <path d="M 215 145 A 20 20 0 0 1 200 165" fill="none" stroke="var(--primary-400)" stroke-width="2"/>
+                <path d="M 200 165 A 20 20 0 0 1 185 145" fill="none" stroke="var(--primary-400)" stroke-width="2"/>
+              </g>
+
+              <!-- Angle labels -->
+              <g class="angle-labels">
+                <text x="165" y="120" fill="var(--primary-400)" font-size="11">120°</text>
+                <text x="220" y="120" fill="var(--primary-400)" font-size="11">120°</text>
+                <text x="200" y="190" text-anchor="middle" fill="var(--primary-400)" font-size="11">120°</text>
+              </g>
+
+              <!-- Steiner edges -->
+              <g class="edges steiner-edges">
+                <line x1="80" y1="80" x2="200" y2="145" stroke="var(--success)" stroke-width="3"/>
+                <line x1="320" y1="80" x2="200" y2="145" stroke="var(--success)" stroke-width="3"/>
+                <line x1="200" y1="250" x2="200" y2="145" stroke="var(--success)" stroke-width="3"/>
+              </g>
+
+              <!-- Cities -->
+              <g class="cities">
+                <circle cx="80" cy="80" r="16" fill="var(--primary-500)"/>
+                <text x="80" y="85" text-anchor="middle" fill="white" font-size="12" font-weight="bold">A</text>
+                <circle cx="320" cy="80" r="16" fill="var(--primary-500)"/>
+                <text x="320" y="85" text-anchor="middle" fill="white" font-size="12" font-weight="bold">B</text>
+                <circle cx="200" cy="250" r="16" fill="var(--primary-500)"/>
+                <text x="200" y="255" text-anchor="middle" fill="white" font-size="12" font-weight="bold">C</text>
+              </g>
+
+              <!-- Fermat Point with glow -->
+              <circle cx="200" cy="145" r="20" fill="rgba(168, 85, 247, 0.3)" class="fermat-glow"/>
+              <circle cx="200" cy="145" r="14" fill="var(--secondary-500)"/>
+              <text x="200" y="149" text-anchor="middle" fill="white" font-size="10" font-weight="bold">F</text>
+
+              <!-- Label -->
+              <text x="200" y="35" text-anchor="middle" fill="var(--secondary-400)" font-size="14" font-weight="600">Fermat Point</text>
+            </svg>
+          </div>
+          <div class="explanation">
+            <h3>{{ slides[4].title }}</h3>
+            <p class="subtitle">{{ slides[4].subtitle }}</p>
+            <div class="description">
+              <p>For exactly 3 cities, the optimal Steiner point is called the <strong>Fermat Point</strong> (or Torricelli Point).</p>
+              <p>It has a beautiful property: <strong>all three angles are exactly 120°</strong>.</p>
+              <div class="formula">
+                <span class="label">Mathematical property:</span>
+                <span class="math">∠AFB = ∠BFC = ∠CFA = 120°</span>
+              </div>
+              <div class="key-point">
+                <span class="icon">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                </span>
+                <span>This point minimizes the sum of distances to all three cities!</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Navigation -->
+    <div class="modal-footer">
+      <div class="slide-indicators">
+        <button
+          *ngFor="let slide of slides; let i = index"
+          class="indicator"
+          [class.active]="currentSlide === i"
+          (click)="goToSlide(i)"
+          [attr.aria-label]="'Go to slide ' + (i + 1)">
+        </button>
+      </div>
+      <div class="nav-buttons">
+        <button class="nav-btn" (click)="prevSlide()" [disabled]="currentSlide === 0">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+          Previous
+        </button>
+        <button class="nav-btn primary" *ngIf="currentSlide < slides.length - 1" (click)="nextSlide()">
+          Next
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        </button>
+        <button class="nav-btn primary" *ngIf="currentSlide === slides.length - 1" (click)="close()">
+          Start Demo
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Floating button to reopen -->
+<button class="help-btn" *ngIf="!isVisible" (click)="open()" aria-label="Show introduction">
+  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+</button>

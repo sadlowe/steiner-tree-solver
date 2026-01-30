@@ -7,6 +7,7 @@ import { ControlsComponent } from './components/controls/controls.component';
 import { InfoPanelComponent } from './components/info-panel/info-panel.component';
 import { HeaderComponent } from './components/header/header.component';
 import { FooterComponent } from './components/footer/footer.component';
+import { IntroductionComponent } from './components/introduction/introduction.component';
 
 /**
  * Main application component for the Steiner Tree Solver.
@@ -21,7 +22,8 @@ import { FooterComponent } from './components/footer/footer.component';
     ControlsComponent,
     InfoPanelComponent,
     HeaderComponent,
-    FooterComponent
+    FooterComponent,
+    IntroductionComponent
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
