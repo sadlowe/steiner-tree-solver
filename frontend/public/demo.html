@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Démo — Relier 3 maisons avec le moins de route</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #e8f5e9;
+      color: #1e293b;
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    header {
+      background: linear-gradient(135deg, #1b5e20 0%, #2e7d32 100%);
+      color: white;
+      padding: 18px 30px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+    header h1 { font-size: 1.4rem; font-weight: 700; }
+    header p  { font-size: 0.88rem; opacity: 0.85; margin-top: 3px; }
+    .back-btn {
+      background: rgba(255,255,255,0.15);
+      color: white;
+      border: 1px solid rgba(255,255,255,0.3);
+      padding: 7px 14px;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      white-space: nowrap;
+      transition: background 0.15s;
+      flex-shrink: 0;
+    }
+    .back-btn:hover { background: rgba(255,255,255,0.25); }
+
+    /* ── Main layout ── */
+    .page {
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      gap: 16px;
+      padding: 16px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* ── Sidebar ── */
+    .sidebar { display: flex; flex-direction: column; gap: 14px; }
+
+    .card {
+      background: white;
+      border-radius: 14px;
+      padding: 16px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    }
+    .card-title {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: #2e7d32;
+      margin-bottom: 12px;
+    }
+
+    /* ── Scenario card ── */
+    .scenario {
+      background: linear-gradient(135deg, #e8f5e9, #f0fdf4);
+      border: 1px solid #a7f3d0;
+      border-radius: 14px;
+      padding: 16px;
+      font-size: 0.88rem;
+      color: #1e3a2f;
+      line-height: 1.6;
+    }
+    .scenario strong { color: #166534; }
+    .scenario-icon { font-size: 2rem; text-align: center; margin-bottom: 8px; }
+
+    /* ── Steps ── */
+    .steps { display: flex; flex-direction: column; gap: 10px; }
+    .step { display: flex; gap: 10px; align-items: flex-start; }
+    .step-num {
+      width: 26px; height: 26px; border-radius: 50%;
+      font-size: 0.78rem; font-weight: 700; color: white;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      transition: background 0.3s;
+    }
+    .step-num.todo   { background: #cbd5e1; }
+    .step-num.active { background: #f59e0b; }
+    .step-num.done   { background: #16a34a; }
+    .step-text { font-size: 0.84rem; color: #475569; line-height: 1.45; padding-top: 4px; }
+    .step-text strong { color: #1e293b; }
+
+    /* ── Explanation ── */
+    .expl {
+      background: #fffbeb;
+      border-left: 3px solid #f59e0b;
+      border-radius: 0 8px 8px 0;
+      padding: 10px 12px;
+      font-size: 0.83rem;
+      color: #78350f;
+      line-height: 1.55;
+      min-height: 60px;
+    }
+
+    /* ── Comparison ── */
+    .compare { display: flex; flex-direction: column; gap: 8px; }
+    .compare-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #f8fafc;
+      border-radius: 10px;
+      padding: 10px 12px;
+    }
+    .compare-row .label { display: flex; align-items: center; gap: 8px; font-size: 0.83rem; font-weight: 600; }
+    .compare-row .length { font-size: 1.1rem; font-weight: 700; font-family: monospace; }
+    .swatch { width: 22px; height: 5px; border-radius: 3px; }
+    .row-naive   .length { color: #d97706; }
+    .row-steiner .length { color: #16a34a; }
+
+    .saving-box {
+      display: none;
+      background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+      border: 2px solid #6ee7b7;
+      border-radius: 12px;
+      padding: 12px;
+      text-align: center;
+      margin-top: 4px;
+    }
+    .saving-box .big { font-size: 1.8rem; font-weight: 800; color: #059669; line-height: 1; }
+    .saving-box small { font-size: 0.78rem; color: #065f46; margin-top: 4px; display: block; }
+
+    /* ── Legend ── */
+    .legend { display: flex; flex-direction: column; gap: 8px; }
+    .legend-row { display: flex; align-items: center; gap: 8px; font-size: 0.82rem; color: #475569; }
+
+    /* ── Buttons ── */
+    .btn-group { display: flex; gap: 8px; flex-direction: column; }
+    .btn {
+      width: 100%;
+      padding: 11px 14px;
+      border: none;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .btn:disabled { opacity: 0.35; cursor: not-allowed; }
+    .btn-green  { background: #16a34a; color: white; }
+    .btn-green:hover:not(:disabled)  { background: #15803d; }
+    .btn-amber  { background: #f59e0b; color: white; }
+    .btn-amber:hover:not(:disabled)  { background: #d97706; }
+    .btn-reset  { background: #f1f5f9; color: #64748b; border: 1px solid #e2e8f0; }
+    .btn-reset:hover:not(:disabled)  { background: #e2e8f0; }
+
+    /* ── Canvas section ── */
+    .canvas-section { display: flex; flex-direction: column; gap: 10px; }
+    canvas {
+      display: block;
+      width: 100%;
+      border-radius: 14px;
+      cursor: crosshair;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+    }
+    .canvas-msg {
+      text-align: center;
+      font-size: 0.84rem;
+      color: #64748b;
+      background: white;
+      border-radius: 8px;
+      padding: 8px 12px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <a class="back-btn" href="javascript:window.close()">&#8592; Retour</a>
+  <div>
+    <h1>Relier 3 maisons avec le moins de route possible</h1>
+    <p>Où placer le carrefour pour minimiser la longueur totale du réseau ?</p>
+  </div>
+</header>
+
+<div class="page">
+
+  <!-- ═══ SIDEBAR ═══ -->
+  <div class="sidebar">
+
+    <!-- Scenario -->
+    <div class="scenario">
+      <div class="scenario-icon">🏘️</div>
+      <strong>Le problème :</strong><br>
+      Un village veut construire des routes pour relier 3 maisons entre elles.<br><br>
+      <strong>L'objectif :</strong> dépenser le moins possible, c'est-à-dire construire le <strong>moins de route</strong> possible.<br><br>
+      La solution : ajouter un <strong>carrefour</strong> au bon endroit pour partager le chemin commun !
+    </div>
+
+    <!-- Steps -->
+    <div class="card">
+      <div class="card-title">Comment utiliser la démo</div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num todo" id="s1">1</div>
+          <div class="step-text">Cliquez sur la carte pour placer <strong>3 maisons</strong></div>
+        </div>
+        <div class="step">
+          <div class="step-num todo" id="s2">2</div>
+          <div class="step-text">La route <strong>directe</strong> (orange) s'affiche — comme si on reliait chaque maison sans carrefour</div>
+        </div>
+        <div class="step">
+          <div class="step-num todo" id="s3">3</div>
+          <div class="step-text">Cliquez sur <em>« Trouver le carrefour »</em> pour voir la route <strong>optimale</strong> avec carrefour (vert)</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Explanation -->
+    <div class="card">
+      <div class="card-title">Ce qui se passe</div>
+      <div class="expl" id="expl">
+        Placez 3 maisons sur la carte pour commencer.
+      </div>
+    </div>
+
+    <!-- Buttons -->
+    <div class="card">
+      <div class="btn-group">
+        <button class="btn btn-green" id="btnFind" disabled onclick="computeSteiner()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          Trouver le carrefour optimal
+        </button>
+        <button class="btn btn-amber" id="btnToggle" disabled onclick="toggleDirect()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          Masquer route directe
+        </button>
+        <button class="btn btn-reset" onclick="clearAll()">
+          Recommencer
+        </button>
+      </div>
+    </div>
+
+    <!-- Comparison -->
+    <div class="card">
+      <div class="card-title">Comparaison des routes</div>
+      <div class="compare">
+        <div class="compare-row row-naive">
+          <div class="label">
+            <div class="swatch" style="background:#f59e0b;"></div>
+            Route directe
+          </div>
+          <div class="length" id="lenNaive">—</div>
+        </div>
+        <div class="compare-row row-steiner">
+          <div class="label">
+            <div class="swatch" style="background:#16a34a;"></div>
+            Avec carrefour
+          </div>
+          <div class="length" id="lenSteiner">—</div>
+        </div>
+      </div>
+      <div class="saving-box" id="savingBox">
+        <div class="big" id="savingPct">—</div>
+        <small>de route économisée grâce au carrefour !</small>
+      </div>
+    </div>
+
+    <!-- Legend -->
+    <div class="card">
+      <div class="card-title">Légende</div>
+      <div class="legend">
+        <div class="legend-row">
+          <svg width="22" height="22" viewBox="0 0 22 22"><rect x="4" y="10" width="14" height="10" fill="#2563eb" rx="1"/><polygon points="1,10 11,1 21,10" fill="#1d4ed8"/><rect x="8" y="15" width="6" height="7" fill="#1e40af"/></svg>
+          <span>Maison</span>
+        </div>
+        <div class="legend-row">
+          <svg width="22" height="22" viewBox="0 0 22 22"><circle cx="11" cy="11" r="7" fill="#dc2626"/><line x1="11" y1="4" x2="11" y2="18" stroke="white" stroke-width="2"/><line x1="4" y1="11" x2="18" y2="11" stroke="white" stroke-width="2"/></svg>
+          <span>Carrefour optimal</span>
+        </div>
+        <div class="legend-row">
+          <svg width="22" height="4"><rect width="22" height="4" rx="2" fill="#f59e0b"/></svg>
+          <span>Route directe (sans carrefour)</span>
+        </div>
+        <div class="legend-row">
+          <svg width="22" height="4"><rect width="22" height="4" rx="2" fill="#16a34a"/></svg>
+          <span>Route optimale (avec carrefour)</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ═══ CANVAS ═══ -->
+  <div class="canvas-section">
+    <canvas id="canvas" width="820" height="580"></canvas>
+    <div class="canvas-msg" id="msg">Cliquez sur la carte pour placer une maison (3 maisons au maximum)</div>
+  </div>
+
+</div>
+
+<script>
+// ═══════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════
+const houses = [];      // [{x,y}] up to 3
+let junction  = null;   // {x,y} steiner point
+let showDirect  = true;
+let showOptimal = false;
+let obtuseIdx   = -1;   // index of house that IS the junction (-1 if interior point)
+
+// ═══════════════════════════════════════════════
+//  CANVAS
+// ═══════════════════════════════════════════════
+const canvas = document.getElementById('canvas');
+const ctx    = canvas.getContext('2d');
+canvas.width  = 820;
+canvas.height = 580;
+
+canvas.addEventListener('click', e => {
+  if (houses.length >= 3) return;
+  const r  = canvas.getBoundingClientRect();
+  houses.push({
+    x: (e.clientX - r.left) * (canvas.width  / r.width),
+    y: (e.clientY - r.top)  * (canvas.height / r.height)
+  });
+  junction    = null;
+  showOptimal = false;
+  obtuseIdx   = -1;
+  refresh();
+});
+
+// ═══════════════════════════════════════════════
+//  MATH
+// ═══════════════════════════════════════════════
+const D = (a, b) => Math.hypot(b.x - a.x, b.y - a.y);
+
+function angleDeg(a, v, b) {
+  const ax = a.x-v.x, ay = a.y-v.y, bx = b.x-v.x, by = b.y-v.y;
+  const dot = ax*bx + ay*by;
+  const mag = Math.hypot(ax,ay) * Math.hypot(bx,by);
+  return mag < 1e-12 ? 0 : Math.acos(Math.max(-1, Math.min(1, dot/mag))) * 180/Math.PI;
+}
+
+function weiszfeld(pts) {
+  let x = pts.reduce((s,p) => s+p.x, 0) / pts.length;
+  let y = pts.reduce((s,p) => s+p.y, 0) / pts.length;
+  for (let i = 0; i < 2000; i++) {
+    let wx=0, wy=0, w=0;
+    for (const p of pts) {
+      const d = Math.hypot(p.x-x, p.y-y);
+      if (d < 1e-10) return {x: p.x, y: p.y};
+      wx += p.x/d; wy += p.y/d; w += 1/d;
+    }
+    const nx=wx/w, ny=wy/w;
+    if (Math.hypot(nx-x, ny-y) < 1e-10) break;
+    x=nx; y=ny;
+  }
+  return {x, y};
+}
+
+function naiveLen() {
+  if (houses.length < 2) return 0;
+  if (houses.length === 2) return D(houses[0], houses[1]);
+  const d01 = D(houses[0],houses[1]), d12 = D(houses[1],houses[2]), d02 = D(houses[0],houses[2]);
+  return d01 + d12 + d02 - Math.max(d01, d12, d02);
+}
+
+function optimalLen() {
+  if (!junction) return 0;
+  if (houses.length === 2) return D(houses[0], houses[1]);
+  return houses.reduce((s,h) => s + D(junction,h), 0);
+}
+
+// ═══════════════════════════════════════════════
+//  DRAWING
+// ═══════════════════════════════════════════════
+function draw() {
+  // Background — grass texture feel
+  ctx.fillStyle = '#e8f5e9';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // Subtle grid (like map grid)
+  ctx.strokeStyle = 'rgba(100,180,100,0.18)';
+  ctx.lineWidth = 1;
+  for (let x = 0; x <= canvas.width;  x += 60) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,canvas.height); ctx.stroke(); }
+  for (let y = 0; y <= canvas.height; y += 60) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(canvas.width,y);  ctx.stroke(); }
+
+  // Roads
+  if (showDirect && houses.length >= 2) drawDirectRoads();
+  if (showOptimal && junction)           drawOptimalRoads();
+
+  // Junction first (below houses)
+  if (showOptimal && junction && obtuseIdx === -1) drawJunction(junction);
+
+  // Houses on top
+  houses.forEach((h, i) => drawHouse(h, i));
+}
+
+function drawDirectRoads() {
+  ctx.strokeStyle = '#f59e0b';
+  ctx.lineWidth   = showOptimal ? 2 : 4;
+  ctx.lineCap     = 'round';
+  ctx.setLineDash(showOptimal ? [8, 6] : []);
+
+  if (houses.length === 2) {
+    road(houses[0], houses[1]);
+  } else {
+    // MST: 2 shortest edges
+    const edges = [
+      {a:0,b:1,d:D(houses[0],houses[1])},
+      {a:1,b:2,d:D(houses[1],houses[2])},
+      {a:0,b:2,d:D(houses[0],houses[2])},
+    ].sort((x,y)=>x.d-y.d);
+    road(houses[edges[0].a], houses[edges[0].b]);
+    road(houses[edges[1].a], houses[edges[1].b]);
+  }
+  ctx.setLineDash([]);
+
+  // Distance labels on roads (only when no optimal shown)
+  if (!showOptimal && houses.length >= 2) drawDistLabels();
+}
+
+function drawOptimalRoads() {
+  // Glow
+  ctx.strokeStyle = 'rgba(22,163,74,0.2)';
+  ctx.lineWidth   = 14;
+  ctx.lineCap     = 'round';
+  houses.forEach(h => road(junction, h));
+
+  // Road
+  ctx.strokeStyle = '#16a34a';
+  ctx.lineWidth   = 4;
+  houses.forEach(h => road(junction, h));
+
+  // Distance labels on each arm
+  houses.forEach(h => {
+    const mx = (junction.x + h.x) / 2;
+    const my = (junction.y + h.y) / 2;
+    drawDistLabel(mx, my, D(junction, h).toFixed(0));
+  });
+}
+
+function road(a, b) {
+  ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+}
+
+function drawDistLabels() {
+  if (houses.length === 2) {
+    const mx = (houses[0].x + houses[1].x)/2;
+    const my = (houses[0].y + houses[1].y)/2;
+    drawDistLabel(mx, my, D(houses[0],houses[1]).toFixed(0));
+  } else {
+    const edges = [
+      {a:0,b:1,d:D(houses[0],houses[1])},
+      {a:1,b:2,d:D(houses[1],houses[2])},
+      {a:0,b:2,d:D(houses[0],houses[2])},
+    ].sort((x,y)=>x.d-y.d);
+    [edges[0], edges[1]].forEach(e => {
+      const mx = (houses[e.a].x + houses[e.b].x)/2;
+      const my = (houses[e.a].y + houses[e.b].y)/2;
+      drawDistLabel(mx, my, e.d.toFixed(0));
+    });
+  }
+}
+
+function drawDistLabel(x, y, text) {
+  ctx.save();
+  ctx.fillStyle   = 'white';
+  const w = ctx.measureText(text + ' m').width + 10;
+  ctx.beginPath();
+  ctx.roundRect(x - w/2, y - 11, w, 22, 5);
+  ctx.fill();
+  ctx.strokeStyle = '#e2e8f0';
+  ctx.lineWidth   = 1;
+  ctx.stroke();
+  ctx.fillStyle   = '#78350f';
+  ctx.font        = 'bold 11px Segoe UI, sans-serif';
+  ctx.textAlign   = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(text + ' m', x, y);
+  ctx.restore();
+}
+
+function drawHouse(p, idx) {
+  const W = 22, H = 18, roofH = 14;
+  const x = p.x, y = p.y;
+
+  // Shadow
+  ctx.fillStyle = 'rgba(0,0,0,0.08)';
+  ctx.beginPath();
+  ctx.ellipse(x, y + H/2 + 4, W, 5, 0, 0, Math.PI*2);
+  ctx.fill();
+
+  // Wall
+  ctx.fillStyle = '#bfdbfe';
+  ctx.strokeStyle = '#2563eb';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.rect(x - W/2, y - H/2, W, H);
+  ctx.fill(); ctx.stroke();
+
+  // Roof
+  ctx.fillStyle = '#1d4ed8';
+  ctx.beginPath();
+  ctx.moveTo(x - W/2 - 3, y - H/2);
+  ctx.lineTo(x,            y - H/2 - roofH);
+  ctx.lineTo(x + W/2 + 3, y - H/2);
+  ctx.closePath();
+  ctx.fill(); ctx.stroke();
+
+  // Door
+  ctx.fillStyle = '#1e40af';
+  ctx.beginPath();
+  ctx.rect(x - 5, y + H/2 - 9, 10, 9);
+  ctx.fill();
+
+  // Window
+  ctx.fillStyle = '#fef9c3';
+  ctx.strokeStyle = '#2563eb';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.rect(x - W/2 + 3, y - 7, 7, 7);
+  ctx.fill(); ctx.stroke();
+
+  // Label
+  const names = ['Maison A', 'Maison B', 'Maison C'];
+  ctx.fillStyle    = '#1e3a8a';
+  ctx.font         = 'bold 13px Segoe UI, sans-serif';
+  ctx.textAlign    = 'center';
+  ctx.textBaseline = 'top';
+  ctx.fillText(names[idx], x, y + H/2 + 8);
+}
+
+function drawJunction(p) {
+  // Road circle base
+  ctx.beginPath();
+  ctx.arc(p.x, p.y, 22, 0, Math.PI*2);
+  ctx.fillStyle = 'rgba(220,38,38,0.12)';
+  ctx.fill();
+
+  // Circle
+  ctx.beginPath();
+  ctx.arc(p.x, p.y, 11, 0, Math.PI*2);
+  ctx.fillStyle   = '#dc2626';
+  ctx.fill();
+  ctx.strokeStyle = 'white';
+  ctx.lineWidth   = 2.5;
+  ctx.stroke();
+
+  // Cross (crossroads symbol)
+  ctx.strokeStyle = 'white';
+  ctx.lineWidth   = 2.5;
+  ctx.lineCap     = 'round';
+  ctx.beginPath(); ctx.moveTo(p.x - 6, p.y); ctx.lineTo(p.x + 6, p.y); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(p.x, p.y - 6); ctx.lineTo(p.x, p.y + 6); ctx.stroke();
+
+  // Label
+  ctx.fillStyle    = '#991b1b';
+  ctx.font         = 'bold 12px Segoe UI, sans-serif';
+  ctx.textAlign    = 'center';
+  ctx.textBaseline = 'bottom';
+  ctx.fillText('Carrefour', p.x, p.y - 14);
+
+  // 120° arc labels
+  draw120arcs(p);
+}
+
+function draw120arcs(center) {
+  const angles = houses.map(h => Math.atan2(h.y - center.y, h.x - center.x)).sort((a,b)=>a-b);
+  ctx.strokeStyle = 'rgba(220,38,38,0.5)';
+  ctx.lineWidth   = 1.5;
+  ctx.fillStyle   = '#dc2626';
+  ctx.font        = 'bold 10px Segoe UI, sans-serif';
+  ctx.textAlign   = 'center';
+  ctx.textBaseline = 'middle';
+  const R = 32;
+  for (let i = 0; i < 3; i++) {
+    const a1 = angles[i];
+    const a2 = i < 2 ? angles[i+1] : angles[0] + 2*Math.PI;
+    ctx.beginPath();
+    ctx.arc(center.x, center.y, R, a1, a2);
+    ctx.stroke();
+    const mid = (a1+a2)/2;
+    ctx.fillText('120°', center.x+(R+14)*Math.cos(mid), center.y+(R+14)*Math.sin(mid));
+  }
+}
+
+// ═══════════════════════════════════════════════
+//  COMPUTE
+// ═══════════════════════════════════════════════
+function computeSteiner() {
+  if (houses.length < 2) return;
+
+  if (houses.length === 2) {
+    junction    = null;
+    showOptimal = true;
+    obtuseIdx   = -1;
+    setExpl('Avec 2 maisons, la route directe est déjà la meilleure solution. Pas besoin de carrefour !');
+    refresh(); return;
+  }
+
+  const [A,B,C] = houses;
+  const aA = angleDeg(B,A,C), aB = angleDeg(A,B,C), aC = angleDeg(A,C,B);
+
+  if (aA >= 120) {
+    junction  = {...A}; obtuseIdx = 0;
+    setExpl(`L'angle à la <strong>Maison A</strong> est très ouvert (${aA.toFixed(0)}°). La Maison A est déjà au bon endroit pour servir de carrefour. On relie simplement les deux autres maisons à elle.`);
+  } else if (aB >= 120) {
+    junction  = {...B}; obtuseIdx = 1;
+    setExpl(`L'angle à la <strong>Maison B</strong> est très ouvert (${aB.toFixed(0)}°). La Maison B est au bon endroit pour servir de carrefour.`);
+  } else if (aC >= 120) {
+    junction  = {...C}; obtuseIdx = 2;
+    setExpl(`L'angle à la <strong>Maison C</strong> est très ouvert (${aC.toFixed(0)}°). La Maison C est au bon endroit pour servir de carrefour.`);
+  } else {
+    junction  = weiszfeld(houses); obtuseIdx = -1;
+    setExpl(`Le <strong>carrefour optimal</strong> se trouve à l'intérieur du triangle formé par les 3 maisons. En plaçant le carrefour ici, les routes qui s'y rejoignent forment chacune un angle de <strong>120°</strong>. C'est mathématiquement prouvé comme étant le minimum possible !`);
+  }
+
+  showOptimal = true;
+  refresh();
+}
+
+function toggleDirect() {
+  showDirect = !showDirect;
+  document.getElementById('btnToggle').textContent =
+    showDirect ? 'Masquer route directe' : 'Afficher route directe';
+  refresh();
+}
+
+function clearAll() {
+  houses.length = 0; junction = null;
+  showDirect = true; showOptimal = false; obtuseIdx = -1;
+  document.getElementById('btnToggle').textContent = 'Masquer route directe';
+  setExpl('Placez 3 maisons sur la carte pour commencer.');
+  refresh();
+}
+
+function setExpl(html) { document.getElementById('expl').innerHTML = html; }
+
+// ═══════════════════════════════════════════════
+//  UI REFRESH
+// ═══════════════════════════════════════════════
+function refresh() {
+  draw();
+
+  // Buttons
+  document.getElementById('btnFind').disabled   = houses.length < 2;
+  document.getElementById('btnToggle').disabled = houses.length < 2;
+
+  // Lengths
+  const nl = naiveLen(), ol = optimalLen();
+  document.getElementById('lenNaive').textContent   = houses.length >= 2 ? nl.toFixed(0) + ' m' : '—';
+  document.getElementById('lenSteiner').textContent = showOptimal && houses.length >= 2 ? ol.toFixed(0) + ' m' : '—';
+
+  // Saving
+  const box = document.getElementById('savingBox');
+  if (showOptimal && houses.length === 3 && nl > 0 && ol < nl - 1) {
+    document.getElementById('savingPct').textContent = ((nl-ol)/nl*100).toFixed(1) + '%';
+    box.style.display = 'block';
+  } else { box.style.display = 'none'; }
+
+  // Step badges
+  const s = (id, cls) => document.getElementById(id).className = 'step-num ' + cls;
+  s('s1', houses.length >= 1 ? 'done' : 'active');
+  s('s2', houses.length >= 2 ? 'done' : houses.length === 1 ? 'active' : 'todo');
+  s('s3', showOptimal ? 'done' : houses.length >= 2 ? 'active' : 'todo');
+
+  // Message
+  const msg = document.getElementById('msg');
+  if (houses.length === 0) msg.textContent = 'Cliquez sur la carte pour placer une maison (3 au maximum)';
+  else if (houses.length < 3) msg.textContent = `${houses.length} maison${houses.length>1?'s':''} placée${houses.length>1?'s':''} — encore ${3-houses.length} à placer`;
+  else if (!showOptimal) msg.textContent = '3 maisons placées — cliquez sur « Trouver le carrefour optimal » !';
+  else msg.textContent = 'Carrefour trouvé ! Comparez les deux routes dans le panneau de gauche.';
+}
+
+refresh();
+</script>
+</body>
+</html>
