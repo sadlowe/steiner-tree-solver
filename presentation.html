@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Problème de l'Arbre de Steiner — Démo Interactive</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #f1f5f9;
+      color: #1e293b;
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    header {
+      background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%);
+      color: white;
+      padding: 22px 40px;
+      text-align: center;
+    }
+    header h1 { font-size: 1.75rem; font-weight: 700; margin-bottom: 6px; }
+    header p  { font-size: 1rem; opacity: 0.85; }
+
+    /* ── Layout ── */
+    .layout {
+      display: grid;
+      grid-template-columns: 260px 1fr 270px;
+      gap: 18px;
+      padding: 18px;
+      max-width: 1340px;
+      margin: 0 auto;
+    }
+
+    /* ── Cards ── */
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 14px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+    }
+    .card h3 {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: #2563eb;
+      margin-bottom: 12px;
+    }
+
+    /* ── Steps ── */
+    .step { display: flex; gap: 10px; margin-bottom: 12px; align-items: flex-start; }
+    .step-badge {
+      width: 24px; height: 24px; border-radius: 50%;
+      background: #cbd5e1; color: white;
+      font-size: 0.78rem; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; transition: background 0.3s;
+    }
+    .step-badge.active  { background: #2563eb; }
+    .step-badge.done    { background: #16a34a; }
+    .step p { font-size: 0.84rem; color: #475569; line-height: 1.45; }
+    .step strong { color: #1e293b; }
+
+    /* ── Explanation box ── */
+    .explanation {
+      background: #eff6ff;
+      border-left: 3px solid #2563eb;
+      border-radius: 0 8px 8px 0;
+      padding: 10px 12px;
+      font-size: 0.82rem;
+      color: #1e40af;
+      line-height: 1.55;
+    }
+
+    /* ── Legend ── */
+    .legend { display: flex; flex-direction: column; gap: 8px; }
+    .legend-row { display: flex; align-items: center; gap: 8px; font-size: 0.83rem; color: #475569; }
+    .dot  { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+    .line-swatch { width: 26px; height: 4px; border-radius: 2px; flex-shrink: 0; }
+
+    /* ── Canvas area ── */
+    .canvas-wrap { position: relative; }
+    canvas {
+      display: block;
+      width: 100%;
+      border-radius: 12px;
+      cursor: crosshair;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.10);
+    }
+    .canvas-hint {
+      text-align: center;
+      font-size: 0.82rem;
+      color: #64748b;
+      margin-top: 8px;
+      min-height: 20px;
+    }
+
+    /* ── Buttons ── */
+    .btn-row { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+    .btn {
+      flex: 1;
+      padding: 10px 12px;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+      min-width: 120px;
+    }
+    .btn:disabled { opacity: 0.38; cursor: not-allowed; }
+    .btn-primary { background: #2563eb; color: white; }
+    .btn-primary:hover:not(:disabled) { background: #1d4ed8; }
+    .btn-secondary { background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; }
+    .btn-secondary:hover:not(:disabled) { background: #e2e8f0; }
+    .btn-danger { background: #fee2e2; color: #991b1b; }
+    .btn-danger:hover:not(:disabled) { background: #fecaca; }
+
+    /* ── Stats ── */
+    .stat-block {
+      border-radius: 8px;
+      padding: 10px 12px;
+      margin-bottom: 8px;
+    }
+    .stat-block label {
+      display: block;
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #94a3b8;
+      margin-bottom: 2px;
+    }
+    .stat-block .val { font-size: 1.25rem; font-weight: 700; }
+    .stat-block.orange { background: #fff7ed; }
+    .stat-block.orange .val { color: #ea580c; }
+    .stat-block.green  { background: #f0fdf4; }
+    .stat-block.green  .val { color: #16a34a; }
+
+    .savings-banner {
+      display: none;
+      background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+      border: 1px solid #6ee7b7;
+      border-radius: 10px;
+      padding: 10px;
+      text-align: center;
+      margin-top: 4px;
+    }
+    .savings-banner .pct { font-size: 1.5rem; font-weight: 700; color: #059669; }
+    .savings-banner small { display: block; font-size: 0.78rem; color: #065f46; margin-top: 2px; }
+
+    /* ── Points list ── */
+    #points-list { font-size: 0.84rem; }
+    .pt-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 5px 0; border-bottom: 1px solid #f1f5f9;
+    }
+    .pt-row:last-child { border-bottom: none; }
+    .pt-row .lbl { font-weight: 600; }
+    .pt-row .coords { font-family: monospace; color: #64748b; font-size: 0.8rem; }
+    .pt-city   { color: #2563eb; }
+    .pt-steiner { color: #dc2626; }
+    .pt-none   { color: #94a3b8; }
+
+    /* ── Math note ── */
+    .math-note {
+      background: #fefce8;
+      border-left: 3px solid #eab308;
+      border-radius: 0 8px 8px 0;
+      padding: 10px 12px;
+      font-size: 0.81rem;
+      color: #713f12;
+      line-height: 1.55;
+    }
+
+    footer {
+      text-align: center;
+      padding: 14px;
+      font-size: 0.78rem;
+      color: #94a3b8;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Le Problème de l'Arbre de Steiner</h1>
+  <p>Comment relier des villes avec le minimum de routes ? — Démo interactive pour lycéens et collégiens</p>
+</header>
+
+<div class="layout">
+
+  <!-- ═══ LEFT SIDEBAR ═══ -->
+  <div>
+
+    <div class="card">
+      <h3>Guide étape par étape</h3>
+
+      <div class="step">
+        <div class="step-badge" id="b1">1</div>
+        <p>Cliquez sur le canvas pour placer jusqu'à <strong>3 villes</strong>.</p>
+      </div>
+
+      <div class="step">
+        <div class="step-badge" id="b2">2</div>
+        <p>La <strong>connexion naïve</strong> (orange) s'affiche automatiquement — les villes reliées sans point intermédiaire.</p>
+      </div>
+
+      <div class="step">
+        <div class="step-badge" id="b3">3</div>
+        <p>Cliquez sur <em>« Réseau optimal »</em> pour découvrir le <strong>point de Steiner</strong> (rouge) et la route la plus courte possible.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Explication</h3>
+      <div class="explanation" id="explanation">
+        Placez des villes sur le canvas pour commencer.
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Légende</h3>
+      <div class="legend">
+        <div class="legend-row">
+          <div class="dot" style="background:#2563eb;"></div>
+          <span>Ville (point terminal)</span>
+        </div>
+        <div class="legend-row">
+          <div class="dot" style="background:#dc2626;"></div>
+          <span>Point de Steiner (jonction optimale)</span>
+        </div>
+        <div class="legend-row">
+          <div class="line-swatch" style="background:#f59e0b;"></div>
+          <span>Route naïve (MST direct)</span>
+        </div>
+        <div class="legend-row">
+          <div class="line-swatch" style="background:#16a34a;"></div>
+          <span>Route optimale (Steiner)</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ═══ CANVAS ═══ -->
+  <div>
+    <div class="canvas-wrap">
+      <canvas id="canvas" width="760" height="520"></canvas>
+    </div>
+    <p class="canvas-hint" id="hint">Cliquez sur le canvas pour placer une ville (maximum 3)</p>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" id="btnSolve" disabled onclick="computeSteiner()">
+        Reseau optimal
+      </button>
+      <button class="btn btn-secondary" id="btnToggleNaive" disabled onclick="toggleNaive()">
+        Masquer route naive
+      </button>
+      <button class="btn btn-danger" onclick="clearAll()">
+        Tout effacer
+      </button>
+    </div>
+  </div>
+
+  <!-- ═══ RIGHT SIDEBAR ═══ -->
+  <div>
+
+    <div class="card">
+      <h3>Longueur totale des routes</h3>
+
+      <div class="stat-block orange">
+        <label>Route naïve (MST)</label>
+        <div class="val" id="statNaive">—</div>
+      </div>
+
+      <div class="stat-block green">
+        <label>Route optimale (Steiner)</label>
+        <div class="val" id="statSteiner">—</div>
+      </div>
+
+      <div class="savings-banner" id="savings">
+        <div class="pct" id="savingsPct">—</div>
+        <small>économisé grâce au point de Steiner !</small>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Points placés</h3>
+      <div id="points-list">
+        <span class="pt-none">Aucune ville placée.</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>A retenir</h3>
+      <div class="math-note">
+        Le <strong>point de Fermat–Steiner</strong> est le point qui minimise la somme des distances aux 3 villes.<br><br>
+        Il se trouve <em>à l'intérieur</em> du triangle si tous les angles sont &lt; 120°, et les trois routes y forment des angles de exactement <strong>120°</strong>.<br><br>
+        Si un angle est &ge; 120°, ce sommet est lui-même le point optimal.
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<footer>Démo pédagogique — Problème de l'Arbre de Steiner · Algorithme de Weiszfeld</footer>
+
+<script>
+// ════════════════════════════════════════════════
+//  STATE
+// ════════════════════════════════════════════════
+const cities = [];       // [{x, y}, ...] up to 3
+let steinerPt = null;    // {x, y} — Fermat/Steiner point
+let showNaive   = true;
+let showSteiner = false;
+let isObtuse    = false; // true when steiner pt = a city vertex
+
+// ════════════════════════════════════════════════
+//  CANVAS SETUP
+// ════════════════════════════════════════════════
+const canvas = document.getElementById('canvas');
+const ctx    = canvas.getContext('2d');
+
+// Keep logical resolution fixed; CSS handles display size
+canvas.width  = 760;
+canvas.height = 520;
+
+canvas.addEventListener('click', e => {
+  if (cities.length >= 3) return;
+  const r  = canvas.getBoundingClientRect();
+  const sx = canvas.width  / r.width;
+  const sy = canvas.height / r.height;
+  cities.push({ x: (e.clientX - r.left) * sx, y: (e.clientY - r.top) * sy });
+  steinerPt   = null;
+  showSteiner = false;
+  update();
+});
+
+// ════════════════════════════════════════════════
+//  GEOMETRY HELPERS
+// ════════════════════════════════════════════════
+function dist(a, b) {
+  return Math.hypot(b.x - a.x, b.y - a.y);
+}
+
+/** Angle (degrees) at vertex V in triangle (A,V,B) */
+function angleDeg(a, v, b) {
+  const ax = a.x - v.x, ay = a.y - v.y;
+  const bx = b.x - v.x, by = b.y - v.y;
+  const dot = ax*bx + ay*by;
+  const mag = Math.hypot(ax, ay) * Math.hypot(bx, by);
+  if (mag < 1e-12) return 0;
+  return Math.acos(Math.max(-1, Math.min(1, dot / mag))) * 180 / Math.PI;
+}
+
+/** Weiszfeld algorithm — geometric median (= Fermat point for 3 pts) */
+function weiszfeld(pts, maxIter = 2000) {
+  let x = pts.reduce((s, p) => s + p.x, 0) / pts.length;
+  let y = pts.reduce((s, p) => s + p.y, 0) / pts.length;
+  for (let i = 0; i < maxIter; i++) {
+    let wx = 0, wy = 0, w = 0;
+    for (const p of pts) {
+      const d = Math.hypot(p.x - x, p.y - y);
+      if (d < 1e-10) return { x: p.x, y: p.y };
+      wx += p.x / d; wy += p.y / d; w += 1 / d;
+    }
+    const nx = wx / w, ny = wy / w;
+    if (Math.hypot(nx - x, ny - y) < 1e-10) break;
+    x = nx; y = ny;
+  }
+  return { x, y };
+}
+
+/** Naive MST length for current cities (no intermediate point) */
+function naiveMSTLength() {
+  if (cities.length < 2) return 0;
+  if (cities.length === 2) return dist(cities[0], cities[1]);
+  // 3 cities: MST = remove the longest edge from the triangle
+  const d01 = dist(cities[0], cities[1]);
+  const d12 = dist(cities[1], cities[2]);
+  const d02 = dist(cities[0], cities[2]);
+  return d01 + d12 + d02 - Math.max(d01, d12, d02);
+}
+
+/** Steiner tree length when steinerPt is set */
+function steinerLength() {
+  if (!steinerPt) return 0;
+  if (cities.length === 2) return dist(cities[0], cities[1]);
+  return cities.reduce((s, c) => s + dist(steinerPt, c), 0);
+}
+
+// ════════════════════════════════════════════════
+//  DRAWING
+// ════════════════════════════════════════════════
+function draw() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Background
+  ctx.fillStyle = '#f8fafc';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // Grid
+  ctx.strokeStyle = 'rgba(148,163,184,0.25)';
+  ctx.lineWidth = 1;
+  for (let x = 0; x <= canvas.width;  x += 50) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke(); }
+  for (let y = 0; y <= canvas.height; y += 50) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y);  ctx.stroke(); }
+
+  if (showNaive && cities.length >= 2)  drawNaive();
+  if (showSteiner && steinerPt)          drawSteinerEdges();
+
+  cities.forEach((p, i) => drawCity(p, i + 1));
+
+  if (showSteiner && steinerPt && !isObtuse) drawSteinerPoint(steinerPt);
+  if (showSteiner && steinerPt && !isObtuse) draw120Labels(steinerPt);
+}
+
+function line(a, b) {
+  ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+}
+
+function drawNaive() {
+  ctx.strokeStyle = '#f59e0b';
+  ctx.lineWidth   = showSteiner ? 1.8 : 3;
+  ctx.lineCap     = 'round';
+  ctx.setLineDash(showSteiner ? [7, 5] : []);
+
+  if (cities.length === 2) {
+    line(cities[0], cities[1]);
+  } else {
+    // 3 cities: draw MST (2 shortest edges)
+    const edges = [
+      { a: 0, b: 1, d: dist(cities[0], cities[1]) },
+      { a: 1, b: 2, d: dist(cities[1], cities[2]) },
+      { a: 0, b: 2, d: dist(cities[0], cities[2]) },
+    ].sort((x, y) => x.d - y.d);
+    line(cities[edges[0].a], cities[edges[0].b]);
+    line(cities[edges[1].a], cities[edges[1].b]);
+  }
+  ctx.setLineDash([]);
+}
+
+function drawSteinerEdges() {
+  // Glow pass
+  ctx.strokeStyle = 'rgba(22,163,74,0.25)';
+  ctx.lineWidth   = 10;
+  ctx.lineCap     = 'round';
+  cities.forEach(c => line(steinerPt, c));
+
+  // Main lines
+  ctx.strokeStyle = '#16a34a';
+  ctx.lineWidth   = 3;
+  cities.forEach(c => line(steinerPt, c));
+}
+
+function drawCity(p, n) {
+  // Glow
+  const g = ctx.createRadialGradient(p.x, p.y, 6, p.x, p.y, 18);
+  g.addColorStop(0, 'rgba(37,99,235,0.25)');
+  g.addColorStop(1, 'transparent');
+  ctx.beginPath(); ctx.arc(p.x, p.y, 18, 0, Math.PI * 2);
+  ctx.fillStyle = g; ctx.fill();
+
+  // Disc
+  ctx.beginPath(); ctx.arc(p.x, p.y, 9, 0, Math.PI * 2);
+  ctx.fillStyle   = '#2563eb'; ctx.fill();
+  ctx.strokeStyle = 'white';  ctx.lineWidth = 2.5; ctx.stroke();
+
+  // Labels
+  ctx.fillStyle    = '#1e3a8a';
+  ctx.font         = 'bold 13px Segoe UI, sans-serif';
+  ctx.textAlign    = 'left';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(`Ville ${n}`, p.x + 14, p.y - 7);
+  ctx.font      = '11px monospace';
+  ctx.fillStyle = '#94a3b8';
+  ctx.fillText(`(${Math.round(p.x)}, ${Math.round(p.y)})`, p.x + 14, p.y + 7);
+}
+
+function drawSteinerPoint(p) {
+  // Glow
+  const g = ctx.createRadialGradient(p.x, p.y, 6, p.x, p.y, 20);
+  g.addColorStop(0, 'rgba(220,38,38,0.25)');
+  g.addColorStop(1, 'transparent');
+  ctx.beginPath(); ctx.arc(p.x, p.y, 20, 0, Math.PI * 2);
+  ctx.fillStyle = g; ctx.fill();
+
+  // Disc
+  ctx.beginPath(); ctx.arc(p.x, p.y, 9, 0, Math.PI * 2);
+  ctx.fillStyle   = '#dc2626'; ctx.fill();
+  ctx.strokeStyle = 'white';  ctx.lineWidth = 2.5; ctx.stroke();
+
+  // Labels
+  ctx.fillStyle    = '#991b1b';
+  ctx.font         = 'bold 13px Segoe UI, sans-serif';
+  ctx.textAlign    = 'left';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('Point de Steiner', p.x + 14, p.y - 7);
+  ctx.font      = '11px monospace';
+  ctx.fillStyle = '#94a3b8';
+  ctx.fillText(`(${p.x.toFixed(1)}, ${p.y.toFixed(1)})`, p.x + 14, p.y + 7);
+}
+
+/** Draw "120°" labels between the three rays at the Steiner point */
+function draw120Labels(center) {
+  const angles = cities
+    .map(c => Math.atan2(c.y - center.y, c.x - center.x))
+    .sort((a, b) => a - b);
+
+  ctx.font         = 'bold 10px Segoe UI, sans-serif';
+  ctx.fillStyle    = '#dc2626';
+  ctx.textAlign    = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.strokeStyle  = 'rgba(220,38,38,0.4)';
+  ctx.lineWidth    = 1.5;
+
+  const R = 28; // arc radius
+
+  for (let i = 0; i < 3; i++) {
+    const a1 = angles[i];
+    const a2 = i < 2 ? angles[i + 1] : angles[0] + 2 * Math.PI;
+
+    // Arc
+    ctx.beginPath();
+    ctx.arc(center.x, center.y, R, a1, a2);
+    ctx.stroke();
+
+    // Label midpoint
+    const mid = (a1 + a2) / 2;
+    const lx  = center.x + (R + 16) * Math.cos(mid);
+    const ly  = center.y + (R + 16) * Math.sin(mid);
+    ctx.fillText('120°', lx, ly);
+  }
+}
+
+// ════════════════════════════════════════════════
+//  COMPUTE STEINER
+// ════════════════════════════════════════════════
+function computeSteiner() {
+  if (cities.length < 2) return;
+
+  if (cities.length === 2) {
+    // Direct connection — no Steiner point needed
+    steinerPt   = null;
+    showSteiner = true;
+    isObtuse    = false;
+    setExplanation(
+      'Avec seulement 2 villes, il suffit de les relier directement. ' +
+      'Aucun point de Steiner n\'est nécessaire.'
+    );
+    update();
+    return;
+  }
+
+  const [A, B, C] = cities;
+  const angA = angleDeg(B, A, C);
+  const angB = angleDeg(A, B, C);
+  const angC = angleDeg(A, C, B);
+
+  if (angA >= 120) {
+    steinerPt = { ...A };
+    isObtuse  = true;
+    setExplanation(
+      `L'angle en <strong>Ville 1</strong> est <strong>${angA.toFixed(1)}°</strong> ≥ 120°.<br>` +
+      `Le point optimal est la Ville 1 elle-même : on relie simplement les deux autres villes à elle, sans point intermédiaire supplémentaire.`
+    );
+  } else if (angB >= 120) {
+    steinerPt = { ...B };
+    isObtuse  = true;
+    setExplanation(
+      `L'angle en <strong>Ville 2</strong> est <strong>${angB.toFixed(1)}°</strong> ≥ 120°.<br>` +
+      `Le point optimal est la Ville 2 elle-même : on relie les deux autres villes à elle directement.`
+    );
+  } else if (angC >= 120) {
+    steinerPt = { ...C };
+    isObtuse  = true;
+    setExplanation(
+      `L'angle en <strong>Ville 3</strong> est <strong>${angC.toFixed(1)}°</strong> ≥ 120°.<br>` +
+      `Le point optimal est la Ville 3 elle-même : on relie les deux autres villes à elle directement.`
+    );
+  } else {
+    // All angles < 120° → interior Fermat point (Weiszfeld)
+    steinerPt = weiszfeld(cities);
+    isObtuse  = false;
+    setExplanation(
+      `Tous les angles sont &lt; 120° (${angA.toFixed(1)}°, ${angB.toFixed(1)}°, ${angC.toFixed(1)}°).<br>` +
+      `Le <strong>point de Fermat–Steiner</strong> se trouve à l'intérieur du triangle. ` +
+      `Chaque route y forme un angle de <strong>120°</strong> avec les deux autres — c'est la configuration minimale prouvée mathématiquement !`
+    );
+  }
+
+  showSteiner = true;
+  update();
+}
+
+function toggleNaive() {
+  showNaive = !showNaive;
+  document.getElementById('btnToggleNaive').textContent =
+    showNaive ? 'Masquer route naive' : 'Afficher route naive';
+  update();
+}
+
+function clearAll() {
+  cities.length = 0;
+  steinerPt     = null;
+  showNaive     = true;
+  showSteiner   = false;
+  isObtuse      = false;
+  document.getElementById('btnToggleNaive').textContent = 'Masquer route naive';
+  setExplanation('Placez des villes sur le canvas pour commencer.');
+  update();
+}
+
+function setExplanation(html) {
+  document.getElementById('explanation').innerHTML = html;
+}
+
+// ════════════════════════════════════════════════
+//  UI UPDATE
+// ════════════════════════════════════════════════
+function update() {
+  draw();
+  updateButtons();
+  updateStats();
+  updatePointsList();
+  updateStepBadges();
+  updateHint();
+}
+
+function updateButtons() {
+  document.getElementById('btnSolve').disabled      = cities.length < 2;
+  document.getElementById('btnToggleNaive').disabled = cities.length < 2;
+}
+
+function updateStats() {
+  const naive   = naiveMSTLength();
+  const steiner = steinerLength();
+
+  document.getElementById('statNaive').textContent =
+    cities.length >= 2 ? naive.toFixed(1) + ' px' : '—';
+
+  document.getElementById('statSteiner').textContent =
+    showSteiner && cities.length >= 2 ? steiner.toFixed(1) + ' px' : '—';
+
+  const box = document.getElementById('savings');
+  if (showSteiner && cities.length === 3 && naive > 0 && steiner < naive - 0.5) {
+    const pct = ((naive - steiner) / naive * 100).toFixed(1);
+    document.getElementById('savingsPct').textContent = pct + '%';
+    box.style.display = 'block';
+  } else {
+    box.style.display = 'none';
+  }
+}
+
+function updatePointsList() {
+  const el = document.getElementById('points-list');
+  if (cities.length === 0) {
+    el.innerHTML = '<span class="pt-none">Aucune ville placée.</span>';
+    return;
+  }
+  let html = cities.map((p, i) => `
+    <div class="pt-row">
+      <span class="lbl pt-city">Ville ${i + 1}</span>
+      <span class="coords">(${Math.round(p.x)}, ${Math.round(p.y)})</span>
+    </div>`).join('');
+
+  if (showSteiner && steinerPt && !isObtuse) {
+    html += `
+    <div class="pt-row" style="border-top:2px solid #fee2e2; margin-top:4px; padding-top:6px;">
+      <span class="lbl pt-steiner">Point de Steiner</span>
+      <span class="coords">(${steinerPt.x.toFixed(1)}, ${steinerPt.y.toFixed(1)})</span>
+    </div>`;
+  }
+  el.innerHTML = html;
+}
+
+function updateStepBadges() {
+  const set = (id, cls) => {
+    const el = document.getElementById(id);
+    el.className = 'step-badge ' + cls;
+  };
+  set('b1', cities.length >= 1 ? 'done' : 'active');
+  set('b2', cities.length >= 2 ? 'done' : cities.length === 1 ? 'active' : '');
+  set('b3', showSteiner ? 'done' : cities.length >= 2 ? 'active' : '');
+}
+
+function updateHint() {
+  const el = document.getElementById('hint');
+  if (cities.length === 0) {
+    el.textContent = 'Cliquez sur le canvas pour placer une ville (maximum 3)';
+  } else if (cities.length < 3) {
+    const r = 3 - cities.length;
+    el.textContent = `${cities.length} ville${cities.length > 1 ? 's' : ''} placée${cities.length > 1 ? 's' : ''} — encore ${r} à placer`;
+  } else if (!showSteiner) {
+    el.textContent = '3 villes placées — cliquez sur « Reseau optimal » pour calculer le point de Steiner !';
+  } else {
+    el.textContent = 'Solution affichée. Comparez les longueurs dans le panneau de droite.';
+  }
+}
+
+// Initial render
+update();
+</script>
+</body>
+</html>
