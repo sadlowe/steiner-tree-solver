@@ -19,28 +19,28 @@ export class IntroductionComponent {
   slides = [
     {
       id: 'problem',
-      title: 'The Problem',
-      subtitle: 'Connect cities with minimum road length'
+      title: 'Le problème',
+      subtitle: 'Connecter des villes avec une longueur de route minimale'
     },
     {
       id: 'naive',
-      title: 'Naive Solution',
-      subtitle: 'Direct connections between all cities'
+      title: 'Solution naïve',
+      subtitle: 'Connexions directes entre toutes les villes'
     },
     {
       id: 'mst',
-      title: 'Better: Minimum Spanning Tree',
-      subtitle: 'Connect without cycles, but still not optimal'
+      title: 'Mieux : Arbre couvrant minimal',
+      subtitle: 'Connexion sans cycles, mais pas encore optimal'
     },
     {
       id: 'steiner',
-      title: 'Optimal: Steiner Tree',
-      subtitle: 'Add junction points to minimize total length'
+      title: 'Optimal : Arbre de Steiner',
+      subtitle: 'Ajouter des points de jonction pour minimiser la longueur totale'
     },
     {
       id: 'fermat',
-      title: 'The Fermat Point',
-      subtitle: 'For 3 cities, the optimal junction has 120° angles'
+      title: 'Le point de Fermat',
+      subtitle: 'Pour 3 villes, la jonction optimale a des angles de 120°'
     }
   ];
 

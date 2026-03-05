@@ -7,6 +7,7 @@
       <span class="slide-counter">{{ currentSlide + 1 }} / {{ slides.length }}</span>
       <button class="close-btn" (click)="close()" aria-label="Close">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+
       </button>
     </div>
   </div>
@@ -82,6 +83,7 @@
             <div class="detail-card">
               <div class="card-icon">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+
               </div>
               <div class="card-title">Circuit Design</div>
               <div class="card-text">Wire electronic components with minimal trace length on PCBs</div>
@@ -180,6 +182,7 @@
             <div class="step">
               <div class="step-num">3</div>
               <div class="step-text">Many roads are <strong>redundant</strong> — you could remove some and still keep all cities connected.</div>
+
             </div>
           </div>
 
@@ -268,6 +271,7 @@
             <div class="step">
               <div class="step-num">3</div>
               <div class="step-text">Both give the <strong>same optimal result</strong> — the MST is unique when all edges have different lengths.</div>
+
             </div>
           </div>
 
@@ -361,6 +365,7 @@
             <div class="detail-card">
               <div class="card-icon">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+
               </div>
               <div class="card-title">Savings</div>
               <div class="card-text">Always ≤ MST length. Maximum savings: ~13.4% for equilateral triangle</div>
@@ -458,6 +463,7 @@
             <div class="step">
               <div class="step-num">2</div>
               <div class="step-text">Draw lines from each new outer vertex to the <strong>opposite original city</strong>.</div>
+
             </div>
             <div class="step">
               <div class="step-num">3</div>
@@ -508,6 +514,7 @@
         Start Demo
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
       </button>
+
     </div>
   </div>
 
@@ -517,4 +524,5 @@
 <button class="help-btn" *ngIf="!isVisible" (click)="open()" aria-label="Show introduction">
   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
   <span class="help-btn-label">Tutorial</span>
+
 </button>
