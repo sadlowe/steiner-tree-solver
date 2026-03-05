@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Point, Edge, SteinerResult } from './models';
 import { SteinerService } from './services';
@@ -29,8 +29,14 @@ import { IntroductionComponent } from './components/introduction/introduction.co
   styleUrl: './app.component.css'
 })
 export class AppComponent {
+  @ViewChild(IntroductionComponent) introComponent!: IntroductionComponent;
+
   /** Application title */
   title = 'Steiner Tree Solver';
+
+  openTutorial(): void {
+    this.introComponent.open();
+  }
 
   /** Array of user-placed terminal points (cities) */
   terminalPoints: Point[] = [];

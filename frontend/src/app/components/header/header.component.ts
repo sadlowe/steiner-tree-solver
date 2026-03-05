@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, EventEmitter, Output } from '@angular/core';
 
 /**
  * Header component displaying the application title and description.
@@ -10,4 +10,6 @@ import { Component } from '@angular/core';
   templateUrl: './header.component.html',
   styleUrl: './header.component.css'
 })
-export class HeaderComponent {}
+export class HeaderComponent {
+  @Output() tutorialClick = new EventEmitter<void>();
+}
