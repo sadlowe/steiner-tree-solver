@@ -1,39 +1,39 @@
 ﻿<div class="info-panel">
-  <h3 class="panel-title">Statistics</h3>
+  <h3 class="panel-title">Statistiques</h3>
   <div class="info-section">
     <h4 class="section-title">Points</h4>
     <div class="stat-row">
       <span class="stat-label">
         <span class="dot terminal-dot"></span>
-        Terminal Points (Cities)
+        Points terminaux (Villes)
       </span>
       <span class="stat-value">{{ terminalCount }}</span>
     </div>
     <div class="stat-row" *ngIf="hasSolution">
       <span class="stat-label">
         <span class="dot steiner-dot"></span>
-        Steiner Points
+        Points de Steiner
       </span>
       <span class="stat-value">{{ steinerCount }}</span>
     </div>
     <div class="stat-row total" *ngIf="hasSolution">
-      <span class="stat-label">Total Points</span>
+      <span class="stat-label">Total de points</span>
       <span class="stat-value">{{ terminalCount + steinerCount }}</span>
     </div>
   </div>
   <div class="info-section" *ngIf="hasSolution">
     <h4 class="section-title">Solution</h4>
     <div class="stat-row">
-      <span class="stat-label">Number of Edges</span>
+      <span class="stat-label">Nombre d'arêtes</span>
       <span class="stat-value">{{ edgeCount }}</span>
     </div>
     <div class="stat-row highlight">
-      <span class="stat-label">Total Network Length</span>
+      <span class="stat-label">Longueur totale du réseau</span>
       <span class="stat-value length">{{ formattedLength }} px</span>
     </div>
   </div>
   <div class="info-section" *ngIf="terminalCount > 0">
-    <h4 class="section-title">Terminal Points List</h4>
+    <h4 class="section-title">Liste des points terminaux</h4>
     <div class="points-list">
       <div class="point-item" *ngFor="let point of terminalPoints; let i = index">
         <span class="point-label">P{{ i + 1 }}</span>
@@ -42,7 +42,7 @@
     </div>
   </div>
   <div class="info-section" *ngIf="steinerCount > 0">
-    <h4 class="section-title">Steiner Points List</h4>
+    <h4 class="section-title">Liste des points de Steiner</h4>
     <div class="points-list">
       <div class="point-item steiner" *ngFor="let point of steinerPoints; let i = index">
         <span class="point-label">S{{ i + 1 }}</span>

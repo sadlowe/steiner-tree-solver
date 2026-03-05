@@ -64,8 +64,8 @@ export class ControlsComponent {
    */
   get solveButtonText(): string {
     if (this.isLoading) {
-      return 'Computing...';
+      return 'Calcul en cours...';
     }
-    return this.hasSolution ? 'Solve Again' : 'Solve Steiner Tree';
+    return this.hasSolution ? 'Résoudre à nouveau' : 'Résoudre l\'arbre de Steiner';
   }
 }
