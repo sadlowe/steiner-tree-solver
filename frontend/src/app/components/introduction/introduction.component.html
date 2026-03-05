@@ -2,8 +2,8 @@
   <div class="introduction-modal">
     <!-- Header -->
     <div class="modal-header">
-      <h2>Understanding the Steiner Tree Problem</h2>
-      <button class="close-btn" (click)="close()" aria-label="Close">
+      <h2>Comprendre le problème de l'arbre de Steiner</h2>
+      <button class="close-btn" (click)="close()" aria-label="Fermer">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
       </button>
     </div>
@@ -50,13 +50,13 @@
             <h3>{{ slides[0].title }}</h3>
             <p class="subtitle">{{ slides[0].subtitle }}</p>
             <div class="description">
-              <p>Imagine you need to build a road network connecting three cities. Your goal is to <strong>minimize the total length of roads</strong> while ensuring all cities are connected.</p>
-              <p>This is the essence of the <strong>Steiner Tree Problem</strong>, named after mathematician Jakob Steiner (1796-1863).</p>
+              <p>Imaginez que vous devez construire un réseau routier reliant trois villes. Votre objectif est de <strong>minimiser la longueur totale des routes</strong> tout en assurant la connexion de toutes les villes.</p>
+              <p>C'est l'essence du <strong>problème de l'arbre de Steiner</strong>, nommé d'après le mathématicien Jakob Steiner (1796-1863).</p>
               <div class="key-point">
                 <span class="icon">
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
                 </span>
-                <span>Real applications: telecommunications, circuit design, pipeline networks</span>
+                <span>Applications réelles : télécommunications, conception de circuits, réseaux de pipelines</span>
               </div>
             </div>
           </div>
@@ -110,12 +110,12 @@
             <h3>{{ slides[1].title }}</h3>
             <p class="subtitle">{{ slides[1].subtitle }}</p>
             <div class="description">
-              <p>The most obvious solution is to connect every city directly to every other city, forming a <strong>complete graph</strong>.</p>
-              <p>This works, but it's <strong>wasteful</strong> - we're building more roads than necessary!</p>
+              <p>La solution la plus évidente est de connecter directement chaque ville à toutes les autres, formant un <strong>graphe complet</strong>.</p>
+              <p>Cela fonctionne, mais c'est <strong>gaspilleur</strong> - nous construisons plus de routes que nécessaire !</p>
               <div class="comparison bad">
-                <span class="label">Total length:</span>
+                <span class="label">Longueur totale :</span>
                 <span class="value">640 km</span>
-                <span class="verdict">Inefficient</span>
+                <span class="verdict">Inefficace</span>
               </div>
             </div>
           </div>
@@ -170,14 +170,14 @@
             <h3>{{ slides[2].title }}</h3>
             <p class="subtitle">{{ slides[2].subtitle }}</p>
             <div class="description">
-              <p>A <strong>Minimum Spanning Tree (MST)</strong> connects all cities without forming cycles, using the shortest possible edges.</p>
-              <p>This is much better! We removed the A-B edge since we can go A → C → B.</p>
+              <p>Un <strong>arbre couvrant minimal (MST)</strong> connecte toutes les villes sans former de cycles, en utilisant les arêtes les plus courtes possibles.</p>
+              <p>C'est bien mieux ! Nous avons supprimé l'arête A-B car nous pouvons passer par A → C → B.</p>
               <div class="comparison medium">
-                <span class="label">Total length:</span>
+                <span class="label">Longueur totale :</span>
                 <span class="value">400 km</span>
-                <span class="verdict">Better (-37%)</span>
+                <span class="verdict">Mieux (-37%)</span>
               </div>
-              <p class="hint">But can we do even better?</p>
+              <p class="hint">Mais peut-on faire encore mieux ?</p>
             </div>
           </div>
         </div>
@@ -237,10 +237,10 @@
             <h3>{{ slides[3].title }}</h3>
             <p class="subtitle">{{ slides[3].subtitle }}</p>
             <div class="description">
-              <p>The <strong>Steiner Tree</strong> adds a new junction point (called a <strong>Steiner point</strong>) that doesn't correspond to any city.</p>
-              <p>By placing this point strategically, we can reduce the total road length even further!</p>
+              <p>L'<strong>arbre de Steiner</strong> ajoute un nouveau point de jonction (appelé <strong>point de Steiner</strong>) qui ne correspond à aucune ville.</p>
+              <p>En plaçant ce point stratégiquement, nous pouvons réduire encore plus la longueur totale des routes !</p>
               <div class="comparison good">
-                <span class="label">Total length:</span>
+                <span class="label">Longueur totale :</span>
                 <span class="value">360 km</span>
                 <span class="verdict">Optimal (-44%)</span>
               </div>
@@ -248,7 +248,7 @@
                 <span class="icon">
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
                 </span>
-                <span>The purple point S is the Steiner point - a junction we added!</span>
+                <span>Le point violet S est le point de Steiner - une jonction que nous avons ajoutée !</span>
               </div>
             </div>
           </div>
@@ -312,17 +312,17 @@
             <h3>{{ slides[4].title }}</h3>
             <p class="subtitle">{{ slides[4].subtitle }}</p>
             <div class="description">
-              <p>For exactly 3 cities, the optimal Steiner point is called the <strong>Fermat Point</strong> (or Torricelli Point).</p>
-              <p>It has a beautiful property: <strong>all three angles are exactly 120°</strong>.</p>
+              <p>Pour exactement 3 villes, le point de Steiner optimal est appelé le <strong>point de Fermat</strong> (ou point de Torricelli).</p>
+              <p>Il a une propriété remarquable : <strong>les trois angles sont exactement de 120°</strong>.</p>
               <div class="formula">
-                <span class="label">Mathematical property:</span>
+                <span class="label">Propriété mathématique :</span>
                 <span class="math">∠AFB = ∠BFC = ∠CFA = 120°</span>
               </div>
               <div class="key-point">
                 <span class="icon">
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
                 </span>
-                <span>This point minimizes the sum of distances to all three cities!</span>
+                <span>Ce point minimise la somme des distances vers les trois villes !</span>
               </div>
             </div>
           </div>
@@ -339,20 +339,20 @@
           class="indicator"
           [class.active]="currentSlide === i"
           (click)="goToSlide(i)"
-          [attr.aria-label]="'Go to slide ' + (i + 1)">
+          [attr.aria-label]="'Aller à la diapositive ' + (i + 1)">
         </button>
       </div>
       <div class="nav-buttons">
         <button class="nav-btn" (click)="prevSlide()" [disabled]="currentSlide === 0">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
-          Previous
+          Précédent
         </button>
         <button class="nav-btn primary" *ngIf="currentSlide < slides.length - 1" (click)="nextSlide()">
-          Next
+          Suivant
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
         </button>
         <button class="nav-btn primary" *ngIf="currentSlide === slides.length - 1" (click)="close()">
-          Start Demo
+          Commencer la démo
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
         </button>
       </div>
@@ -361,6 +361,6 @@
 </div>
 
 <!-- Floating button to reopen -->
-<button class="help-btn" *ngIf="!isVisible" (click)="open()" aria-label="Show introduction">
+<button class="help-btn" *ngIf="!isVisible" (click)="open()" aria-label="Afficher l'introduction">
   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
 </button>
