@@ -60,6 +60,29 @@
   text-transform: uppercase;
 }
 
+/* Tutorial Button */
+.tutorial-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-md);
+  background: transparent;
+  border: 1px solid var(--primary-500);
+  color: var(--primary-400);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+
+.tutorial-btn:hover {
+  background: var(--primary-500);
+  color: white;
+  box-shadow: var(--glow-primary);
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .app-header {
