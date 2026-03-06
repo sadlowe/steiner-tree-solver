@@ -1,10 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
-/**
- * Introduction component with educational illustrations
- * explaining the Steiner Tree problem to the public.
- */
 @Component({
   selector: 'app-introduction',
   standalone: true,

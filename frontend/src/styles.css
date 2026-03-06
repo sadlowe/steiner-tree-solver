@@ -1,21 +1,10 @@
-/* ==========================================================================
-   STEINER TREE SOLVER - Futuristic Scientific UI
-   A modern, dark-mode interface for algorithm visualization
-   ========================================================================== */
-
-/* ==========================================================================
-   CSS CUSTOM PROPERTIES (THEME VARIABLES)
-   ========================================================================== */
 :root {
-  /* -------------------- Colors: Backgrounds -------------------- */
   --bg-primary: #0a0e17;
   --bg-secondary: #0d1321;
   --bg-tertiary: #131a2b;
   --bg-elevated: #1a2235;
   --bg-glass: rgba(13, 19, 33, 0.85);
   --bg-glass-light: rgba(26, 34, 53, 0.7);
-
-  /* -------------------- Colors: Primary (Cyan/Blue) -------------------- */
   --primary-100: #e0f7ff;
   --primary-200: #b3ecff;
   --primary-300: #80dfff;
@@ -25,8 +14,6 @@
   --primary-700: #0091c2;
   --primary-800: #007aa3;
   --primary-900: #006385;
-
-  /* -------------------- Colors: Secondary (Violet/Purple) -------------------- */
   --secondary-100: #f3e8ff;
   --secondary-200: #e4ccff;
   --secondary-300: #d4afff;
@@ -36,36 +23,24 @@
   --secondary-700: #7e22ce;
   --secondary-800: #6b21a8;
   --secondary-900: #581c87;
-
-  /* -------------------- Colors: Accent (Teal/Lime) -------------------- */
   --accent-teal: #14b8a6;
   --accent-lime: #84cc16;
   --accent-emerald: #10b981;
-
-  /* -------------------- Colors: Semantic -------------------- */
   --success: #10b981;
   --warning: #f59e0b;
   --error: #ef4444;
   --info: #3b82f6;
-
-  /* -------------------- Colors: Text -------------------- */
   --text-primary: #f1f5f9;
   --text-secondary: #94a3b8;
   --text-tertiary: #64748b;
   --text-muted: #475569;
-
-  /* -------------------- Colors: Borders & Dividers -------------------- */
   --border-subtle: rgba(148, 163, 184, 0.1);
   --border-default: rgba(148, 163, 184, 0.2);
   --border-strong: rgba(148, 163, 184, 0.3);
   --border-glow: rgba(0, 191, 255, 0.3);
-
-  /* -------------------- Gradients -------------------- */
   --gradient-primary: linear-gradient(135deg, var(--primary-500) 0%, var(--secondary-500) 100%);
   --gradient-glow: linear-gradient(135deg, rgba(0, 191, 255, 0.15) 0%, rgba(168, 85, 247, 0.15) 100%);
   --gradient-surface: linear-gradient(180deg, var(--bg-tertiary) 0%, var(--bg-secondary) 100%);
-
-  /* -------------------- Shadows & Glows -------------------- */
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -2px rgba(0, 0, 0, 0.3);
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -4px rgba(0, 0, 0, 0.4);
@@ -73,8 +48,6 @@
   --glow-primary: 0 0 20px rgba(0, 191, 255, 0.3);
   --glow-secondary: 0 0 20px rgba(168, 85, 247, 0.3);
   --glow-success: 0 0 15px rgba(16, 185, 129, 0.4);
-
-  /* -------------------- Typography -------------------- */
   --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-mono: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
 
@@ -100,8 +73,6 @@
   --letter-spacing-normal: 0;
   --letter-spacing-wide: 0.025em;
   --letter-spacing-wider: 0.05em;
-
-  /* -------------------- Spacing -------------------- */
   --space-1: 0.25rem;
   --space-2: 0.5rem;
   --space-3: 0.75rem;
@@ -112,32 +83,22 @@
   --space-10: 2.5rem;
   --space-12: 3rem;
   --space-16: 4rem;
-
-  /* -------------------- Border Radius -------------------- */
   --radius-sm: 4px;
   --radius-md: 8px;
   --radius-lg: 12px;
   --radius-xl: 16px;
   --radius-2xl: 24px;
   --radius-full: 9999px;
-
-  /* -------------------- Transitions -------------------- */
   --transition-fast: 150ms ease;
   --transition-base: 250ms ease;
   --transition-slow: 350ms ease;
   --transition-bounce: 500ms cubic-bezier(0.34, 1.56, 0.64, 1);
-
-  /* -------------------- Z-Index Scale -------------------- */
   --z-base: 0;
   --z-dropdown: 100;
   --z-sticky: 200;
   --z-modal: 300;
   --z-tooltip: 400;
 }
-
-/* ==========================================================================
-   CSS RESET & BASE STYLES
-   ========================================================================== */
 *,
 *::before,
 *::after {
@@ -162,7 +123,6 @@ body {
   min-height: 100vh;
 }
 
-/* Subtle animated background gradient */
 body::before {
   content: '';
   position: fixed;
@@ -178,7 +138,6 @@ body::before {
   z-index: -1;
 }
 
-/* Typography defaults */
 h1, h2, h3, h4, h5, h6 {
   font-weight: var(--font-weight-semibold);
   line-height: var(--line-height-tight);
@@ -190,19 +149,16 @@ p {
   color: var(--text-secondary);
 }
 
-/* Selection styling */
 ::selection {
   background: var(--primary-500);
   color: var(--bg-primary);
 }
 
-/* Focus styles for accessibility */
 :focus-visible {
   outline: 2px solid var(--primary-500);
   outline-offset: 2px;
 }
 
-/* Links */
 a {
   color: var(--primary-400);
   text-decoration: none;
@@ -222,7 +178,6 @@ button {
   background: none;
 }
 
-/* Scrollbar styling */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -243,11 +198,6 @@ button {
   background: var(--text-tertiary);
 }
 
-/* ==========================================================================
-   ANIMATIONS
-   ========================================================================== */
-
-/* Subtle pulse animation for active elements */
 @keyframes pulse-glow {
   0%, 100% {
     box-shadow: 0 0 5px rgba(0, 191, 255, 0.3);
@@ -257,7 +207,6 @@ button {
   }
 }
 
-/* Fade in animation */
 @keyframes fade-in {
   from {
     opacity: 0;
@@ -269,7 +218,6 @@ button {
   }
 }
 
-/* Slide in from right */
 @keyframes slide-in-right {
   from {
     opacity: 0;
@@ -281,7 +229,6 @@ button {
   }
 }
 
-/* Spinner animation */
 @keyframes spin {
   from {
     transform: rotate(0deg);

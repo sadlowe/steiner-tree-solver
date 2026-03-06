@@ -1,8 +1,5 @@
 import { Component, EventEmitter, Output } from '@angular/core';
 
-/**
- * Header component displaying the application title and description.
- */
 @Component({
   selector: 'app-header',
   standalone: true,

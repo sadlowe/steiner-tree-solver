@@ -1,7 +1,6 @@
-﻿﻿<div class="controls-container">
+<div class="controls-container">
   <h3 class="controls-title">Commandes</h3>
   <div class="button-group">
-    <!-- Solve Button -->
     <button
       class="btn btn-primary"
       [disabled]="!canSolve"
@@ -15,7 +14,6 @@
       </span>
       {{ solveButtonText }}
     </button>
-    <!-- Clear Solution Button (only shown when there's a solution) -->
     <button
       class="btn btn-secondary"
       *ngIf="hasSolution"
@@ -25,7 +23,6 @@
       </span>
       Effacer la solution
     </button>
-    <!-- Clear All Button -->
     <button
       class="btn btn-danger"
       [disabled]="pointCount === 0"
@@ -36,7 +33,6 @@
       Tout effacer
     </button>
   </div>
-  <!-- Status Messages -->
   <div class="help-text">
     <p *ngIf="pointCount < 2" class="warning">
       [!] Ajoutez au moins 2 points pour résoudre

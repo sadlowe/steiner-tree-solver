@@ -1,8 +1,5 @@
 package com.terra.numerica.steiner_tree_solver.model;
 
-/**
- * Represents an edge (connection) between two points.
- */
 public class Edge {
     private Point start;
     private Point end;
@@ -30,9 +27,6 @@ public class Edge {
         this.end = end;
     }
 
-    /**
-     * Calculates the length of this edge.
-     */
     public double getLength() {
         return start.distanceTo(end);
     }

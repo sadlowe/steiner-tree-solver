@@ -8,12 +8,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-/**
- * REST Controller for the Steiner Tree API.
- */
 @RestController
 @RequestMapping("/api/steiner")
-@CrossOrigin(origins = "http://localhost:4200") // Allow Angular frontend
+@CrossOrigin(origins = "http://localhost:4200")
 public class SteinerController {
 
     private final SteinerTreeService steinerTreeService;
@@ -22,12 +19,6 @@ public class SteinerController {
         this.steinerTreeService = steinerTreeService;
     }
 
-    /**
-     * Solves the Steiner Tree problem for the given points.
-     *
-     * @param points List of terminal points to connect
-     * @return SteinerResult with edges, Steiner points, and total length
-     */
     @PostMapping("/solve")
     public ResponseEntity<SteinerResult> solve(@RequestBody List<Point> points) {
         if (points == null || points.size() < 2) {
@@ -42,9 +33,6 @@ public class SteinerController {
         }
     }
 
-    /**
-     * Health check endpoint.
-     */
     @GetMapping("/health")
     public ResponseEntity<String> health() {
         return ResponseEntity.ok("Steiner Tree Solver API is running");

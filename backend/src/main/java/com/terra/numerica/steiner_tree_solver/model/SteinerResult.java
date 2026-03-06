@@ -3,9 +3,6 @@ package com.terra.numerica.steiner_tree_solver.model;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Result of the Steiner Tree computation.
- */
 public class SteinerResult {
     private List<Edge> edges;
     private double totalLength;

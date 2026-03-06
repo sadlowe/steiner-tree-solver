@@ -1,8 +1,5 @@
 import { Component } from '@angular/core';
 
-/**
- * Footer component displaying project info and links.
- */
 @Component({
   selector: 'app-footer',
   standalone: true,

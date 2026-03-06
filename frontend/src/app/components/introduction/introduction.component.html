@@ -1,6 +1,5 @@
 <div class="introduction-overlay" *ngIf="isVisible">
 
-  <!-- Top Bar -->
   <div class="modal-header">
     <h2>Arbre de Steiner — Tutoriel interactif</h2>
     <div class="header-right">
@@ -12,10 +11,8 @@
     </div>
   </div>
 
-  <!-- Slides -->
   <div class="slide-container">
 
-    <!-- ── SLIDE 1 : The Problem ── -->
     <div class="slide" *ngIf="currentSlide === 0">
       <div class="slide-content">
 
@@ -29,12 +26,10 @@
             </defs>
             <rect width="500" height="380" fill="url(#bg1)"/>
 
-            <!-- Dashed potential roads -->
             <line x1="100" y1="100" x2="400" y2="100" stroke="rgba(255,255,255,0.08)" stroke-width="2" stroke-dasharray="10,6"/>
             <line x1="400" y1="100" x2="250" y2="300" stroke="rgba(255,255,255,0.08)" stroke-width="2" stroke-dasharray="10,6"/>
             <line x1="250" y1="300" x2="100" y2="100" stroke="rgba(255,255,255,0.08)" stroke-width="2" stroke-dasharray="10,6"/>
 
-            <!-- Cities -->
             <circle cx="100" cy="100" r="28" fill="rgba(0,191,255,0.15)" stroke="var(--primary-500)" stroke-width="2" class="city-node"/>
             <text x="100" y="106" text-anchor="middle" fill="white" font-size="16" font-weight="bold">A</text>
             <text x="100" y="148" text-anchor="middle" fill="var(--text-tertiary)" font-size="13">Paris</text>
@@ -50,7 +45,6 @@
             <!-- Question marks -->
             <text x="250" y="195" text-anchor="middle" fill="var(--primary-400)" font-size="56" font-weight="bold" class="question-mark">?</text>
 
-            <!-- Caption -->
             <text x="250" y="28" text-anchor="middle" fill="var(--text-muted)" font-size="13">Comment connecter toutes les villes avec une longueur minimale ?</text>
           </svg>
         </div>
@@ -108,7 +102,6 @@
       </div>
     </div>
 
-    <!-- ── SLIDE 2 : Naive Solution ── -->
     <div class="slide" *ngIf="currentSlide === 1">
       <div class="slide-content">
 
@@ -122,12 +115,10 @@
             </defs>
             <rect width="500" height="380" fill="url(#bg2)"/>
 
-            <!-- All edges (complete graph) -->
             <line x1="100" y1="100" x2="400" y2="100" stroke="var(--error)" stroke-width="3" class="edge-line"/>
             <line x1="400" y1="100" x2="250" y2="300" stroke="var(--error)" stroke-width="3" class="edge-line"/>
             <line x1="250" y1="300" x2="100" y2="100" stroke="var(--error)" stroke-width="3" class="edge-line"/>
 
-            <!-- Length labels -->
             <rect x="195" y="56" width="110" height="24" rx="4" fill="rgba(0,0,0,0.5)"/>
             <text x="250" y="73" text-anchor="middle" fill="var(--error)" font-size="13" font-weight="bold">300 km</text>
             <rect x="335" y="185" width="110" height="24" rx="4" fill="rgba(0,0,0,0.5)"/>
@@ -135,7 +126,6 @@
             <rect x="55" y="185" width="110" height="24" rx="4" fill="rgba(0,0,0,0.5)"/>
             <text x="110" y="202" text-anchor="middle" fill="var(--error)" font-size="13" font-weight="bold">236 km</text>
 
-            <!-- Cities -->
             <circle cx="100" cy="100" r="26" fill="rgba(0,191,255,0.15)" stroke="var(--primary-500)" stroke-width="2"/>
             <text x="100" y="106" text-anchor="middle" fill="white" font-size="16" font-weight="bold">A</text>
             <circle cx="400" cy="100" r="26" fill="rgba(0,191,255,0.15)" stroke="var(--primary-500)" stroke-width="2"/>
@@ -143,11 +133,9 @@
             <circle cx="250" cy="300" r="26" fill="rgba(0,191,255,0.15)" stroke="var(--primary-500)" stroke-width="2"/>
             <text x="250" y="306" text-anchor="middle" fill="white" font-size="16" font-weight="bold">C</text>
 
-            <!-- Total badge -->
             <rect x="168" y="168" width="164" height="38" rx="6" fill="rgba(239,68,68,0.2)" stroke="var(--error)" stroke-width="1.5"/>
             <text x="250" y="192" text-anchor="middle" fill="var(--error)" font-size="16" font-weight="bold">Total : 772 km</text>
 
-            <!-- Cross icon -->
             <circle cx="445" cy="48" r="18" fill="rgba(239,68,68,0.2)" stroke="var(--error)" stroke-width="1.5"/>
             <line x1="438" y1="41" x2="452" y2="55" stroke="var(--error)" stroke-width="2.5"/>
             <line x1="452" y1="41" x2="438" y2="55" stroke="var(--error)" stroke-width="2.5"/>

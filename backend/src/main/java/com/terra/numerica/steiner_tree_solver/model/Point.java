@@ -1,8 +1,5 @@
 package com.terra.numerica.steiner_tree_solver.model;
 
-/**
- * Represents a 2D point on the canvas.
- */
 public class Point {
     private double x;
     private double y;
@@ -30,9 +27,6 @@ public class Point {
         this.y = y;
     }
 
-    /**
-     * Calculates the Euclidean distance to another point.
-     */
     public double distanceTo(Point other) {
         double dx = this.x - other.x;
         double dy = this.y - other.y;
