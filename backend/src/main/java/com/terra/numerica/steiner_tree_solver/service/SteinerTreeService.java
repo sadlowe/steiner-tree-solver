@@ -7,6 +7,22 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+/**
+ * Service de calcul de l'arbre de Steiner euclidien.
+ *
+ * ALGORITHME POUR 4 POINTS
+ * ─────────────────────────
+ * Un arbre de Steiner sur n terminaux peut contenir au plus n−2 points de Steiner.
+ * Pour n=4, on énumère exhaustivement les 16 topologies candidates :
+ *
+ *   • 0 point de Steiner  ( 1 topologie) : arbre couvrant minimal (MST)
+ *   • 1 point de Steiner  (12 topologies): triplet → point de Fermat,
+ *                                          le 4e terminal se raccorde à l'un des 3 autres
+ *   • 2 points de Steiner ( 3 topologies): partition {a,b}|{c,d},
+ *                                          S1 et S2 optimisés par Weiszfeld alterné
+ *
+ * La topologie de longueur minimale valide est retournée.
+ */
 @Service
 public class SteinerTreeService {
 
@@ -14,30 +30,30 @@ public class SteinerTreeService {
         if (points == null || points.size() < 2) {
             throw new IllegalArgumentException("At least 2 points are required");
         }
-
         switch (points.size()) {
-            case 2:
-                return solveForTwoPoints(points);
-            case 3:
-                return solveForThreePoints(points);
-            case 4:
-                return solveForFourPoints(points);
-            default:
-                return solveWithMST(points);
+            case 2:  return solveForTwoPoints(points);
+            case 3:  return solveForThreePoints(points);
+            case 4:  return solveForFourPoints(points);
+            default: return solveWithMST(points);
         }
     }
+
+    // =========================================================================
+    // 2 POINTS : segment direct
+    // =========================================================================
 
     private SteinerResult solveForTwoPoints(List<Point> points) {
         SteinerResult result = new SteinerResult();
         result.setTerminalPoints(points);
-
-        Point p1 = points.get(0);
-        Point p2 = points.get(1);
-
-        result.addEdge(new Edge(p1, p2));
-
+        result.addEdge(new Edge(points.get(0), points.get(1)));
         return result;
     }
+
+    // =========================================================================
+    // 3 POINTS : point de Fermat-Torricelli
+    // Si un angle >= 120°, ce sommet est le point optimal (pas de Steiner utile).
+    // Sinon, le point de Fermat divise les 3 arêtes à exactement 120°.
+    // =========================================================================
 
     private SteinerResult solveForThreePoints(List<Point> points) {
         SteinerResult result = new SteinerResult();
@@ -47,258 +63,375 @@ public class SteinerTreeService {
         Point p2 = points.get(1);
         Point p3 = points.get(2);
 
-        double angle1 = calculateAngle(p2, p1, p3);
-        double angle2 = calculateAngle(p1, p2, p3);
-        double angle3 = calculateAngle(p1, p3, p2);
+        double threshold = Math.toRadians(120.0);
 
-        double threshold = Math.toRadians(120);
-
-        if (angle1 >= threshold) {
+        if (calculateAngle(p2, p1, p3) >= threshold) {
             result.addEdge(new Edge(p1, p2));
             result.addEdge(new Edge(p1, p3));
-        } else if (angle2 >= threshold) {
+        } else if (calculateAngle(p1, p2, p3) >= threshold) {
             result.addEdge(new Edge(p2, p1));
             result.addEdge(new Edge(p2, p3));
-        } else if (angle3 >= threshold) {
+        } else if (calculateAngle(p1, p3, p2) >= threshold) {
             result.addEdge(new Edge(p3, p1));
             result.addEdge(new Edge(p3, p2));
         } else {
-            Point fermatPoint = computeFermatPoint(p1, p2, p3);
-            result.addSteinerPoint(fermatPoint);
-
-            result.addEdge(new Edge(fermatPoint, p1));
-            result.addEdge(new Edge(fermatPoint, p2));
-            result.addEdge(new Edge(fermatPoint, p3));
+            Point fermat = computeFermatPoint(p1, p2, p3);
+            result.addSteinerPoint(fermat);
+            result.addEdge(new Edge(fermat, p1));
+            result.addEdge(new Edge(fermat, p2));
+            result.addEdge(new Edge(fermat, p3));
         }
 
         return result;
     }
 
-    private double calculateAngle(Point a, Point b, Point c) {
-        double ba_x = a.getX() - b.getX();
-        double ba_y = a.getY() - b.getY();
-        double bc_x = c.getX() - b.getX();
-        double bc_y = c.getY() - b.getY();
+    // =========================================================================
+    // 4 POINTS : énumération complète des 16 topologies
+    // =========================================================================
 
-        double dotProduct = ba_x * bc_x + ba_y * bc_y;
-        double magnitudeBA = Math.sqrt(ba_x * ba_x + ba_y * ba_y);
-        double magnitudeBC = Math.sqrt(bc_x * bc_x + bc_y * bc_y);
+    private SteinerResult solveForFourPoints(List<Point> points) {
+        Point[] p = {
+            points.get(0), points.get(1),
+            points.get(2), points.get(3)
+        };
 
-        if (magnitudeBA == 0 || magnitudeBC == 0) {
-            return 0;
+        SteinerResult best = solveWithMST(points);
+        best.setTerminalPoints(points);
+        double bestLength = best.getTotalLength();
+
+        // ── 1 point de Steiner : 4 triplets × 3 attaches = 12 topologies ────
+        //
+        // Structure :
+        //   S = Fermat(triplet[0], triplet[1], triplet[2])
+        //   terminal lone → terminal attach  (attach ∈ triplet)
+        //
+        // IMPORTANT : le terminal lone se connecte à UN TERMINAL du triplet,
+        // PAS au point de Steiner. Un point de Steiner n'a que 3 arêtes (120°).
+        int[][] triplets = { {0,1,2}, {0,1,3}, {0,2,3}, {1,2,3} };
+        int[]   lones    = {  3,       2,       1,       0       };
+
+        for (int t = 0; t < 4; t++) {
+            int[] tri = triplets[t];
+            int   lone = lones[t];
+
+            Point ta = p[tri[0]], tb = p[tri[1]], tc = p[tri[2]];
+            Point fermat = computeFermatPoint(ta, tb, tc);
+            if (fermat == null) continue;   // triplet colinéaire, topologie invalide
+
+            boolean atVertex = fermat.distanceTo(ta) < 1e-8
+                            || fermat.distanceTo(tb) < 1e-8
+                            || fermat.distanceTo(tc) < 1e-8;
+
+            for (int attach : tri) {
+                SteinerResult candidate = new SteinerResult();
+                candidate.setTerminalPoints(points);
+
+                if (!atVertex) {
+                    candidate.addSteinerPoint(fermat);
+                }
+                candidate.addEdge(new Edge(fermat, ta));
+                candidate.addEdge(new Edge(fermat, tb));
+                candidate.addEdge(new Edge(fermat, tc));
+                candidate.addEdge(new Edge(p[lone], p[attach]));
+
+                if (candidate.getTotalLength() < bestLength) {
+                    best = candidate;
+                    bestLength = candidate.getTotalLength();
+                }
+            }
         }
 
-        double cosAngle = dotProduct / (magnitudeBA * magnitudeBC);
-        cosAngle = Math.max(-1, Math.min(1, cosAngle));
+        // ── 2 points de Steiner : 3 partitions en 2 paires ──────────────────
+        //
+        // Structure (exemple partition {0,1}|{2,3}) :
+        //   S1 connecté à T0, T1, S2   (angles 120°)
+        //   S2 connecté à T2, T3, S1   (angles 120°)
+        //
+        // Optimisation par itérations de Weiszfeld alternées (sans dépendance externe).
+        int[][][] partitions = {
+            {{0, 1}, {2, 3}},
+            {{0, 2}, {1, 3}},
+            {{0, 3}, {1, 2}}
+        };
 
-        return Math.acos(cosAngle);
+        for (int[][] partition : partitions) {
+            int a = partition[0][0], b = partition[0][1];
+            int c = partition[1][0], d = partition[1][1];
+
+            SteinerResult candidate = evalTwoSteinerTopology(p, a, b, c, d);
+            if (candidate == null) continue;
+
+            candidate.setTerminalPoints(points);
+            if (candidate.getTotalLength() < bestLength) {
+                best = candidate;
+                bestLength = candidate.getTotalLength();
+            }
+        }
+
+        return best;
     }
 
-    private Point computeFermatPoint(Point p1, Point p2, Point p3) {
-        double x = (p1.getX() + p2.getX() + p3.getX()) / 3;
-        double y = (p1.getY() + p2.getY() + p3.getY()) / 3;
+    // =========================================================================
+    // OPTIMISATION DES 2 POINTS DE STEINER
+    //
+    // Topologie : S1 ↔ {Ta, Tb, S2}    S2 ↔ {Tc, Td, S1}
+    //
+    // On minimise f(S1,S2) = d(S1,Ta)+d(S1,Tb)+d(S1,S2)+d(S2,Tc)+d(S2,Td)
+    //
+    // Algorithme : Weiszfeld alterné (coordinate descent).
+    //   1. Fixer S2, mettre à jour S1 = Weber({Ta, Tb, S2}) par Weiszfeld
+    //   2. Fixer S1, mettre à jour S2 = Weber({Tc, Td, S1}) par Weiszfeld
+    //   3. Répéter jusqu'à convergence
+    //
+    // Plusieurs initialisations pour éviter les minima locaux.
+    // =========================================================================
 
-        for (int i = 0; i < 100; i++) {
-            Point current = new Point(x, y);
+    private SteinerResult evalTwoSteinerTopology(Point[] p, int a, int b, int c, int d) {
+        Point ta = p[a], tb = p[b], tc = p[c], td = p[d];
 
-            double d1 = current.distanceTo(p1);
-            double d2 = current.distanceTo(p2);
-            double d3 = current.distanceTo(p3);
+        double cx = (ta.getX() + tb.getX() + tc.getX() + td.getX()) / 4.0;
+        double cy = (ta.getY() + tb.getY() + tc.getY() + td.getY()) / 4.0;
+        double mabX = (ta.getX() + tb.getX()) / 2.0;
+        double mabY = (ta.getY() + tb.getY()) / 2.0;
+        double mcdX = (tc.getX() + td.getX()) / 2.0;
+        double mcdY = (tc.getY() + td.getY()) / 2.0;
 
-            if (d1 < 1e-10) return p1;
-            if (d2 < 1e-10) return p2;
-            if (d3 < 1e-10) return p3;
+        // 4 points de départ différents
+        double[][] inits = {
+            // Init 1 : milieux des deux paires
+            { mabX, mabY, mcdX, mcdY },
+            // Init 2 : milieux décalés vers le centroïde
+            { (mabX * 2 + mcdX) / 3.0, (mabY * 2 + mcdY) / 3.0,
+              (mcdX * 2 + mabX) / 3.0, (mcdY * 2 + mabY) / 3.0 },
+            // Init 3 : centroïde ± perturbation vers chaque paire
+            { (ta.getX() + tb.getX() + cx) / 3.0, (ta.getY() + tb.getY() + cy) / 3.0,
+              (tc.getX() + td.getX() + cx) / 3.0, (tc.getY() + td.getY() + cy) / 3.0 },
+            // Init 4 : décalé vers les terminaux respectifs
+            { 0.65 * ta.getX() + 0.35 * cx, 0.65 * ta.getY() + 0.35 * cy,
+              0.65 * tc.getX() + 0.35 * cx, 0.65 * tc.getY() + 0.35 * cy }
+        };
 
-            double w1 = 1.0 / d1;
-            double w2 = 1.0 / d2;
-            double w3 = 1.0 / d3;
-            double totalWeight = w1 + w2 + w3;
+        double   bestLen    = Double.MAX_VALUE;
+        double[] bestCoords = null;
 
-            double newX = (p1.getX() * w1 + p2.getX() * w2 + p3.getX() * w3) / totalWeight;
-            double newY = (p1.getY() * w1 + p2.getY() * w2 + p3.getY() * w3) / totalWeight;
+        for (double[] init : inits) {
+            double[] coords = optimizeTwoSteiner(
+                ta, tb, tc, td,
+                init[0], init[1], init[2], init[3]
+            );
+            if (coords == null) continue;
 
-            if (Math.abs(newX - x) < 1e-10 && Math.abs(newY - y) < 1e-10) {
+            double s1x = coords[0], s1y = coords[1];
+            double s2x = coords[2], s2y = coords[3];
+            double len = dist(s1x, s1y, ta.getX(), ta.getY())
+                       + dist(s1x, s1y, tb.getX(), tb.getY())
+                       + dist(s1x, s1y, s2x, s2y)
+                       + dist(s2x, s2y, tc.getX(), tc.getY())
+                       + dist(s2x, s2y, td.getX(), td.getY());
+
+            if (len < bestLen) {
+                bestLen    = len;
+                bestCoords = coords;
+            }
+        }
+
+        if (bestCoords == null) return null;
+
+        double s1x = bestCoords[0], s1y = bestCoords[1];
+        double s2x = bestCoords[2], s2y = bestCoords[3];
+
+        // Validation : points de Steiner non confondus avec terminaux/entre eux
+        double scale = maxPairDistance(ta, tb, tc, td);
+        double eps   = Math.max(1e-8, 1e-4 * scale);
+
+        if (dist(s1x, s1y, s2x, s2y) < eps) return null;
+        for (Point t : new Point[]{ ta, tb, tc, td }) {
+            if (dist(s1x, s1y, t.getX(), t.getY()) < eps) return null;
+            if (dist(s2x, s2y, t.getX(), t.getY()) < eps) return null;
+        }
+
+        // Validation des angles ≈ 120° aux deux points de Steiner
+        Point s1 = new Point(s1x, s1y);
+        Point s2 = new Point(s2x, s2y);
+        if (!checkAngles120(s1, ta, tb, s2)) return null;
+        if (!checkAngles120(s2, tc, td, s1)) return null;
+
+        SteinerResult result = new SteinerResult();
+        result.addSteinerPoint(s1);
+        result.addSteinerPoint(s2);
+        result.addEdge(new Edge(s1, ta));
+        result.addEdge(new Edge(s1, tb));
+        result.addEdge(new Edge(s1, s2));
+        result.addEdge(new Edge(s2, tc));
+        result.addEdge(new Edge(s2, td));
+        return result;
+    }
+
+    /**
+     * Optimise S1 et S2 par itérations de Weiszfeld alternées.
+     *
+     * Chaque étape :
+     *   S1 ← Weber({Ta, Tb, S2}) :  S1 = (Ta/d(S1,Ta) + Tb/d(S1,Tb) + S2/d(S1,S2))
+     *                                     / (1/d(S1,Ta) + 1/d(S1,Tb) + 1/d(S1,S2))
+     *   S2 ← Weber({Tc, Td, S1}) :  même formule avec Tc, Td, S1
+     */
+    private double[] optimizeTwoSteiner(
+            Point ta, Point tb, Point tc, Point td,
+            double s1x, double s1y, double s2x, double s2y) {
+
+        for (int iter = 0; iter < 50_000; iter++) {
+            double ps1x = s1x, ps1y = s1y;
+            double ps2x = s2x, ps2y = s2y;
+
+            // Mise à jour de S1 : Weber({Ta, Tb, S2})
+            double d1a  = dist(s1x, s1y, ta.getX(), ta.getY());
+            double d1b  = dist(s1x, s1y, tb.getX(), tb.getY());
+            double d1s2 = dist(s1x, s1y, s2x, s2y);
+            if (d1a < 1e-12 || d1b < 1e-12 || d1s2 < 1e-12) break;
+
+            double w1a = 1.0 / d1a, w1b = 1.0 / d1b, w1s2 = 1.0 / d1s2;
+            double ws1 = w1a + w1b + w1s2;
+            s1x = (ta.getX() * w1a + tb.getX() * w1b + s2x * w1s2) / ws1;
+            s1y = (ta.getY() * w1a + tb.getY() * w1b + s2y * w1s2) / ws1;
+
+            // Mise à jour de S2 : Weber({Tc, Td, S1})
+            double d2c  = dist(s2x, s2y, tc.getX(), tc.getY());
+            double d2d  = dist(s2x, s2y, td.getX(), td.getY());
+            double d2s1 = dist(s2x, s2y, s1x, s1y);
+            if (d2c < 1e-12 || d2d < 1e-12 || d2s1 < 1e-12) break;
+
+            double w2c = 1.0 / d2c, w2d = 1.0 / d2d, w2s1 = 1.0 / d2s1;
+            double ws2 = w2c + w2d + w2s1;
+            s2x = (tc.getX() * w2c + td.getX() * w2d + s1x * w2s1) / ws2;
+            s2y = (tc.getY() * w2c + td.getY() * w2d + s1y * w2s1) / ws2;
+
+            // Critère de convergence
+            if (Math.abs(s1x - ps1x) < 1e-10 && Math.abs(s1y - ps1y) < 1e-10
+             && Math.abs(s2x - ps2x) < 1e-10 && Math.abs(s2y - ps2y) < 1e-10) {
                 break;
             }
+        }
 
-            x = newX;
-            y = newY;
+        return new double[]{ s1x, s1y, s2x, s2y };
+    }
+
+    // =========================================================================
+    // UTILITAIRES GÉOMÉTRIQUES
+    // =========================================================================
+
+    /**
+     * Point de Fermat-Torricelli de trois points par itérations de Weiszfeld.
+     * Retourne null si les points sont colinéaires.
+     * Retourne directement le sommet si son angle est >= 120°.
+     */
+    private Point computeFermatPoint(Point p1, Point p2, Point p3) {
+        double threshold = Math.toRadians(120.0) - 1e-9;
+        if (calculateAngle(p2, p1, p3) >= threshold) return p1;
+        if (calculateAngle(p1, p2, p3) >= threshold) return p2;
+        if (calculateAngle(p1, p3, p2) >= threshold) return p3;
+
+        // Triangle plat → pas de point de Fermat défini
+        double cross = (p2.getX() - p1.getX()) * (p3.getY() - p1.getY())
+                     - (p2.getY() - p1.getY()) * (p3.getX() - p1.getX());
+        if (Math.abs(cross) < 1e-10) return null;
+
+        double x = (p1.getX() + p2.getX() + p3.getX()) / 3.0;
+        double y = (p1.getY() + p2.getY() + p3.getY()) / 3.0;
+
+        for (int i = 0; i < 50_000; i++) {
+            double d1 = dist(x, y, p1.getX(), p1.getY());
+            double d2 = dist(x, y, p2.getX(), p2.getY());
+            double d3 = dist(x, y, p3.getX(), p3.getY());
+
+            if (d1 < 1e-12) return p1;
+            if (d2 < 1e-12) return p2;
+            if (d3 < 1e-12) return p3;
+
+            double w1 = 1.0/d1, w2 = 1.0/d2, w3 = 1.0/d3, wt = w1+w2+w3;
+            double nx = (p1.getX()*w1 + p2.getX()*w2 + p3.getX()*w3) / wt;
+            double ny = (p1.getY()*w1 + p2.getY()*w2 + p3.getY()*w3) / wt;
+
+            if (Math.abs(nx - x) < 1e-10 && Math.abs(ny - y) < 1e-10) {
+                x = nx; y = ny;
+                break;
+            }
+            x = nx; y = ny;
         }
 
         return new Point(x, y);
     }
 
-    private SteinerResult solveForFourPoints(List<Point> points) {
-        Point p1 = points.get(0);
-        Point p2 = points.get(1);
-        Point p3 = points.get(2);
-        Point p4 = points.get(3);
-
-        SteinerResult bestResult = null;
-        double bestLength = Double.MAX_VALUE;
-
-        SteinerResult result1 = tryThreePointsWithFourth(p1, p2, p3, p4);
-        if (result1 != null && result1.getTotalLength() < bestLength) {
-            bestResult = result1;
-            bestLength = result1.getTotalLength();
-        }
-
-        SteinerResult result2 = tryThreePointsWithFourth(p1, p2, p4, p3);
-        if (result2 != null && result2.getTotalLength() < bestLength) {
-            bestResult = result2;
-            bestLength = result2.getTotalLength();
-        }
-
-        SteinerResult result3 = tryThreePointsWithFourth(p1, p3, p4, p2);
-        if (result3 != null && result3.getTotalLength() < bestLength) {
-            bestResult = result3;
-            bestLength = result3.getTotalLength();
-        }
-
-        SteinerResult result4 = tryThreePointsWithFourth(p2, p3, p4, p1);
-        if (result4 != null && result4.getTotalLength() < bestLength) {
-            bestResult = result4;
-            bestLength = result4.getTotalLength();
-        }
-
-        if (bestResult == null) {
-            return solveWithMST(points);
-        }
-
-        bestResult.setTerminalPoints(points);
-        return bestResult;
+    /** Angle en b dans le triangle (a, b, c). */
+    private double calculateAngle(Point a, Point b, Point c) {
+        double bax = a.getX() - b.getX(), bay = a.getY() - b.getY();
+        double bcx = c.getX() - b.getX(), bcy = c.getY() - b.getY();
+        double dot = bax * bcx + bay * bcy;
+        double mag = Math.sqrt(bax*bax + bay*bay) * Math.sqrt(bcx*bcx + bcy*bcy);
+        if (mag < 1e-15) return 0;
+        return Math.acos(Math.max(-1.0, Math.min(1.0, dot / mag)));
     }
 
-    private SteinerResult tryThreePointsWithFourth(Point p1, Point p2, Point p3, Point p4) {
-        SteinerResult result = new SteinerResult();
-
-        double angle1 = calculateAngle(p2, p1, p3);
-        double angle2 = calculateAngle(p1, p2, p3);
-        double angle3 = calculateAngle(p1, p3, p2);
-        double threshold = Math.toRadians(120);
-
-        Point steinerPoint = null;
-        boolean hasBaseSteinerPoint = false;
-
-        if (angle1 >= threshold) {
-            result.addEdge(new Edge(p1, p2));
-            result.addEdge(new Edge(p1, p3));
-
-            result.addEdge(new Edge(p1, p4));
-
-        } else if (angle2 >= threshold) {
-            result.addEdge(new Edge(p2, p1));
-            result.addEdge(new Edge(p2, p3));
-
-            result.addEdge(new Edge(p2, p4));
-
-        } else if (angle3 >= threshold) {
-            result.addEdge(new Edge(p3, p1));
-            result.addEdge(new Edge(p3, p2));
-
-            result.addEdge(new Edge(p3, p4));
-
-        } else {
-            steinerPoint = computeFermatPoint(p1, p2, p3);
-            hasBaseSteinerPoint = true;
-
-            result.addSteinerPoint(steinerPoint);
-            result.addEdge(new Edge(steinerPoint, p1));
-            result.addEdge(new Edge(steinerPoint, p2));
-            result.addEdge(new Edge(steinerPoint, p3));
-
-            result.addEdge(new Edge(steinerPoint, p4));
-
-            if (!verifyFourWayAngles(steinerPoint, p1, p2, p3, p4)) {
-                result = tryConnectionToClosestTerminal(p1, p2, p3, p4, steinerPoint);
-            }
-        }
-
-        return result;
+    /**
+     * Vérifie que les 3 arêtes du point de Steiner s (vers n1, n2, n3)
+     * forment des angles d'environ 120° (tolérance ± 10°).
+     */
+    private boolean checkAngles120(Point s, Point n1, Point n2, Point n3) {
+        double tol    = Math.toRadians(10.0);
+        double target = Math.toRadians(120.0);
+        return Math.abs(calculateAngle(n1, s, n2) - target) < tol
+            && Math.abs(calculateAngle(n2, s, n3) - target) < tol
+            && Math.abs(calculateAngle(n1, s, n3) - target) < tol;
     }
 
-    private boolean verifyFourWayAngles(Point steiner, Point p1, Point p2, Point p3, Point p4) {
-        double angle1 = calculateAngle(p1, steiner, p2);
-        double angle2 = calculateAngle(p2, steiner, p3);
-        double angle3 = calculateAngle(p3, steiner, p4);
-        double angle4 = calculateAngle(p4, steiner, p1);
-
-        double minAngle = Math.toRadians(60);
-        double maxAngle = Math.toRadians(120);
-
-        return (angle1 >= minAngle && angle1 <= maxAngle) ||
-               (angle2 >= minAngle && angle2 <= maxAngle) ||
-               (angle3 >= minAngle && angle3 <= maxAngle) ||
-               (angle4 >= minAngle && angle4 <= maxAngle);
+    private double dist(double x1, double y1, double x2, double y2) {
+        double dx = x1 - x2, dy = y1 - y2;
+        return Math.sqrt(dx * dx + dy * dy);
     }
 
-    private SteinerResult tryConnectionToClosestTerminal(Point p1, Point p2, Point p3, Point p4, Point steiner) {
-        SteinerResult result = new SteinerResult();
-
-        result.addSteinerPoint(steiner);
-        result.addEdge(new Edge(steiner, p1));
-        result.addEdge(new Edge(steiner, p2));
-        result.addEdge(new Edge(steiner, p3));
-
-        double dist1 = p4.distanceTo(p1);
-        double dist2 = p4.distanceTo(p2);
-        double dist3 = p4.distanceTo(p3);
-
-        Point closest = p1;
-        if (dist2 < dist1 && dist2 < dist3) {
-            closest = p2;
-        } else if (dist3 < dist1 && dist3 < dist2) {
-            closest = p3;
-        }
-
-        result.addEdge(new Edge(closest, p4));
-
-        return result;
+    private double maxPairDistance(Point ta, Point tb, Point tc, Point td) {
+        Point[] pts = { ta, tb, tc, td };
+        double max = 0;
+        for (int i = 0; i < 4; i++)
+            for (int j = i + 1; j < 4; j++)
+                max = Math.max(max, pts[i].distanceTo(pts[j]));
+        return max;
     }
+
+    // =========================================================================
+    // MST — algorithme de Prim pour n >= 5 points
+    // =========================================================================
 
     private SteinerResult solveWithMST(List<Point> points) {
         SteinerResult result = new SteinerResult();
         result.setTerminalPoints(points);
 
         int n = points.size();
-        boolean[] inMST = new boolean[n];
-        double[] minDist = new double[n];
-        int[] parent = new int[n];
+        boolean[] inMST  = new boolean[n];
+        double[]  minDist = new double[n];
+        int[]     parent  = new int[n];
 
-        for (int i = 0; i < n; i++) {
-            minDist[i] = Double.MAX_VALUE;
-            parent[i] = -1;
-        }
+        for (int i = 0; i < n; i++) { minDist[i] = Double.MAX_VALUE; parent[i] = -1; }
         minDist[0] = 0;
 
         for (int count = 0; count < n; count++) {
-            int u = -1;
-            double minVal = Double.MAX_VALUE;
+            int u = -1; double minVal = Double.MAX_VALUE;
             for (int i = 0; i < n; i++) {
-                if (!inMST[i] && minDist[i] < minVal) {
-                    minVal = minDist[i];
-                    u = i;
-                }
+                if (!inMST[i] && minDist[i] < minVal) { minVal = minDist[i]; u = i; }
             }
-
             if (u == -1) break;
             inMST[u] = true;
 
             for (int v = 0; v < n; v++) {
                 if (!inMST[v]) {
-                    double dist = points.get(u).distanceTo(points.get(v));
-                    if (dist < minDist[v]) {
-                        minDist[v] = dist;
-                        parent[v] = u;
-                    }
+                    double d = points.get(u).distanceTo(points.get(v));
+                    if (d < minDist[v]) { minDist[v] = d; parent[v] = u; }
                 }
             }
         }
 
         for (int i = 1; i < n; i++) {
-            if (parent[i] != -1) {
+            if (parent[i] != -1)
                 result.addEdge(new Edge(points.get(parent[i]), points.get(i)));
-            }
         }
 
         return result;
