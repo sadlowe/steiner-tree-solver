@@ -12,4 +12,5 @@ import { Component, EventEmitter, Output } from '@angular/core';
 })
 export class HeaderComponent {
   @Output() tutorialClick = new EventEmitter<void>();
+  @Output() activityClick = new EventEmitter<void>();
 }

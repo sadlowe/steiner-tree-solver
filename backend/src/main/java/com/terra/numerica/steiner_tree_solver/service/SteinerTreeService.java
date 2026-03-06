@@ -36,7 +36,6 @@ public class SteinerTreeService {
             case 4:
                 return solveForFourPoints(points);
             default:
-                // For more than 4 points, use a simple MST approach for now
                 return solveWithMST(points);
         }
     }
@@ -372,13 +371,7 @@ public class SteinerTreeService {
         return result;
     }
 
-    /**
-     * Simple MST (Minimum Spanning Tree) solution for more than 4 points.
-     * Uses Prim's algorithm.
-     *
-     * Note: This is NOT an optimal Steiner tree, just a simple MST.
-     * A true Steiner tree could be shorter by adding Steiner points.
-     */
+
     private SteinerResult solveWithMST(List<Point> points) {
         SteinerResult result = new SteinerResult();
         result.setTerminalPoints(points);
@@ -388,16 +381,15 @@ public class SteinerTreeService {
         double[] minDist = new double[n];
         int[] parent = new int[n];
 
-        // Initialize
         for (int i = 0; i < n; i++) {
             minDist[i] = Double.MAX_VALUE;
             parent[i] = -1;
         }
         minDist[0] = 0;
 
-        // Prim's algorithm
+
         for (int count = 0; count < n; count++) {
-            // Find minimum distance vertex not in MST
+
             int u = -1;
             double minVal = Double.MAX_VALUE;
             for (int i = 0; i < n; i++) {
@@ -410,7 +402,7 @@ public class SteinerTreeService {
             if (u == -1) break;
             inMST[u] = true;
 
-            // Update distances
+
             for (int v = 0; v < n; v++) {
                 if (!inMST[v]) {
                     double dist = points.get(u).distanceTo(points.get(v));
@@ -422,7 +414,6 @@ public class SteinerTreeService {
             }
         }
 
-        // Build edges from parent array
         for (int i = 1; i < n; i++) {
             if (parent[i] != -1) {
                 result.addEdge(new Edge(points.get(parent[i]), points.get(i)));

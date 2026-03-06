@@ -2,8 +2,11 @@
   <!-- Introduction Modal -->
   <app-introduction></app-introduction>
 
+  <!-- Activite Debranchee Modal -->
+  <app-activite-debranchee></app-activite-debranchee>
+
   <!-- Header -->
-  <app-header (tutorialClick)="openTutorial()"></app-header>
+  <app-header (tutorialClick)="openTutorial()" (activityClick)="openActivity()"></app-header>
   <!-- Main Content -->
   <main class="main-content">
     <div class="content-wrapper">

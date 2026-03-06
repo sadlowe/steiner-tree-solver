@@ -8,6 +8,7 @@ import { InfoPanelComponent } from './components/info-panel/info-panel.component
 import { HeaderComponent } from './components/header/header.component';
 import { FooterComponent } from './components/footer/footer.component';
 import { IntroductionComponent } from './components/introduction/introduction.component';
+import { ActiviteDebrancheeComponent } from './components/activite-debranchee/activite-debranchee.component';
 
 /**
  * Main application component for the Steiner Tree Solver.
@@ -23,19 +24,25 @@ import { IntroductionComponent } from './components/introduction/introduction.co
     InfoPanelComponent,
     HeaderComponent,
     FooterComponent,
-    IntroductionComponent
+    IntroductionComponent,
+    ActiviteDebrancheeComponent
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
 export class AppComponent {
   @ViewChild(IntroductionComponent) introComponent!: IntroductionComponent;
+  @ViewChild(ActiviteDebrancheeComponent) activityComponent!: ActiviteDebrancheeComponent;
 
   /** Application title */
   title = 'Steiner Tree Solver';
 
   openTutorial(): void {
     this.introComponent.open();
+  }
+
+  openActivity(): void {
+    this.activityComponent.open();
   }
 
   /** Array of user-placed terminal points (cities) */
