@@ -1,0 +1,351 @@
+/* ==========================================================================
+   STABILITY & PERFORMANCE FIXES
+   Améliorations pour une page plus stable et fluide
+   ========================================================================== */
+
+/* Force GPU acceleration pour toutes les animations */
+* {
+  will-change: auto;
+}
+
+/* Optimiser les animations */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Fix pour le layout shift */
+html {
+  overflow-y: scroll;
+  scroll-behavior: smooth;
+}
+
+body {
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Optimize images and SVGs */
+img,
+svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+/* Canvas optimization */
+canvas {
+  display: block;
+  image-rendering: crisp-edges;
+  image-rendering: pixelated;
+}
+
+/* Fix backdrop filter performance */
+.stats-panel,
+.canvas-container,
+.controls-container,
+.info-panel {
+  /* Only apply blur on capable devices */
+  @supports (backdrop-filter: blur(1px)) {
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+
+  /* Fallback for older browsers */
+  @supports not (backdrop-filter: blur(1px)) {
+    background: rgba(13, 19, 33, 0.95);
+  }
+}
+
+/* Prevent layout thrashing */
+.stat-item,
+.mode-tab,
+.btn {
+  contain: layout style paint;
+}
+
+/* Optimize transitions */
+.stat-item,
+.mode-tab,
+.comp-row,
+.point-item,
+.btn {
+  transition: all 250ms ease;
+  /* Use transform instead of position changes */
+  transform: translateZ(0);
+}
+
+/* Prevent cumulative layout shift */
+.btn {
+  min-height: 44px;
+  padding: var(--space-3) var(--space-5);
+}
+
+.stat-item {
+  min-height: 60px;
+  padding: var(--space-2);
+}
+
+/* Fix for font rendering */
+body,
+button,
+input,
+textarea,
+select {
+  font-family: var(--font-family);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Optimize scrollbar for all browsers */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--bg-elevated);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-tertiary);
+}
+
+/* Firefox scrollbar */
+* {
+  scrollbar-color: var(--bg-elevated) var(--bg-secondary);
+  scrollbar-width: thin;
+}
+
+/* Optimize input focus */
+:focus-visible {
+  outline: 2px solid var(--primary-500);
+  outline-offset: 2px;
+  /* Use outline instead of box-shadow for better performance */
+}
+
+/* Prevent button text selection */
+button {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Optimize animations - use transform instead of position */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes bounce-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.95) translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes glow-pulse {
+  0%, 100% {
+    opacity: 0.8;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Use GPU-accelerated opacity instead of visibility */
+.hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateZ(0);
+}
+
+.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Optimize transform for buttons and interactive elements */
+button:active {
+  transform: scale(0.98);
+}
+
+/* Prevent text selection flicker */
+::selection {
+  background: var(--primary-500);
+  color: var(--bg-primary);
+  -webkit-text-fill-color: inherit;
+}
+
+/* Fix for mobile viewport */
+@media (max-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+
+  body {
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Optimize touch targets */
+  button,
+  a,
+  input {
+    min-height: 48px;
+    min-width: 48px;
+  }
+
+  /* Disable hover animations on touch devices */
+  @media (hover: none) {
+    .stat-item:hover,
+    .btn:hover,
+    .mode-tab:hover {
+      transform: none;
+    }
+  }
+}
+
+/* Prevent flickering on transitions */
+.stats-panel,
+.canvas-container,
+.controls-container,
+.info-panel,
+.btn {
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+/* Fix for chrome flickering */
+@media (prefers-color-scheme: dark) {
+  html {
+    color-scheme: dark;
+  }
+}
+
+/* Optimize border rendering */
+.stats-panel,
+.canvas-container,
+.controls-container,
+.info-panel {
+  border-image: none;
+  border: 1px solid rgba(0, 191, 255, 0.15);
+}
+
+/* Prevent content jump */
+.sidebar {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.points-list {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Stabilize button states */
+.btn {
+  position: relative;
+  transition: all 250ms ease;
+}
+
+.btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.btn:not(:disabled):active {
+  transition-duration: 75ms;
+}
+
+/* Optimize box-shadows for performance */
+.canvas-container {
+  /* Reduce number of shadows for better performance */
+  box-shadow: 0 0 30px rgba(0, 191, 255, 0.08);
+}
+
+/* Fix for Windows High Contrast Mode */
+@media (prefers-contrast: more) {
+  :root {
+    --border-subtle: rgba(0, 191, 255, 0.3);
+    --border-default: rgba(0, 191, 255, 0.5);
+  }
+}
+
+/* Stable animation timing */
+.fade-in {
+  animation: fade-in 0.5s ease-out forwards;
+}
+
+.slide-in-right {
+  animation: slide-in-right 0.5s ease-out forwards;
+}
+
+.bounce-in {
+  animation: bounce-in 0.6s ease-out forwards;
+}
+
+/* Ensure text rendering consistency */
+h1, h2, h3, h4, h5, h6 {
+  font-feature-settings: "kern" 1;
+}
+
+/* Optimize label rendering */
+label {
+  display: inline-block;
+  margin-bottom: 4px;
+}
+
+/* Fix for subpixel rendering */
+body {
+  -webkit-text-size-adjust: 100%;
+  text-rendering: optimizeLegibility;
+}
+
+/* Prevent zoom on iOS input focus */
+@media (max-width: 768px) {
+  input,
+  textarea,
+  select {
+    font-size: 16px;
+  }
+}
+

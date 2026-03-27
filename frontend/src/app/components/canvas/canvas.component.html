@@ -2,12 +2,24 @@
   <canvas
     #canvas
     class="steiner-canvas"
-    [style.cursor]="cursorStyle"
+    [style.cursor]="isAddingEnabled ? 'crosshair' : 'default'"
     (click)="onCanvasClick($event)">
     Your browser does not support the HTML5 canvas element.
   </canvas>
 
   <div class="canvas-instructions" *ngIf="terminalPoints.length === 0 && isAddingEnabled">
-    <p>Click anywhere on the canvas to add points</p>
+    <svg class="instruction-icon" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="1"></circle>
+      <path d="M12 8v-2"></path>
+      <path d="M12 18v2"></path>
+      <path d="M4.22 4.22l-1.42 1.42"></path>
+      <path d="M19.78 19.78l1.42 1.42"></path>
+      <path d="M1.05 12H3.05"></path>
+      <path d="M20.95 12h2"></path>
+      <path d="M4.22 19.78l-1.42 1.42"></path>
+      <path d="M19.78 4.22l1.42 -1.42"></path>
+    </svg>
+    <p>Cliquez pour ajouter des points</p>
+    <small>Résolvez après avoir placé au moins 2 points</small>
   </div>
 </div>

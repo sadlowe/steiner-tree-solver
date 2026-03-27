@@ -1,5 +1,7 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Subject } from 'rxjs';
+import { takeUntil, debounceTime } from 'rxjs/operators';
 import { Point, Edge, SteinerResult } from './models';
 import { SteinerService } from './services';
 import { CanvasComponent } from './components/canvas/canvas.component';
@@ -7,7 +9,6 @@ import { ControlsComponent } from './components/controls/controls.component';
 import { InfoPanelComponent } from './components/info-panel/info-panel.component';
 import { HeaderComponent } from './components/header/header.component';
 import { FooterComponent } from './components/footer/footer.component';
-import { IntroductionComponent } from './components/introduction/introduction.component';
 
 export type ConnectionMode = 'naive' | 'mst' | 'steiner';
 
@@ -21,13 +22,11 @@ export type ConnectionMode = 'naive' | 'mst' | 'steiner';
     InfoPanelComponent,
     HeaderComponent,
     FooterComponent,
-    IntroductionComponent,
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
-export class AppComponent {
-  @ViewChild(IntroductionComponent) introComponent!: IntroductionComponent;
+export class AppComponent implements OnDestroy {
 
   title = 'Steiner Tree Solver';
 
@@ -50,7 +49,19 @@ export class AppComponent {
   isLoading = false;
   errorMessage: string | null = null;
 
+  // RxJS cleanup
+  private destroy$ = new Subject<void>();
+  private errorTimeoutId: any = null;
+
   constructor(private steinerService: SteinerService) {}
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+    if (this.errorTimeoutId) {
+      clearTimeout(this.errorTimeoutId);
+    }
+  }
 
   // ── Getters d'affichage selon le mode sélectionné ────────────────────────
 
@@ -93,64 +104,116 @@ export class AppComponent {
   // ── Gestionnaires d'événements ────────────────────────────────────────────
 
   onModeChange(mode: string): void {
+    // Validation
+    if (!['naive', 'mst', 'steiner'].includes(mode)) {
+      return;
+    }
     this.selectedMode = mode as ConnectionMode;
+    this.dismissError();
   }
 
   onPointAdded(point: Point): void {
+    // Validation du point
+    if (!point || typeof point.x !== 'number' || typeof point.y !== 'number') {
+      console.error('Invalid point:', point);
+      return;
+    }
+
     this.terminalPoints = [...this.terminalPoints, point];
     // Steiner périmé dès qu'un point change
-    this.steinerEdges = [];
-    this.steinerPoints = [];
-    this.steinerLength = null;
+    this.resetSteinerSolution();
+
     // Naïve et MST recalculés immédiatement (pas de backend)
     if (this.terminalPoints.length >= 2) {
-      this.computeNaive();
-      this.computeMST();
+      try {
+        this.computeNaive();
+        this.computeMST();
+      } catch (error) {
+        console.error('Error computing solutions:', error);
+        this.setError('Erreur lors du calcul. Vérifiez vos données.');
+      }
     }
   }
 
   onSolve(): void {
     if (this.terminalPoints.length < 2) {
-      this.errorMessage = 'Ajoutez au moins 2 points pour résoudre.';
+      this.setError('Ajoutez au moins 2 points pour résoudre.');
       return;
     }
 
     if (this.selectedMode === 'naive') {
-      this.computeNaive();
+      try {
+        this.computeNaive();
+        this.dismissError();
+      } catch (error) {
+        this.setError('Erreur lors du calcul naïve.');
+      }
       return;
     }
 
     if (this.selectedMode === 'mst') {
-      this.computeMST();
+      try {
+        this.computeMST();
+        this.dismissError();
+      } catch (error) {
+        this.setError('Erreur lors du calcul MST.');
+      }
       return;
     }
 
     // Mode Steiner : appel backend
     this.isLoading = true;
-    this.errorMessage = null;
-    this.steinerService.solve(this.terminalPoints).subscribe({
-      next: (result: SteinerResult) => this.handleSolveSuccess(result),
-      error: (error: Error)         => this.handleSolveError(error)
-    });
+    this.dismissError();
+
+    this.steinerService.solve(this.terminalPoints)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (result: SteinerResult) => this.handleSolveSuccess(result),
+        error: (error: Error) => this.handleSolveError(error),
+        complete: () => { this.isLoading = false; }
+      });
   }
 
   onClear(): void {
     this.terminalPoints = [];
-    this.naiveEdges = [];  this.naiveLength = null;
-    this.mstEdges = [];    this.mstLength = null;
-    this.steinerEdges = []; this.steinerPoints = []; this.steinerLength = null;
-    this.errorMessage = null;
+    this.naiveEdges = [];
+    this.naiveLength = null;
+    this.mstEdges = [];
+    this.mstLength = null;
+    this.resetSteinerSolution();
+    this.dismissError();
   }
 
   onClearSolution(): void {
     // Efface uniquement la solution Steiner (naïve et MST sont auto-calculés)
+    this.resetSteinerSolution();
+    this.dismissError();
+  }
+
+  dismissError(): void {
+    if (this.errorTimeoutId) {
+      clearTimeout(this.errorTimeoutId);
+      this.errorTimeoutId = null;
+    }
+    this.errorMessage = null;
+  }
+
+  // ── Méthodes privées ───────────────────────────────────────────────────────
+
+  private resetSteinerSolution(): void {
     this.steinerEdges = [];
     this.steinerPoints = [];
     this.steinerLength = null;
   }
 
-  dismissError(): void {
-    this.errorMessage = null;
+  private setError(message: string): void {
+    this.dismissError();
+    this.errorMessage = message;
+
+    // Auto-dismiss error after 5 seconds
+    this.errorTimeoutId = setTimeout(() => {
+      this.dismissError();
+    }, 5000);
   }
 
   // ── Algorithmes côté client ───────────────────────────────────────────────

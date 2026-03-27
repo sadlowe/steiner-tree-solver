@@ -1,13 +1,16 @@
 <div class="app-container">
-  <app-introduction></app-introduction>
-
   <app-header></app-header>
   <main class="main-content">
     <div class="content-wrapper">
+      <!-- Canvas Principal -->
       <section class="canvas-section">
+        <div class="canvas-header">
+          <h2>Placement des points</h2>
+          <p class="instructions-text">Cliquez sur le canvas pour ajouter des points</p>
+        </div>
         <app-canvas
-          [width]="800"
-          [height]="600"
+          [width]="950"
+          [height]="580"
           [terminalPoints]="terminalPoints"
           [steinerPoints]="displaySteinerPoints"
           [edges]="edges"
@@ -16,7 +19,26 @@
           (pointAdded)="onPointAdded($event)">
         </app-canvas>
       </section>
+
+      <!-- Sidebar -->
       <aside class="sidebar">
+        <!-- Stats -->
+        <div class="stats-panel">
+          <div class="stat-item">
+            <span class="stat-label">Points</span>
+            <span class="stat-value">{{ terminalPoints.length }}</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Longueur</span>
+            <span class="stat-value mono">{{ totalLength ? (totalLength | number:'1.2-2') : '-' }}</span>
+          </div>
+          <div class="stat-item" *ngIf="steinerLength">
+            <span class="stat-label">Steiner</span>
+            <span class="stat-value">{{ steinerPoints.length }}</span>
+          </div>
+        </div>
+
+        <!-- Controls -->
         <app-controls
           [pointCount]="terminalPoints.length"
           [isLoading]="isLoading"
@@ -28,6 +50,8 @@
           (clearSolution)="onClearSolution()"
           (modeChange)="onModeChange($event)">
         </app-controls>
+
+        <!-- Info Panel (Scrollable interne seulement) -->
         <app-info-panel
           [terminalPoints]="terminalPoints"
           [steinerPoints]="displaySteinerPoints"
@@ -38,12 +62,12 @@
           [steinerLength]="steinerLength"
           [selectedMode]="selectedMode">
         </app-info-panel>
+
+        <!-- Erreur -->
         <div class="error-message" *ngIf="errorMessage">
-          <span class="error-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-          </span>
+          <span class="error-icon">⚠️</span>
           <p>{{ errorMessage }}</p>
-          <button class="dismiss-btn" (click)="dismissError()">&times;</button>
+          <button class="dismiss-btn" (click)="dismissError()">×</button>
         </div>
       </aside>
     </div>
