@@ -1,8 +1,39 @@
 <div class="controls-container">
   <h3 class="controls-title">Commandes</h3>
+
+  <!-- Sélecteur de mode -->
+  <div class="mode-selector">
+    <p class="mode-label">Mode de connexion</p>
+    <div class="mode-tabs">
+      <button
+        class="mode-tab"
+        [class.active-naive]="selectedMode === 'naive'"
+        (click)="onModeChange('naive')">
+        <span class="mode-dot naive-dot"></span>
+        Naïve
+      </button>
+      <button
+        class="mode-tab"
+        [class.active-mst]="selectedMode === 'mst'"
+        (click)="onModeChange('mst')">
+        <span class="mode-dot mst-dot"></span>
+        MST
+      </button>
+      <button
+        class="mode-tab"
+        [class.active-steiner]="selectedMode === 'steiner'"
+        (click)="onModeChange('steiner')">
+        <span class="mode-dot steiner-dot"></span>
+        Steiner
+      </button>
+    </div>
+  </div>
+
   <div class="button-group">
     <button
       class="btn btn-primary"
+      [class.btn-naive]="selectedMode === 'naive'"
+      [class.btn-mst]="selectedMode === 'mst'"
       [disabled]="!canSolve"
       [class.loading]="isLoading"
       (click)="onSolve()">
@@ -16,12 +47,12 @@
     </button>
     <button
       class="btn btn-secondary"
-      *ngIf="hasSolution"
+      *ngIf="hasSteinerSolution"
       (click)="onClearSolution()">
       <span class="btn-icon">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
       </span>
-      Effacer la solution
+      Effacer Steiner
     </button>
     <button
       class="btn btn-danger"
@@ -37,11 +68,14 @@
     <p *ngIf="pointCount < 2" class="warning">
       [!] Ajoutez au moins 2 points pour résoudre
     </p>
-    <p *ngIf="pointCount >= 2 && !hasSolution" class="info">
-      [i] Prêt à calculer l'arbre de Steiner
+    <p *ngIf="pointCount >= 2 && selectedMode !== 'steiner'" class="info">
+      [i] Connexion {{ selectedMode === 'naive' ? 'naïve' : 'MST' }} calculée automatiquement
     </p>
-    <p *ngIf="hasSolution" class="success">
-      [+] Solution affichée sur le canevas
+    <p *ngIf="pointCount >= 2 && selectedMode === 'steiner' && !hasSteinerSolution" class="info">
+      [i] Cliquez pour calculer l'arbre de Steiner
+    </p>
+    <p *ngIf="hasSolution && selectedMode === 'steiner'" class="success">
+      [+] Arbre de Steiner affiché sur le canevas
     </p>
   </div>
 </div>

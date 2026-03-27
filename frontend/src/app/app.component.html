@@ -9,8 +9,9 @@
           [width]="800"
           [height]="600"
           [terminalPoints]="terminalPoints"
-          [steinerPoints]="steinerPoints"
+          [steinerPoints]="displaySteinerPoints"
           [edges]="edges"
+          [edgeColor]="edgeColor"
           [isAddingEnabled]="!isLoading"
           (pointAdded)="onPointAdded($event)">
         </app-canvas>
@@ -20,15 +21,22 @@
           [pointCount]="terminalPoints.length"
           [isLoading]="isLoading"
           [hasSolution]="hasSolution"
+          [hasSteinerSolution]="hasSteinerSolution"
+          [selectedMode]="selectedMode"
           (solve)="onSolve()"
           (clear)="onClear()"
-          (clearSolution)="onClearSolution()">
+          (clearSolution)="onClearSolution()"
+          (modeChange)="onModeChange($event)">
         </app-controls>
         <app-info-panel
           [terminalPoints]="terminalPoints"
-          [steinerPoints]="steinerPoints"
+          [steinerPoints]="displaySteinerPoints"
           [edges]="edges"
-          [totalLength]="totalLength">
+          [totalLength]="totalLength"
+          [naiveLength]="naiveLength"
+          [mstLength]="mstLength"
+          [steinerLength]="steinerLength"
+          [selectedMode]="selectedMode">
         </app-info-panel>
         <div class="error-message" *ngIf="errorMessage">
           <span class="error-icon">

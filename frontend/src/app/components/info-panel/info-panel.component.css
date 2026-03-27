@@ -150,3 +150,99 @@
 .edge-line {
   background-color: #4CAF50;
 }
+
+/* ==========================================================================
+   COMPARISON SECTION
+   ========================================================================== */
+
+.comparison-section {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 12px;
+  background: #f9fafb;
+}
+
+.comp-row {
+  margin-bottom: 10px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  transition: background 0.2s;
+}
+
+.comp-row:last-of-type { margin-bottom: 0; }
+
+.comp-row.comp-active {
+  background: #ffffff;
+  border-color: #e5e7eb;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+
+.comp-header {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 5px;
+}
+
+.comp-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.naive-comp-dot   { background: #ef4444; }
+.mst-comp-dot     { background: #f59e0b; }
+.steiner-comp-dot { background: #10b981; }
+
+.comp-label {
+  font-size: 13px;
+  color: #555;
+  flex: 1;
+}
+
+.comp-value {
+  font-size: 13px;
+  font-weight: 700;
+  font-family: 'Courier New', monospace;
+}
+
+.naive-val   { color: #ef4444; }
+.mst-val     { color: #d97706; }
+.steiner-val { color: #059669; }
+
+.comp-savings {
+  font-size: 11px;
+  padding: 2px 5px;
+  border-radius: 4px;
+  background: rgba(16, 185, 129, 0.12);
+  color: #059669;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.comp-bar-track {
+  height: 5px;
+  background: #e5e7eb;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.comp-bar {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.4s ease;
+}
+
+.naive-bar   { background: #ef4444; }
+.mst-bar     { background: #f59e0b; }
+.steiner-bar { background: #10b981; }
+
+.comp-hint {
+  font-size: 11px;
+  color: #9ca3af;
+  font-style: italic;
+  margin-top: 8px;
+  text-align: center;
+}

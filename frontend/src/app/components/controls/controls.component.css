@@ -40,6 +40,68 @@
 }
 
 /* ==========================================================================
+   MODE SELECTOR
+   ========================================================================== */
+
+.mode-selector {
+  margin-bottom: var(--space-5);
+}
+
+.mode-label {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wider);
+  margin-bottom: var(--space-2);
+}
+
+.mode-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: var(--space-2);
+}
+
+.mode-tab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-2);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-elevated);
+  color: var(--text-muted);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.mode-tab:hover {
+  border-color: var(--border-default);
+  color: var(--text-secondary);
+}
+
+.mode-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.naive-dot   { background: #ef4444; }
+.mst-dot     { background: #f59e0b; }
+.steiner-dot { background: #10b981; }
+
+.mode-tab.active-naive   { border-color: #ef4444; color: #ef4444; background: rgba(239,68,68,0.1); }
+.mode-tab.active-mst     { border-color: #f59e0b; color: #f59e0b; background: rgba(245,158,11,0.1); }
+.mode-tab.active-steiner { border-color: #10b981; color: #10b981; background: rgba(16,185,129,0.1); }
+
+/* Solve button color variants */
+.btn-naive { background: linear-gradient(135deg, #ef4444, #dc2626) !important; }
+.btn-mst   { background: linear-gradient(135deg, #f59e0b, #d97706) !important; }
+
+/* ==========================================================================
    BUTTON GROUP
    ========================================================================== */
 
