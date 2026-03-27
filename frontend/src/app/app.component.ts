@@ -8,7 +8,6 @@ import { InfoPanelComponent } from './components/info-panel/info-panel.component
 import { HeaderComponent } from './components/header/header.component';
 import { FooterComponent } from './components/footer/footer.component';
 import { IntroductionComponent } from './components/introduction/introduction.component';
-import { ActiviteDebrancheeComponent } from './components/activite-debranchee/activite-debranchee.component';
 
 @Component({
   selector: 'app-root',
@@ -21,24 +20,14 @@ import { ActiviteDebrancheeComponent } from './components/activite-debranchee/ac
     HeaderComponent,
     FooterComponent,
     IntroductionComponent,
-    ActiviteDebrancheeComponent
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
 export class AppComponent {
   @ViewChild(IntroductionComponent) introComponent!: IntroductionComponent;
-  @ViewChild(ActiviteDebrancheeComponent) activityComponent!: ActiviteDebrancheeComponent;
 
   title = 'Steiner Tree Solver';
-
-  openTutorial(): void {
-    this.introComponent.open();
-  }
-
-  openActivity(): void {
-    this.activityComponent.open();
-  }
 
   terminalPoints: Point[] = [];
   steinerPoints: Point[] = [];
@@ -60,7 +49,7 @@ export class AppComponent {
 
   onSolve(): void {
     if (this.terminalPoints.length < 2) {
-      this.errorMessage = 'Please add at least 2 points to solve.';
+      this.errorMessage = 'Ajoutez au moins 2 points pour résoudre.';
       return;
     }
 

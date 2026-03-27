@@ -5,7 +5,12 @@ import com.terra.numerica.steiner_tree_solver.model.Point;
 import com.terra.numerica.steiner_tree_solver.model.SteinerResult;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Service de calcul de l'arbre de Steiner euclidien.
@@ -22,6 +27,12 @@ import java.util.List;
  *                                          S1 et S2 optimisés par Weiszfeld alterné
  *
  * La topologie de longueur minimale valide est retournée.
+ *
+ * ALGORITHME POUR N >= 5 POINTS
+ * ──────────────────────────────
+ * Heuristique d'insertion itérative de points de Fermat :
+ * Partir du MST puis insérer des points de Steiner (Fermat) là où ils
+ * réduisent la longueur totale, jusqu'à convergence.
  */
 @Service
 public class SteinerTreeService {
@@ -34,7 +45,7 @@ public class SteinerTreeService {
             case 2:  return solveForTwoPoints(points);
             case 3:  return solveForThreePoints(points);
             case 4:  return solveForFourPoints(points);
-            default: return solveWithMST(points);
+            default: return solveWithSteinerHeuristic(points);
         }
     }
 
@@ -398,7 +409,213 @@ public class SteinerTreeService {
     }
 
     // =========================================================================
-    // MST — algorithme de Prim pour n >= 5 points
+    // N >= 5 POINTS : heuristique de Steiner par insertion itérative de points
+    // de Fermat
+    //
+    // Algorithme déterministe en trois phases :
+    //
+    //   Phase 1 – Initialisation par le MST
+    //     Construire l'arbre couvrant minimal des n terminaux.
+    //     Le MST est une 2-approximation de l'arbre de Steiner.
+    //
+    //   Phase 2 – Insertion itérative de points de Steiner
+    //     Pour chaque paire d'arêtes (v,a) et (v,b) partageant un nœud v :
+    //       a. Calculer F = point de Fermat de (a, v, b)
+    //       b. Si d(F,a) + d(F,v) + d(F,b) < d(v,a) + d(v,b)
+    //          → Retirer arêtes (v,a) et (v,b)
+    //          → Ajouter arêtes (F,a), (F,v), (F,b)
+    //          → Enregistrer F comme point de Steiner
+    //     Répéter jusqu'à convergence (aucune amélioration possible).
+    //
+    //   Phase 3 – Construction du résultat
+    //     Retourner les arêtes et les points de Steiner insérés.
+    //
+    // Propriétés :
+    //   • Déterministe — pas de hasard, convergence garantie
+    //   • Longueur résultante ≤ longueur MST
+    //   • La propriété 120° est satisfaite aux points de Steiner insérés
+    //   • Complexité : O(n² × passes) — pratique pour n ≤ quelques centaines
+    // =========================================================================
+
+    private SteinerResult solveWithSteinerHeuristic(List<Point> points) {
+        int n = points.size();
+
+        // Représentation de travail (les terminaux occupent les indices 0..n-1)
+        List<double[]> nodes = new ArrayList<>();
+        for (Point p : points) nodes.add(new double[]{p.getX(), p.getY()});
+
+        // Phase 1 : MST initial
+        List<int[]> edges = buildMSTEdgeIndices(nodes);
+
+        // Phase 2 : Insertion itérative de points de Fermat
+        boolean improved = true;
+        int maxPasses = 5 * n; // Limite de sécurité
+
+        while (improved && maxPasses-- > 0) {
+            improved = false;
+
+            Map<Integer, List<Integer>> adj = buildAdj(nodes.size(), edges);
+
+            outerLoop:
+            for (int v = 0; v < nodes.size(); v++) {
+                List<Integer> nbrs = adj.getOrDefault(v, Collections.emptyList());
+                if (nbrs.size() < 2) continue;
+
+                for (int i = 0; i < nbrs.size(); i++) {
+                    for (int j = i + 1; j < nbrs.size(); j++) {
+                        int a = nbrs.get(i);
+                        int b = nbrs.get(j);
+
+                        double[] pa = nodes.get(a);
+                        double[] pv = nodes.get(v);
+                        double[] pb = nodes.get(b);
+
+                        double[] F = fermat2D(pa, pv, pb);
+                        if (F == null) continue;
+
+                        double oldCost = distXY(pa, pv) + distXY(pv, pb);
+                        double newCost = distXY(F, pa) + distXY(F, pv) + distXY(F, pb);
+
+                        if (newCost < oldCost - 1e-8) {
+                            // Vérifier que F n'est pas confondu avec un nœud existant
+                            boolean tooClose = false;
+                            for (double[] nd : nodes) {
+                                if (distXY(F, nd) < 1e-6) { tooClose = true; break; }
+                            }
+                            if (tooClose) continue;
+
+                            int fIdx = nodes.size();
+                            nodes.add(F);
+                            removeEdgeFromList(edges, v, a);
+                            removeEdgeFromList(edges, v, b);
+                            edges.add(new int[]{fIdx, a});
+                            edges.add(new int[]{fIdx, v});
+                            edges.add(new int[]{fIdx, b});
+
+                            improved = true;
+                            break outerLoop;
+                        }
+                    }
+                }
+            }
+        }
+
+        // Phase 3 : Construction du résultat
+        SteinerResult result = new SteinerResult();
+        result.setTerminalPoints(points);
+
+        for (int[] e : edges) {
+            double[] p1 = nodes.get(e[0]);
+            double[] p2 = nodes.get(e[1]);
+            result.addEdge(new Edge(new Point(p1[0], p1[1]), new Point(p2[0], p2[1])));
+        }
+
+        for (int i = n; i < nodes.size(); i++) {
+            double[] p = nodes.get(i);
+            result.addSteinerPoint(new Point(p[0], p[1]));
+        }
+
+        return result;
+    }
+
+    // ── Helpers pour l'heuristique ────────────────────────────────────────────
+
+    /** MST de Prim sur une liste de nœuds. Retourne les arêtes comme paires d'indices. */
+    private List<int[]> buildMSTEdgeIndices(List<double[]> nodes) {
+        int n = nodes.size();
+        boolean[] inMST  = new boolean[n];
+        double[]  minDist = new double[n];
+        int[]     parent  = new int[n];
+        Arrays.fill(minDist, Double.MAX_VALUE);
+        Arrays.fill(parent, -1);
+        minDist[0] = 0;
+
+        for (int count = 0; count < n; count++) {
+            int u = -1;
+            for (int i = 0; i < n; i++)
+                if (!inMST[i] && (u == -1 || minDist[i] < minDist[u])) u = i;
+            if (u == -1) break;
+            inMST[u] = true;
+            for (int v = 0; v < n; v++) {
+                if (!inMST[v]) {
+                    double d = distXY(nodes.get(u), nodes.get(v));
+                    if (d < minDist[v]) { minDist[v] = d; parent[v] = u; }
+                }
+            }
+        }
+
+        List<int[]> edgeList = new ArrayList<>();
+        for (int i = 1; i < n; i++)
+            if (parent[i] != -1) edgeList.add(new int[]{parent[i], i});
+        return edgeList;
+    }
+
+    /** Construit la liste d'adjacence à partir d'une liste d'arêtes (paires d'indices). */
+    private Map<Integer, List<Integer>> buildAdj(int n, List<int[]> edges) {
+        Map<Integer, List<Integer>> adj = new HashMap<>();
+        for (int[] e : edges) {
+            adj.computeIfAbsent(e[0], k -> new ArrayList<>()).add(e[1]);
+            adj.computeIfAbsent(e[1], k -> new ArrayList<>()).add(e[0]);
+        }
+        return adj;
+    }
+
+    /** Supprime l'arête non-orientée (u, v) de la liste. */
+    private void removeEdgeFromList(List<int[]> edges, int u, int v) {
+        edges.removeIf(e -> (e[0] == u && e[1] == v) || (e[0] == v && e[1] == u));
+    }
+
+    /** Distance euclidienne entre deux points 2D (tableaux double[2]). */
+    private double distXY(double[] a, double[] b) {
+        double dx = a[0] - b[0], dy = a[1] - b[1];
+        return Math.sqrt(dx * dx + dy * dy);
+    }
+
+    /**
+     * Point de Fermat-Torricelli de trois points 2D (tableaux double[2]).
+     *
+     * Si un angle du triangle est >= 120°, ce sommet est retourné.
+     * Si le triangle est dégénéré, retourne null.
+     * Sinon, calcule par itérations de Weiszfeld depuis le centroïde.
+     */
+    private double[] fermat2D(double[] a, double[] b, double[] c) {
+        if (angleDeg2D(b, a, c) >= 120.0 - 1e-6) return a.clone();
+        if (angleDeg2D(a, b, c) >= 120.0 - 1e-6) return b.clone();
+        if (angleDeg2D(a, c, b) >= 120.0 - 1e-6) return c.clone();
+
+        double cross = (b[0]-a[0])*(c[1]-a[1]) - (b[1]-a[1])*(c[0]-a[0]);
+        if (Math.abs(cross) < 1e-12) return null;
+
+        double[] f = {(a[0]+b[0]+c[0])/3.0, (a[1]+b[1]+c[1])/3.0};
+        double[][] pts = {a, b, c};
+
+        for (int iter = 0; iter < 50_000; iter++) {
+            double[] prev = f.clone();
+            double wx = 0, wy = 0, wt = 0;
+            for (double[] p : pts) {
+                double d = distXY(f, p);
+                if (d < 1e-12) return p.clone();
+                double w = 1.0 / d;
+                wx += w * p[0]; wy += w * p[1]; wt += w;
+            }
+            f = new double[]{wx / wt, wy / wt};
+            if (distXY(f, prev) < 1e-10) break;
+        }
+        return f;
+    }
+
+    /** Angle en degrés au sommet {@code vertex} dans le triangle (a, vertex, c). */
+    private double angleDeg2D(double[] a, double[] vertex, double[] c) {
+        double[] va = {a[0]-vertex[0], a[1]-vertex[1]};
+        double[] vc = {c[0]-vertex[0], c[1]-vertex[1]};
+        double dot = va[0]*vc[0] + va[1]*vc[1];
+        double mag = Math.sqrt(va[0]*va[0]+va[1]*va[1]) * Math.sqrt(vc[0]*vc[0]+vc[1]*vc[1]);
+        if (mag < 1e-15) return 0;
+        return Math.toDegrees(Math.acos(Math.max(-1.0, Math.min(1.0, dot / mag))));
+    }
+
+    // =========================================================================
+    // MST — algorithme de Prim pour n >= 5 points (utilisé en interne)
     // =========================================================================
 
     private SteinerResult solveWithMST(List<Point> points) {

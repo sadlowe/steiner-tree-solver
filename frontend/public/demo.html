@@ -224,7 +224,7 @@
         </div>
         <div class="step">
           <div class="step-num todo" id="s3">3</div>
-          <div class="step-text">Cliquez sur <em>« Trouver le carrefour »</em> pour voir la route <strong>optimale</strong> avec carrefour (vert)</div>
+          <div class="step-text">Cliquez sur <em>« Trouver le carrefour »</em> pour voir la route <strong>avec carrefour</strong> (vert)</div>
         </div>
       </div>
     </div>
@@ -242,7 +242,7 @@
       <div class="btn-group">
         <button class="btn btn-green" id="btnFind" disabled onclick="computeSteiner()">
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          Trouver le carrefour optimal
+          Trouver le carrefour
         </button>
         <button class="btn btn-amber" id="btnToggle" disabled onclick="toggleDirect()">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
@@ -268,14 +268,14 @@
         <div class="compare-row row-steiner">
           <div class="label">
             <div class="swatch" style="background:#16a34a;"></div>
-            Avec carrefour
+            Avec carrefour (vert)
           </div>
           <div class="length" id="lenSteiner">—</div>
         </div>
       </div>
       <div class="saving-box" id="savingBox">
         <div class="big" id="savingPct">—</div>
-        <small>de route économisée grâce au carrefour !</small>
+        <small>de route en moins grâce au carrefour</small>
       </div>
     </div>
 
@@ -289,7 +289,7 @@
         </div>
         <div class="legend-row">
           <svg width="22" height="22" viewBox="0 0 22 22"><circle cx="11" cy="11" r="7" fill="#dc2626"/><line x1="11" y1="4" x2="11" y2="18" stroke="white" stroke-width="2"/><line x1="4" y1="11" x2="18" y2="11" stroke="white" stroke-width="2"/></svg>
-          <span>Carrefour optimal</span>
+          <span>Carrefour</span>
         </div>
         <div class="legend-row">
           <svg width="22" height="4"><rect width="22" height="4" rx="2" fill="#f59e0b"/></svg>
@@ -684,7 +684,7 @@ function refresh() {
   if (houses.length === 0) msg.textContent = 'Cliquez sur la carte pour placer une maison (3 au maximum)';
   else if (houses.length < 3) msg.textContent = `${houses.length} maison${houses.length>1?'s':''} placée${houses.length>1?'s':''} — encore ${3-houses.length} à placer`;
   else if (!showOptimal) msg.textContent = '3 maisons placées — cliquez sur « Trouver le carrefour optimal » !';
-  else msg.textContent = 'Carrefour trouvé ! Comparez les deux routes dans le panneau de gauche.';
+  else msg.textContent = 'Carrefour calculé ! Comparez les deux routes dans le panneau de gauche.';
 }
 
 refresh();
