@@ -444,6 +444,19 @@ public class SteinerTreeService {
         List<double[]> nodes = new ArrayList<>();
         for (Point p : points) nodes.add(new double[]{p.getX(), p.getY()});
 
+        // Échelle du problème = plus grande distance entre deux terminaux.
+        // Sert à définir des seuils relatifs à la géométrie réelle.
+        double scale = 0;
+        for (int i = 0; i < n; i++)
+            for (int j = i + 1; j < n; j++)
+                scale = Math.max(scale, distXY(nodes.get(i), nodes.get(j)));
+        if (scale < 1e-9) scale = 1.0;
+
+        // Séparation minimale entre deux points de Steiner (1 % de l'échelle,
+        // minimum 1 unité). En-dessous de ce seuil, deux points sont
+        // considérés comme confondus → on évite les doublons visuels.
+        final double minSep = Math.max(1.0, scale * 0.01);
+
         // Phase 1 : MST initial
         List<int[]> edges = buildMSTEdgeIndices(nodes);
 
@@ -473,28 +486,33 @@ public class SteinerTreeService {
                         double[] F = fermat2D(pa, pv, pb);
                         if (F == null) continue;
 
-                        double oldCost = distXY(pa, pv) + distXY(pv, pb);
-                        double newCost = distXY(F, pa) + distXY(F, pv) + distXY(F, pb);
+                        double oldCost    = distXY(pa, pv) + distXY(pv, pb);
+                        double newCost    = distXY(F, pa)  + distXY(F, pv) + distXY(F, pb);
+                        double improvement = oldCost - newCost;
 
-                        if (newCost < oldCost - 1e-8) {
-                            // Vérifier que F n'est pas confondu avec un nœud existant
-                            boolean tooClose = false;
-                            for (double[] nd : nodes) {
-                                if (distXY(F, nd) < 1e-6) { tooClose = true; break; }
-                            }
-                            if (tooClose) continue;
+                        // Seuil absolu ET relatif : l'amélioration doit
+                        // représenter au moins 0,05 % du coût courant.
+                        if (improvement < Math.max(1e-6, oldCost * 5e-4)) continue;
 
-                            int fIdx = nodes.size();
-                            nodes.add(F);
-                            removeEdgeFromList(edges, v, a);
-                            removeEdgeFromList(edges, v, b);
-                            edges.add(new int[]{fIdx, a});
-                            edges.add(new int[]{fIdx, v});
-                            edges.add(new int[]{fIdx, b});
-
-                            improved = true;
-                            break outerLoop;
+                        // F ne doit pas être confondu avec un nœud existant.
+                        // Seuil relatif à l'échelle du problème (minSep),
+                        // pas une constante numérique absurde.
+                        boolean tooClose = false;
+                        for (double[] nd : nodes) {
+                            if (distXY(F, nd) < minSep) { tooClose = true; break; }
                         }
+                        if (tooClose) continue;
+
+                        int fIdx = nodes.size();
+                        nodes.add(F);
+                        removeEdgeFromList(edges, v, a);
+                        removeEdgeFromList(edges, v, b);
+                        edges.add(new int[]{fIdx, a});
+                        edges.add(new int[]{fIdx, v});
+                        edges.add(new int[]{fIdx, b});
+
+                        improved = true;
+                        break outerLoop;
                     }
                 }
             }
