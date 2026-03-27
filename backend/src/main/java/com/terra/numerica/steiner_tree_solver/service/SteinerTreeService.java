@@ -45,6 +45,7 @@ public class SteinerTreeService {
             case 2:  return solveForTwoPoints(points);
             case 3:  return solveForThreePoints(points);
             case 4:  return solveForFourPoints(points);
+            case 5:  return solveForFivePoints(points);
             default: return solveWithSteinerHeuristic(points);
         }
     }
@@ -409,7 +410,341 @@ public class SteinerTreeService {
     }
 
     // =========================================================================
-    // N >= 5 POINTS : heuristique de Steiner par insertion itérative de points
+    // 5 POINTS : énumération complète de toutes les topologies candidates
+    //
+    // Au plus k = n-2 = 3 points de Steiner. Structures explorées :
+    //
+    //   k=0  MST (1 topologie)
+    //   k=1  Fermat(triplet) + 2 terminaux restants raccordés (~150 topologies)
+    //   k=2  Type I  : S0–S1 directs + queue (~60 topologies)
+    //        Type II : S0–T_milieu–S1 indépendants (15 topologies, Fermat exact)
+    //   k=3  Chaîne S0–S1–S2 (15 topologies, seule structure valide pour n=5,k=3)
+    // =========================================================================
+
+    private SteinerResult solveForFivePoints(List<Point> points) {
+        Point[] p = {
+            points.get(0), points.get(1), points.get(2),
+            points.get(3), points.get(4)
+        };
+
+        SteinerResult best = solveWithMST(points);
+        best.setTerminalPoints(points);
+        double bestLen = best.getTotalLength();
+
+        // Tous les triplets C(5,3) = 10
+        int[][] triplets = {
+            {0,1,2},{0,1,3},{0,1,4},
+            {0,2,3},{0,2,4},{0,3,4},
+            {1,2,3},{1,2,4},{1,3,4},
+            {2,3,4}
+        };
+        // 3 partitions non ordonnées de {core[0..3]} en 2 paires
+        // PP[t] = {a,b,c,d} → paire1=(core[a],core[b]), paire2=(core[c],core[d])
+        int[][] PP = {{0,1,2,3},{0,2,1,3},{0,3,1,2}};
+
+        double scale5 = maxPairDist5(p);
+        double eps5   = Math.max(1e-6, 1e-3 * scale5);
+
+        // ── k=1 ─────────────────────────────────────────────────────────────
+        for (int[] tri : triplets) {
+            int ti0=tri[0], ti1=tri[1], ti2=tri[2];
+            int[] ln = lonesOf5(tri);
+            int l0=ln[0], l1=ln[1];
+
+            Point fermat = computeFermatPoint(p[ti0], p[ti1], p[ti2]);
+            if (fermat == null) continue;
+
+            boolean atVtx = fermat.distanceTo(p[ti0]) < 1e-6
+                         || fermat.distanceTo(p[ti1]) < 1e-6
+                         || fermat.distanceTo(p[ti2]) < 1e-6;
+
+            // l0 → n0 ∈ triplet, l1 → n1 ∈ {triplet ∪ {l0}}
+            for (int a0 : tri) {
+                for (int a1 : new int[]{ti0, ti1, ti2, l0}) {
+                    SteinerResult c = new SteinerResult();
+                    c.setTerminalPoints(points);
+                    if (!atVtx) c.addSteinerPoint(fermat);
+                    c.addEdge(new Edge(fermat, p[ti0]));
+                    c.addEdge(new Edge(fermat, p[ti1]));
+                    c.addEdge(new Edge(fermat, p[ti2]));
+                    c.addEdge(new Edge(p[l0], p[a0]));
+                    c.addEdge(new Edge(p[l1], p[a1]));
+                    if (c.getTotalLength() < bestLen) { best=c; bestLen=c.getTotalLength(); }
+                }
+            }
+            // Variante chaîne inversée : l1 → triplet, l0 → l1
+            for (int a1 : tri) {
+                SteinerResult c = new SteinerResult();
+                c.setTerminalPoints(points);
+                if (!atVtx) c.addSteinerPoint(fermat);
+                c.addEdge(new Edge(fermat, p[ti0]));
+                c.addEdge(new Edge(fermat, p[ti1]));
+                c.addEdge(new Edge(fermat, p[ti2]));
+                c.addEdge(new Edge(p[l1], p[a1]));
+                c.addEdge(new Edge(p[l0], p[l1]));
+                if (c.getTotalLength() < bestLen) { best=c; bestLen=c.getTotalLength(); }
+            }
+        }
+
+        // ── k=2 Type I : S0–S1 directs + queue ──────────────────────────────
+        // S0 voisins : {pa, pb, S1}  ; S1 voisins : {pc, pd, S0}
+        // Le terminal "tail" se raccorde à un terminal "att" du cœur.
+        for (int tail = 0; tail < 5; tail++) {
+            int[] core = coreOf5(tail);
+            for (int[] pp : PP) {
+                int pa=core[pp[0]], pb=core[pp[1]], pc=core[pp[2]], pd=core[pp[3]];
+                double[][] inits = twoSteinerInits(p[pa], p[pb], p[pc], p[pd]);
+                double bestSubLen = Double.MAX_VALUE;
+                double[] bestCoords = null;
+                for (double[] init : inits) {
+                    double[] coords = optimizeTwoSteiner(
+                        p[pa], p[pb], p[pc], p[pd],
+                        init[0], init[1], init[2], init[3]);
+                    if (coords == null) continue;
+                    double s0x=coords[0],s0y=coords[1],s1x=coords[2],s1y=coords[3];
+                    double len = dist(s0x,s0y,p[pa].getX(),p[pa].getY())
+                               + dist(s0x,s0y,p[pb].getX(),p[pb].getY())
+                               + dist(s0x,s0y,s1x,s1y)
+                               + dist(s1x,s1y,p[pc].getX(),p[pc].getY())
+                               + dist(s1x,s1y,p[pd].getX(),p[pd].getY());
+                    if (len < bestSubLen) { bestSubLen=len; bestCoords=coords; }
+                }
+                if (bestCoords == null) continue;
+                double s0x=bestCoords[0],s0y=bestCoords[1];
+                double s1x=bestCoords[2],s1y=bestCoords[3];
+                // Validation : Steiner points non confondus
+                if (dist(s0x,s0y,s1x,s1y) < eps5) continue;
+                boolean s0Bad=false, s1Bad=false;
+                for (int idx : new int[]{pa,pb,pc,pd,tail}) {
+                    if (dist(s0x,s0y,p[idx].getX(),p[idx].getY()) < eps5) s0Bad=true;
+                    if (dist(s1x,s1y,p[idx].getX(),p[idx].getY()) < eps5) s1Bad=true;
+                }
+                if (s0Bad || s1Bad) continue;
+                // Essayer chaque point d'attache pour la queue
+                for (int att : core) {
+                    double totalLen = bestSubLen + p[tail].distanceTo(p[att]);
+                    if (totalLen < bestLen) {
+                        bestLen = totalLen;
+                        Point s0=new Point(s0x,s0y), s1=new Point(s1x,s1y);
+                        SteinerResult c = new SteinerResult();
+                        c.setTerminalPoints(points);
+                        c.addSteinerPoint(s0); c.addSteinerPoint(s1);
+                        c.addEdge(new Edge(s0,p[pa])); c.addEdge(new Edge(s0,p[pb]));
+                        c.addEdge(new Edge(s0,s1));
+                        c.addEdge(new Edge(s1,p[pc])); c.addEdge(new Edge(s1,p[pd]));
+                        c.addEdge(new Edge(p[tail], p[att]));
+                        best = c;
+                    }
+                }
+            }
+        }
+
+        // ── k=2 Type II : S0–T_milieu–S1 ────────────────────────────────────
+        // S0 = Fermat(pa, pb, mid)  et  S1 = Fermat(pc, pd, mid) sont indépendants
+        // car ils ne partagent que T_mid, un terminal fixé.
+        for (int mid = 0; mid < 5; mid++) {
+            int[] oth = coreOf5(mid);
+            for (int[] pp : PP) {
+                int pa=oth[pp[0]], pb=oth[pp[1]], pc=oth[pp[2]], pd=oth[pp[3]];
+                Point s0 = computeFermatPoint(p[pa], p[pb], p[mid]);
+                Point s1 = computeFermatPoint(p[pc], p[pd], p[mid]);
+                if (s0==null || s1==null) continue;
+                boolean s0ok = s0.distanceTo(p[pa])>eps5
+                            && s0.distanceTo(p[pb])>eps5
+                            && s0.distanceTo(p[mid])>eps5;
+                boolean s1ok = s1.distanceTo(p[pc])>eps5
+                            && s1.distanceTo(p[pd])>eps5
+                            && s1.distanceTo(p[mid])>eps5;
+                SteinerResult c = new SteinerResult();
+                c.setTerminalPoints(points);
+                if (s0ok) c.addSteinerPoint(s0);
+                if (s1ok) c.addSteinerPoint(s1);
+                c.addEdge(new Edge(s0, p[pa])); c.addEdge(new Edge(s0, p[pb]));
+                c.addEdge(new Edge(s0, p[mid]));
+                c.addEdge(new Edge(s1, p[mid]));
+                c.addEdge(new Edge(s1, p[pc])); c.addEdge(new Edge(s1, p[pd]));
+                if (c.getTotalLength() < bestLen) { best=c; bestLen=c.getTotalLength(); }
+            }
+        }
+
+        // ── k=3 : chaîne S0–S1–S2 (15 topologies) ───────────────────────────
+        // Seule structure arborescente à 3 Steiner sur 5 terminaux.
+        // 5 choix pour le terminal milieu T_tc × C(4,2)/2 = 3 partitions.
+        for (int tc = 0; tc < 5; tc++) {
+            int[] lv = coreOf5(tc);
+            for (int[] pp : PP) {
+                int pa=lv[pp[0]], pb=lv[pp[1]], pd=lv[pp[2]], pe=lv[pp[3]];
+                SteinerResult c = evalThreeSteiner5(p, pa, pb, tc, pd, pe, points, eps5);
+                if (c==null) continue;
+                if (c.getTotalLength() < bestLen) { best=c; bestLen=c.getTotalLength(); }
+            }
+        }
+
+        return best;
+    }
+
+    // ── Évaluation de la topologie k=3 (chaîne S0–S1–S2) ────────────────────
+    // S0 ↔ {pa, pb, S1}  ;  S1 ↔ {S0, tc, S2}  ;  S2 ↔ {S1, pd, pe}
+    private SteinerResult evalThreeSteiner5(Point[] p,
+            int pa, int pb, int tc, int pd, int pe,
+            List<Point> allPoints, double eps) {
+
+        Point ta=p[pa], tb=p[pb], tmid=p[tc], td=p[pd], te=p[pe];
+        double gx=(ta.getX()+tb.getX()+tmid.getX()+td.getX()+te.getX())/5;
+        double gy=(ta.getY()+tb.getY()+tmid.getY()+td.getY()+te.getY())/5;
+        double mabx=(ta.getX()+tb.getX())/2, maby=(ta.getY()+tb.getY())/2;
+        double mdex=(td.getX()+te.getX())/2, mdey=(td.getY()+te.getY())/2;
+
+        Point f0 = computeFermatPoint(ta, tb, tmid);
+        Point f2 = computeFermatPoint(td, te, tmid);
+
+        double[][] inits = {
+            // Init 1 : milieux des paires + centroïde global pour S1
+            {mabx,maby,  gx,gy,  mdex,mdey},
+            // Init 2 : Fermat des sous-problèmes
+            {f0!=null?f0.getX():mabx, f0!=null?f0.getY():maby,
+             gx, gy,
+             f2!=null?f2.getX():mdex, f2!=null?f2.getY():mdey},
+            // Init 3 : décalé vers les terminaux respectifs depuis le centroïde
+            {(ta.getX()+gx)/2,(ta.getY()+gy)/2,
+             (tmid.getX()+gx)/2,(tmid.getY()+gy)/2,
+             (td.getX()+gx)/2,(td.getY()+gy)/2}
+        };
+
+        double bestSubLen = Double.MAX_VALUE;
+        double[] bestCoords = null;
+        for (double[] init : inits) {
+            double[] coords = optimizeThreeSteiner(
+                ta, tb, tmid, td, te,
+                init[0],init[1], init[2],init[3], init[4],init[5]);
+            if (coords==null) continue;
+            double s0x=coords[0],s0y=coords[1],s1x=coords[2];
+            double s1y=coords[3],s2x=coords[4],s2y=coords[5];
+            double len = dist(s0x,s0y,ta.getX(),ta.getY())
+                       + dist(s0x,s0y,tb.getX(),tb.getY())
+                       + dist(s0x,s0y,s1x,s1y)
+                       + dist(s1x,s1y,tmid.getX(),tmid.getY())
+                       + dist(s1x,s1y,s2x,s2y)
+                       + dist(s2x,s2y,td.getX(),td.getY())
+                       + dist(s2x,s2y,te.getX(),te.getY());
+            if (len < bestSubLen) { bestSubLen=len; bestCoords=coords; }
+        }
+        if (bestCoords==null) return null;
+
+        double s0x=bestCoords[0],s0y=bestCoords[1];
+        double s1x=bestCoords[2],s1y=bestCoords[3];
+        double s2x=bestCoords[4],s2y=bestCoords[5];
+
+        // Validation : aucun Steiner confondu
+        if (dist(s0x,s0y,s1x,s1y)<eps || dist(s1x,s1y,s2x,s2y)<eps
+         || dist(s0x,s0y,s2x,s2y)<eps) return null;
+        for (Point t : new Point[]{ta,tb,tmid,td,te}) {
+            if (dist(s0x,s0y,t.getX(),t.getY())<eps) return null;
+            if (dist(s1x,s1y,t.getX(),t.getY())<eps) return null;
+            if (dist(s2x,s2y,t.getX(),t.getY())<eps) return null;
+        }
+
+        Point s0=new Point(s0x,s0y), s1=new Point(s1x,s1y), s2=new Point(s2x,s2y);
+        SteinerResult result = new SteinerResult();
+        result.setTerminalPoints(allPoints);
+        result.addSteinerPoint(s0); result.addSteinerPoint(s1); result.addSteinerPoint(s2);
+        result.addEdge(new Edge(s0,ta)); result.addEdge(new Edge(s0,tb));
+        result.addEdge(new Edge(s0,s1));
+        result.addEdge(new Edge(s1,tmid));
+        result.addEdge(new Edge(s1,s2));
+        result.addEdge(new Edge(s2,td)); result.addEdge(new Edge(s2,te));
+        return result;
+    }
+
+    /**
+     * Weiszfeld alterné pour la chaîne S0–S1–S2 :
+     *   S0 ← Weber(ta, tb, S1)   S1 ← Weber(S0, tc, S2)   S2 ← Weber(S1, td, te)
+     */
+    private double[] optimizeThreeSteiner(
+            Point ta, Point tb, Point tc, Point td, Point te,
+            double s0x, double s0y, double s1x, double s1y, double s2x, double s2y) {
+
+        for (int iter = 0; iter < 50_000; iter++) {
+            double ps0x=s0x,ps0y=s0y,ps1x=s1x,ps1y=s1y,ps2x=s2x,ps2y=s2y;
+
+            // S0 ← Weber(ta, tb, S1)
+            double d0a=dist(s0x,s0y,ta.getX(),ta.getY());
+            double d0b=dist(s0x,s0y,tb.getX(),tb.getY());
+            double d0s1=dist(s0x,s0y,s1x,s1y);
+            if (d0a<1e-12||d0b<1e-12||d0s1<1e-12) break;
+            double wt0=1/d0a+1/d0b+1/d0s1;
+            s0x=(ta.getX()/d0a+tb.getX()/d0b+s1x/d0s1)/wt0;
+            s0y=(ta.getY()/d0a+tb.getY()/d0b+s1y/d0s1)/wt0;
+
+            // S1 ← Weber(S0, tc, S2)
+            double d1s0=dist(s1x,s1y,s0x,s0y);
+            double d1c=dist(s1x,s1y,tc.getX(),tc.getY());
+            double d1s2=dist(s1x,s1y,s2x,s2y);
+            if (d1s0<1e-12||d1c<1e-12||d1s2<1e-12) break;
+            double wt1=1/d1s0+1/d1c+1/d1s2;
+            s1x=(s0x/d1s0+tc.getX()/d1c+s2x/d1s2)/wt1;
+            s1y=(s0y/d1s0+tc.getY()/d1c+s2y/d1s2)/wt1;
+
+            // S2 ← Weber(S1, td, te)
+            double d2s1=dist(s2x,s2y,s1x,s1y);
+            double d2d=dist(s2x,s2y,td.getX(),td.getY());
+            double d2e=dist(s2x,s2y,te.getX(),te.getY());
+            if (d2s1<1e-12||d2d<1e-12||d2e<1e-12) break;
+            double wt2=1/d2s1+1/d2d+1/d2e;
+            s2x=(s1x/d2s1+td.getX()/d2d+te.getX()/d2e)/wt2;
+            s2y=(s1y/d2s1+td.getY()/d2d+te.getY()/d2e)/wt2;
+
+            if (Math.abs(s0x-ps0x)<1e-10&&Math.abs(s0y-ps0y)<1e-10
+             && Math.abs(s1x-ps1x)<1e-10&&Math.abs(s1y-ps1y)<1e-10
+             && Math.abs(s2x-ps2x)<1e-10&&Math.abs(s2y-ps2y)<1e-10) break;
+        }
+        return new double[]{s0x,s0y,s1x,s1y,s2x,s2y};
+    }
+
+    /** Retourne les 2 indices de {0..4} non présents dans le triplet. */
+    private int[] lonesOf5(int[] triplet) {
+        int[] lones = new int[2]; int k=0;
+        outer: for (int i=0; i<5; i++) {
+            for (int t : triplet) if (t==i) continue outer;
+            lones[k++]=i;
+        }
+        return lones;
+    }
+
+    /** Retourne les 4 indices de {0..4} différents de excl. */
+    private int[] coreOf5(int excl) {
+        int[] core = new int[4]; int k=0;
+        for (int i=0; i<5; i++) if (i!=excl) core[k++]=i;
+        return core;
+    }
+
+    /** Plus grande distance entre deux points du tableau. */
+    private double maxPairDist5(Point[] p) {
+        double max=0;
+        for (int i=0; i<p.length; i++)
+            for (int j=i+1; j<p.length; j++)
+                max=Math.max(max, p[i].distanceTo(p[j]));
+        return max;
+    }
+
+    /** Initialisations pour l'optimisation de 2 points de Steiner. */
+    private double[][] twoSteinerInits(Point ta, Point tb, Point tc, Point td) {
+        double mabX=(ta.getX()+tb.getX())/2, mabY=(ta.getY()+tb.getY())/2;
+        double mcdX=(tc.getX()+td.getX())/2, mcdY=(tc.getY()+td.getY())/2;
+        double cx=(ta.getX()+tb.getX()+tc.getX()+td.getX())/4;
+        double cy=(ta.getY()+tb.getY()+tc.getY()+td.getY())/4;
+        return new double[][] {
+            {mabX,mabY,mcdX,mcdY},
+            {(mabX*2+mcdX)/3,(mabY*2+mcdY)/3,(mcdX*2+mabX)/3,(mcdY*2+mabY)/3},
+            {(ta.getX()+tb.getX()+cx)/3,(ta.getY()+tb.getY()+cy)/3,
+             (tc.getX()+td.getX()+cx)/3,(tc.getY()+td.getY()+cy)/3},
+            {0.65*ta.getX()+0.35*cx, 0.65*ta.getY()+0.35*cy,
+             0.65*tc.getX()+0.35*cx, 0.65*tc.getY()+0.35*cy}
+        };
+    }
+
+    // =========================================================================
+    // N >= 6 POINTS : heuristique de Steiner par insertion itérative de points
     // de Fermat
     //
     // Algorithme déterministe en trois phases :
@@ -494,12 +829,16 @@ public class SteinerTreeService {
                         // représenter au moins 0,05 % du coût courant.
                         if (improvement < Math.max(1e-6, oldCost * 5e-4)) continue;
 
-                        // F ne doit pas être confondu avec un nœud existant.
-                        // Seuil relatif à l'échelle du problème (minSep),
-                        // pas une constante numérique absurde.
+                        // F ne doit pas être confondu avec un AUTRE POINT DE STEINER
+                        // existant. On tolère que F soit près d'un terminal (cela
+                        // correspond à un Steiner dégénéré → topologie sous-optimale,
+                        // mais la longueur est correcte). On refuse uniquement les
+                        // doublons de points de Steiner (indices >= n).
                         boolean tooClose = false;
-                        for (double[] nd : nodes) {
-                            if (distXY(F, nd) < minSep) { tooClose = true; break; }
+                        for (int ndIdx = n; ndIdx < nodes.size(); ndIdx++) {
+                            if (distXY(F, nodes.get(ndIdx)) < minSep) {
+                                tooClose = true; break;
+                            }
                         }
                         if (tooClose) continue;
 
