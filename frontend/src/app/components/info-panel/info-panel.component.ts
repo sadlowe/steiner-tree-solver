@@ -15,39 +15,44 @@ export class InfoPanelComponent {
   @Input() edges: Edge[] = [];
   @Input() totalLength: number | null = null;
 
-  get terminalCount(): number {
-    return this.terminalPoints.length;
-  }
+  // Données de comparaison
+  @Input() naiveLength: number | null = null;
+  @Input() mstLength: number | null = null;
+  @Input() steinerLength: number | null = null;
+  @Input() selectedMode: string = 'steiner';
 
-  get steinerCount(): number {
-    return this.steinerPoints.length;
-  }
-
-  get edgeCount(): number {
-    return this.edges.length;
-  }
+  get terminalCount(): number { return this.terminalPoints.length; }
+  get steinerCount(): number  { return this.steinerPoints.length; }
+  get edgeCount(): number     { return this.edges.length; }
 
   get hasSolution(): boolean {
     return this.edges.length > 0 && this.totalLength !== null;
   }
 
+  get hasComparison(): boolean {
+    return this.naiveLength !== null || this.mstLength !== null || this.steinerLength !== null;
+  }
+
   get formattedLength(): string {
-    if (this.totalLength === null) {
-      return '-';
-    }
-    return this.totalLength.toFixed(2);
+    return this.totalLength !== null ? this.totalLength.toFixed(2) : '—';
   }
 
-  calculateEdgeLength(edge: Edge): number {
-    const dx = edge.end.x - edge.start.x;
-    const dy = edge.end.y - edge.start.y;
-    return Math.sqrt(dx * dx + dy * dy);
+  formatLen(v: number | null): string {
+    return v !== null ? v.toFixed(2) : '—';
   }
 
-  get mstComparison(): string {
-    if (!this.hasSolution || this.terminalCount < 2) {
-      return '-';
-    }
-    return 'Computed by algorithm';
+  /** Pourcentage de réduction de target par rapport à reference. */
+  savingsPct(target: number | null, reference: number | null): string {
+    if (target === null || reference === null || reference === 0) return '';
+    const pct = ((reference - target) / reference) * 100;
+    if (pct <= 0.05) return '';
+    return `−${pct.toFixed(0)} %`;
+  }
+
+  /** Largeur de barre proportionnelle au max (pour la visualisation). */
+  barWidth(value: number | null): string {
+    const max = Math.max(this.naiveLength ?? 0, this.mstLength ?? 0, this.steinerLength ?? 0);
+    if (!value || max === 0) return '0%';
+    return `${(value / max) * 100}%`;
   }
 }

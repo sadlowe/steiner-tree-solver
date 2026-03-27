@@ -6,16 +6,15 @@
       <span class="slide-counter">{{ currentSlide + 1 }} / {{ slides.length }}</span>
       <button class="close-btn" (click)="close()" aria-label="Fermer">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-
       </button>
     </div>
   </div>
 
   <div class="slide-container">
 
+    <!-- ── SLIDE 1 : Le problème ── -->
     <div class="slide" *ngIf="currentSlide === 0">
       <div class="slide-content">
-
         <div class="illustration">
           <svg viewBox="0 0 500 380" class="diagram">
             <defs>
@@ -25,86 +24,53 @@
               </radialGradient>
             </defs>
             <rect width="500" height="380" fill="url(#bg1)"/>
-
             <line x1="100" y1="100" x2="400" y2="100" stroke="rgba(255,255,255,0.08)" stroke-width="2" stroke-dasharray="10,6"/>
             <line x1="400" y1="100" x2="250" y2="300" stroke="rgba(255,255,255,0.08)" stroke-width="2" stroke-dasharray="10,6"/>
             <line x1="250" y1="300" x2="100" y2="100" stroke="rgba(255,255,255,0.08)" stroke-width="2" stroke-dasharray="10,6"/>
-
             <circle cx="100" cy="100" r="28" fill="rgba(0,191,255,0.15)" stroke="var(--primary-500)" stroke-width="2" class="city-node"/>
             <text x="100" y="106" text-anchor="middle" fill="white" font-size="16" font-weight="bold">A</text>
             <text x="100" y="148" text-anchor="middle" fill="var(--text-tertiary)" font-size="13">Paris</text>
-
             <circle cx="400" cy="100" r="28" fill="rgba(0,191,255,0.15)" stroke="var(--primary-500)" stroke-width="2" class="city-node"/>
             <text x="400" y="106" text-anchor="middle" fill="white" font-size="16" font-weight="bold">B</text>
             <text x="400" y="148" text-anchor="middle" fill="var(--text-tertiary)" font-size="13">Berlin</text>
-
             <circle cx="250" cy="300" r="28" fill="rgba(0,191,255,0.15)" stroke="var(--primary-500)" stroke-width="2" class="city-node"/>
             <text x="250" y="306" text-anchor="middle" fill="white" font-size="16" font-weight="bold">C</text>
             <text x="250" y="348" text-anchor="middle" fill="var(--text-tertiary)" font-size="13">Rome</text>
-
-            <!-- Question marks -->
             <text x="250" y="195" text-anchor="middle" fill="var(--primary-400)" font-size="56" font-weight="bold" class="question-mark">?</text>
-
             <text x="250" y="28" text-anchor="middle" fill="var(--text-muted)" font-size="13">Comment connecter toutes les villes avec une longueur minimale ?</text>
           </svg>
         </div>
-
         <div class="explanation">
-          <span class="slide-number-badge">Étape 1 sur 5 &nbsp;·&nbsp; Le problème</span>
+          <span class="slide-number-badge">Étape 1 sur 8 &nbsp;·&nbsp; Le problème</span>
           <h3>Connecter des villes avec un minimum de routes</h3>
-          <p class="subtitle">Un problème d'optimisation classique avec un impact réel</p>
-
+          <p class="subtitle">Un problème d'optimisation avec un impact concret</p>
           <div class="description">
-            <p>Imaginez construire un réseau routier reliant trois villes. Votre objectif : <strong>minimiser la longueur totale des routes</strong> tout en maintenant chaque ville connectée.</p>
-            <p>C'est le <strong>problème de l'arbre de Steiner</strong>, nommé d'après le mathématicien suisse Jakob Steiner (1796–1863). Il apparaît dans d'innombrables domaines de l'ingénierie.</p>
+            <p>Imaginez construire un réseau routier reliant plusieurs villes. L'objectif : <strong>minimiser la longueur totale des routes</strong> tout en maintenant chaque ville connectée.</p>
+            <p>C'est le <strong>problème de l'arbre de Steiner</strong>, nommé d'après le mathématicien suisse Jakob Steiner (1796–1863). On le retrouve dans de nombreux domaines.</p>
           </div>
-
           <div class="detail-cards">
             <div class="detail-card">
               <div class="card-icon">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
               </div>
               <div class="card-title">Télécommunications</div>
-              <div class="card-text">Minimiser la longueur de câbles dans les réseaux fibres optiques reliant les centres de données</div>
+              <div class="card-text">Minimiser la longueur de câbles dans les réseaux reliant des centres de données</div>
             </div>
             <div class="detail-card">
               <div class="card-icon">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15 15 0 0 1 0 20M12 2a15 15 0 0 0 0 20"/></svg>
               </div>
               <div class="card-title">Réseaux routiers</div>
-              <div class="card-text">Concevoir des autoroutes et pipelines connectant des régions au coût minimal</div>
+              <div class="card-text">Concevoir des routes et pipelines reliant des régions au coût minimal</div>
             </div>
-            <div class="detail-card">
-              <div class="card-icon">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-
-              </div>
-              <div class="card-title">Conception de circuits</div>
-              <div class="card-text">Connecter des composants électroniques avec une longueur de trace minimale sur PCB</div>
-            </div>
-            <div class="detail-card">
-              <div class="card-icon">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-              </div>
-              <div class="card-title">Biologie computationnelle</div>
-              <div class="card-text">Reconstruire des arbres évolutifs (phylogénétique) à partir de séquences ADN</div>
-            </div>
-          </div>
-
-          <div class="key-point">
-            <span class="icon">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-            </span>
-            <span>Le problème de l'arbre de Steiner est <strong>NP-difficile</strong> en général — aucun algorithme exact en temps polynomial n'est connu pour de grandes instances.</span>
           </div>
         </div>
-
       </div>
     </div>
 
+    <!-- ── SLIDE 2 : Approche naïve ── -->
     <div class="slide" *ngIf="currentSlide === 1">
       <div class="slide-content">
-
         <div class="illustration">
           <svg viewBox="0 0 500 380" class="diagram">
             <defs>
@@ -114,81 +80,67 @@
               </radialGradient>
             </defs>
             <rect width="500" height="380" fill="url(#bg2)"/>
-
             <line x1="100" y1="100" x2="400" y2="100" stroke="var(--error)" stroke-width="3" class="edge-line"/>
             <line x1="400" y1="100" x2="250" y2="300" stroke="var(--error)" stroke-width="3" class="edge-line"/>
             <line x1="250" y1="300" x2="100" y2="100" stroke="var(--error)" stroke-width="3" class="edge-line"/>
-
             <rect x="195" y="56" width="110" height="24" rx="4" fill="rgba(0,0,0,0.5)"/>
             <text x="250" y="73" text-anchor="middle" fill="var(--error)" font-size="13" font-weight="bold">300 km</text>
             <rect x="335" y="185" width="110" height="24" rx="4" fill="rgba(0,0,0,0.5)"/>
             <text x="390" y="202" text-anchor="middle" fill="var(--error)" font-size="13" font-weight="bold">236 km</text>
             <rect x="55" y="185" width="110" height="24" rx="4" fill="rgba(0,0,0,0.5)"/>
             <text x="110" y="202" text-anchor="middle" fill="var(--error)" font-size="13" font-weight="bold">236 km</text>
-
             <circle cx="100" cy="100" r="26" fill="rgba(0,191,255,0.15)" stroke="var(--primary-500)" stroke-width="2"/>
             <text x="100" y="106" text-anchor="middle" fill="white" font-size="16" font-weight="bold">A</text>
             <circle cx="400" cy="100" r="26" fill="rgba(0,191,255,0.15)" stroke="var(--primary-500)" stroke-width="2"/>
             <text x="400" y="106" text-anchor="middle" fill="white" font-size="16" font-weight="bold">B</text>
             <circle cx="250" cy="300" r="26" fill="rgba(0,191,255,0.15)" stroke="var(--primary-500)" stroke-width="2"/>
             <text x="250" y="306" text-anchor="middle" fill="white" font-size="16" font-weight="bold">C</text>
-
             <rect x="168" y="168" width="164" height="38" rx="6" fill="rgba(239,68,68,0.2)" stroke="var(--error)" stroke-width="1.5"/>
             <text x="250" y="192" text-anchor="middle" fill="var(--error)" font-size="16" font-weight="bold">Total : 772 km</text>
-
             <circle cx="445" cy="48" r="18" fill="rgba(239,68,68,0.2)" stroke="var(--error)" stroke-width="1.5"/>
             <line x1="438" y1="41" x2="452" y2="55" stroke="var(--error)" stroke-width="2.5"/>
             <line x1="452" y1="41" x2="438" y2="55" stroke="var(--error)" stroke-width="2.5"/>
           </svg>
         </div>
-
         <div class="explanation">
-          <span class="slide-number-badge">Étape 2 sur 5 &nbsp;·&nbsp; Approche naïve</span>
-          <h3>Graphe complet — tout connecter</h3>
+          <span class="slide-number-badge">Étape 2 sur 8 &nbsp;·&nbsp; Approche naïve</span>
+          <h3>Relier directement toutes les villes</h3>
           <p class="subtitle">La solution évidente n'est pas la meilleure</p>
-
           <div class="description">
-            <p>L'idée la plus simple : construire une route directe entre <strong>chaque paire de villes</strong>. Cela crée un <strong>graphe complet</strong> où chaque ville peut atteindre toutes les autres.</p>
-            <p>Pour <em>n</em> villes, cela nécessite <strong>n(n−1)/2 arêtes</strong>. Avec 3 villes, c'est 3 routes — déjà redondant.</p>
+            <p>L'idée la plus simple : construire une route directe entre <strong>chaque paire de villes</strong>. Chaque ville peut ainsi atteindre toutes les autres directement.</p>
+            <p>Avec 3 villes, cela fait 3 routes — mais certaines sont inutiles car les villes restent connectées même sans elles.</p>
           </div>
-
           <div class="comparison bad">
             <span class="label">Longueur totale :</span>
             <span class="value">772 km</span>
-            <span class="verdict">Pire</span>
           </div>
-
           <div class="steps">
             <div class="step">
               <div class="step-num">1</div>
-              <div class="step-text">Avec 3 villes : <strong>3 arêtes</strong>, une entre chaque paire — toutes sont conservées.</div>
+              <div class="step-text">3 routes directes sont tracées, une entre chaque paire de villes.</div>
             </div>
             <div class="step">
               <div class="step-num">2</div>
-              <div class="step-text">Avec 10 villes : <strong>45 arêtes</strong> — croissance exponentielle du coût.</div>
+              <div class="step-text">Certaines routes sont <strong>redondantes</strong> — on pourrait en supprimer une sans déconnecter de ville.</div>
             </div>
             <div class="step">
               <div class="step-num">3</div>
-              <div class="step-text">De nombreuses routes sont <strong>redondantes</strong> — vous pourriez en supprimer et garder toutes les villes connectées.</div>
-
+              <div class="step-text">Cette approche <strong>gaspille de la longueur</strong> de route. On peut faire beaucoup mieux.</div>
             </div>
           </div>
-
           <div class="key-point">
             <span class="icon">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
             </span>
-            <span>Un graphe complet avec cycles est toujours <strong>sous-optimal</strong>. On peut toujours supprimer au moins une arête sans déconnecter de ville.</span>
+            <span>Un réseau avec des cycles peut toujours être amélioré en supprimant au moins une route.</span>
           </div>
         </div>
-
       </div>
     </div>
 
     <!-- ── SLIDE 3 : MST ── -->
     <div class="slide" *ngIf="currentSlide === 2">
       <div class="slide-content">
-
         <div class="illustration">
           <svg viewBox="0 0 500 380" class="diagram">
             <defs>
@@ -198,81 +150,58 @@
               </radialGradient>
             </defs>
             <rect width="500" height="380" fill="url(#bg3)"/>
-
-            <!-- Removed edge (dashed) -->
             <line x1="100" y1="100" x2="400" y2="100" stroke="var(--text-muted)" stroke-width="2" stroke-dasharray="10,6" opacity="0.3"/>
             <text x="250" y="80" text-anchor="middle" fill="var(--text-muted)" font-size="12" opacity="0.5">supprimée</text>
-
-            <!-- MST edges -->
             <line x1="100" y1="100" x2="250" y2="300" stroke="var(--warning)" stroke-width="4" class="edge-line"/>
             <line x1="400" y1="100" x2="250" y2="300" stroke="var(--warning)" stroke-width="4" class="edge-line"/>
-
-            <!-- Length labels -->
             <rect x="115" y="188" width="110" height="24" rx="4" fill="rgba(0,0,0,0.5)"/>
             <text x="170" y="205" text-anchor="middle" fill="var(--warning)" font-size="13" font-weight="bold">236 km</text>
             <rect x="277" y="188" width="110" height="24" rx="4" fill="rgba(0,0,0,0.5)"/>
             <text x="332" y="205" text-anchor="middle" fill="var(--warning)" font-size="13" font-weight="bold">236 km</text>
-
-            <!-- Cities -->
             <circle cx="100" cy="100" r="26" fill="rgba(0,191,255,0.15)" stroke="var(--primary-500)" stroke-width="2"/>
             <text x="100" y="106" text-anchor="middle" fill="white" font-size="16" font-weight="bold">A</text>
             <circle cx="400" cy="100" r="26" fill="rgba(0,191,255,0.15)" stroke="var(--primary-500)" stroke-width="2"/>
             <text x="400" y="106" text-anchor="middle" fill="white" font-size="16" font-weight="bold">B</text>
             <circle cx="250" cy="300" r="26" fill="rgba(0,191,255,0.15)" stroke="var(--primary-500)" stroke-width="2"/>
             <text x="250" y="306" text-anchor="middle" fill="white" font-size="16" font-weight="bold">C</text>
-
-            <!-- Total badge -->
             <rect x="168" y="152" width="164" height="38" rx="6" fill="rgba(245,158,11,0.2)" stroke="var(--warning)" stroke-width="1.5"/>
-            <text x="250" y="176" text-anchor="middle" fill="var(--success)" font-size="16" font-weight="bold">Total : 439 km</text>
-
-            <!-- Saving badge -->
-            <rect x="168" y="42" width="164" height="28" rx="4" fill="rgba(16,185,129,0.2)" stroke="var(--success)" stroke-width="1"/>
-            <text x="250" y="61" text-anchor="middle" fill="var(--success)" font-size="13">Économie de 33 km vs MST ✓</text>
+            <text x="250" y="176" text-anchor="middle" fill="var(--warning)" font-size="16" font-weight="bold">Total : 472 km</text>
           </svg>
         </div>
-
         <div class="explanation">
-          <span class="slide-number-badge">Étape 3 sur 5 &nbsp;·&nbsp; Approche MST</span>
-          <h3>Arbre couvrant minimal</h3>
-          <p class="subtitle">Supprimer les arêtes redondantes — garder seulement le nécessaire</p>
-
+          <span class="slide-number-badge">Étape 3 sur 8 &nbsp;·&nbsp; Arbre couvrant minimal</span>
+          <h3>Supprimer les routes redondantes</h3>
+          <p class="subtitle">Garder seulement les connexions nécessaires</p>
           <div class="description">
-            <p>Un <strong>Arbre Couvrant</strong> connecte toutes les <em>n</em> villes en utilisant exactement <strong>n−1 arêtes</strong> sans cycles. La version <strong>Minimale</strong> choisit le plus court ensemble possible.</p>
-            <p>Les algorithmes classiques résolvent le MST en temps <strong>O(E log V)</strong> — très efficace même pour des milliers de villes.</p>
+            <p>Un <strong>arbre couvrant</strong> connecte toutes les villes sans cycles, en utilisant seulement les routes nécessaires.</p>
+            <p>La version <strong>minimale</strong> choisit les routes les plus courtes pour connecter toutes les villes.</p>
           </div>
-
           <div class="comparison medium">
             <span class="label">Longueur totale :</span>
             <span class="value">472 km</span>
-            <span class="verdict">Mieux (−39%)</span>
           </div>
-
           <div class="steps">
             <div class="step">
               <div class="step-num">1</div>
-              <div class="step-text"><strong>Kruskal's algorithm:</strong> sort all edges by length, add shortest edge that doesn't create a cycle.</div>
+              <div class="step-text">On commence par la route la plus courte entre deux villes.</div>
             </div>
             <div class="step">
               <div class="step-num">2</div>
-              <div class="step-text"><strong>Prim's algorithm:</strong> grow the tree greedily from any city, always adding the nearest unvisited city.</div>
+              <div class="step-text">On ajoute une route seulement si elle connecte une <strong>nouvelle ville</strong> non encore reliée.</div>
             </div>
             <div class="step">
               <div class="step-num">3</div>
-              <div class="step-text">Both give the <strong>same optimal result</strong> — the MST is unique when all edges have different lengths.</div>
-
+              <div class="step-text">Résultat : toutes les villes sont connectées, sans route inutile.</div>
             </div>
           </div>
-
-          <p class="hint">Can we do even better by adding new junction points?</p>
+          <p class="hint">Peut-on encore faire mieux en ajoutant des points de Steiner ?</p>
         </div>
-
       </div>
     </div>
 
-    <!-- ── SLIDE 4 : Steiner Tree ── -->
+    <!-- ── SLIDE 4 : Arbre de Steiner ── -->
     <div class="slide" *ngIf="currentSlide === 3">
       <div class="slide-content">
-
         <div class="illustration">
           <svg viewBox="0 0 500 380" class="diagram">
             <defs>
@@ -286,187 +215,317 @@
               </radialGradient>
             </defs>
             <rect width="500" height="380" fill="url(#bg4)"/>
-
-            <!-- MST comparison (faded) -->
             <line x1="100" y1="100" x2="250" y2="300" stroke="var(--warning)" stroke-width="2" opacity="0.2" stroke-dasharray="8,5"/>
             <line x1="400" y1="100" x2="250" y2="300" stroke="var(--warning)" stroke-width="2" opacity="0.2" stroke-dasharray="8,5"/>
-
-            <!-- Steiner edges -->
             <line x1="100" y1="100" x2="250" y2="185" stroke="var(--success)" stroke-width="4" class="edge-line"/>
             <line x1="400" y1="100" x2="250" y2="185" stroke="var(--success)" stroke-width="4" class="edge-line"/>
             <line x1="250" y1="300" x2="250" y2="185" stroke="var(--success)" stroke-width="4" class="edge-line"/>
-
-            <!-- Steiner point glow -->
             <circle cx="250" cy="185" r="40" fill="url(#steiner-glow-grad)" class="steiner-glow"/>
-
-            <!-- Length labels -->
             <rect x="120" y="120" width="100" height="22" rx="4" fill="rgba(0,0,0,0.6)"/>
             <text x="170" y="136" text-anchor="middle" fill="var(--success)" font-size="12" font-weight="bold">162 km</text>
             <rect x="282" y="120" width="100" height="22" rx="4" fill="rgba(0,0,0,0.6)"/>
             <text x="332" y="136" text-anchor="middle" fill="var(--success)" font-size="12" font-weight="bold">162 km</text>
             <rect x="257" y="228" width="86" height="22" rx="4" fill="rgba(0,0,0,0.6)"/>
             <text x="300" y="244" text-anchor="middle" fill="var(--success)" font-size="12" font-weight="bold">115 km</text>
-
-            <!-- Cities -->
             <circle cx="100" cy="100" r="26" fill="rgba(0,191,255,0.15)" stroke="var(--primary-500)" stroke-width="2"/>
             <text x="100" y="106" text-anchor="middle" fill="white" font-size="16" font-weight="bold">A</text>
             <circle cx="400" cy="100" r="26" fill="rgba(0,191,255,0.15)" stroke="var(--primary-500)" stroke-width="2"/>
             <text x="400" y="106" text-anchor="middle" fill="white" font-size="16" font-weight="bold">B</text>
             <circle cx="250" cy="300" r="26" fill="rgba(0,191,255,0.15)" stroke="var(--primary-500)" stroke-width="2"/>
             <text x="250" y="306" text-anchor="middle" fill="white" font-size="16" font-weight="bold">C</text>
-
-            <!-- Steiner Point -->
             <circle cx="250" cy="185" r="18" fill="var(--secondary-500)" class="steiner-point"/>
             <text x="250" y="191" text-anchor="middle" fill="white" font-size="13" font-weight="bold">S</text>
-            <text x="290" y="182" fill="var(--secondary-400)" font-size="12">Steiner Point</text>
-
-            <!-- Total badge -->
             <rect x="168" y="42" width="164" height="38" rx="6" fill="rgba(16,185,129,0.2)" stroke="var(--success)" stroke-width="1.5"/>
             <text x="250" y="66" text-anchor="middle" fill="var(--success)" font-size="16" font-weight="bold">Total : 439 km</text>
           </svg>
         </div>
-
         <div class="explanation">
-          <span class="slide-number-badge">Étape 4 sur 5 &nbsp;·&nbsp; Arbre de Steiner</span>
-          <h3>Ajouter des points de jonction pour réduire la distance</h3>
-          <p class="subtitle">Le point de Steiner n'est pas une ville — c'est une jonction calculée</p>
-
+          <span class="slide-number-badge">Étape 4 sur 8 &nbsp;·&nbsp; Arbre de Steiner</span>
+          <h3>L'arbre de Steiner</h3>
+          <p class="subtitle">Réduire la longueur totale grâce aux points de Steiner</p>
           <div class="description">
-            <p>L'élément clé de l'arbre de Steiner : nous pouvons ajouter <strong>de nouveaux points intermédiaires</strong> (appelés points de Steiner) qui ne sont pas des villes d'origine. Les routes se croisent à ces jonctions, réduisant la longueur totale.</p>
-            <p>Un arbre de Steiner sur <em>n</em> terminaux peut avoir au plus <strong>n−2 points de Steiner</strong>. Pour 3 villes, cela signifie au plus 1 jonction supplémentaire.</p>
+            <p>L'arbre de Steiner ajoute des <strong>points de Steiner</strong> dans le réseau. Ce sont des points de passage qui ne correspondent pas à des villes, mais qui permettent de <strong>réduire la longueur totale</strong> des routes.</p>
           </div>
-
-          <div class="comparison good">
-            <span class="label">Longueur totale :</span>
-            <span class="value">439 km</span>
-            <span class="verdict">Optimal (−7%)</span>
-          </div>
-
-          <div class="detail-cards">
-            <div class="detail-card">
-              <div class="card-icon">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-              </div>
-              <div class="card-title">Complexité</div>
-              <div class="card-text">NP-difficile pour ≥3 terminaux. Approximation à un rapport de 1.39 (Robins–Zelikovsky)</div>
+          <div class="steps">
+            <div class="step">
+              <div class="step-num">1</div>
+              <div class="step-text">On place un <strong>point de Steiner S</strong> à l'intérieur du triangle formé par les 3 villes.</div>
             </div>
-            <div class="detail-card">
-              <div class="card-icon">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-
-              </div>
-              <div class="card-title">Économies</div>
-              <div class="card-text">Toujours ≤ longueur du MST. Économie maximale : ~13,4% pour un triangle équilatéral</div>
+            <div class="step">
+              <div class="step-num">2</div>
+              <div class="step-text">On trace une route de S vers chaque ville. La longueur totale (439 km) est inférieure à celle de l'arbre couvrant minimal (472 km).</div>
             </div>
           </div>
-
           <div class="key-point">
             <span class="icon">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
             </span>
-            <span>Le <strong>point S</strong> violet n'est pas une ville — c'est une jonction virtuelle que nous avons introduite pour réduire la longueur totale du réseau.</span>
+            <span>Le point <strong>S</strong> est un <strong>point de Steiner</strong> — un point de passage supplémentaire, pas une ville, calculé pour raccourcir le réseau.</span>
           </div>
         </div>
-
       </div>
     </div>
 
-    <!-- ── SLIDE 5 : Fermat Point ── -->
+    <!-- ── SLIDE 5 : Algo 2 points ── -->
     <div class="slide" *ngIf="currentSlide === 4">
       <div class="slide-content">
-
         <div class="illustration">
           <svg viewBox="0 0 500 380" class="diagram">
             <defs>
               <radialGradient id="bg5" cx="50%" cy="50%" r="60%">
+                <stop offset="0%" stop-color="rgba(0,191,255,0.08)"/>
+                <stop offset="100%" stop-color="rgba(0,0,0,0)"/>
+              </radialGradient>
+            </defs>
+            <rect width="500" height="380" fill="url(#bg5)"/>
+            <line x1="110" y1="190" x2="390" y2="190" stroke="var(--success)" stroke-width="5" class="edge-line"/>
+            <rect x="190" y="160" width="120" height="24" rx="4" fill="rgba(0,0,0,0.6)"/>
+            <text x="250" y="177" text-anchor="middle" fill="var(--success)" font-size="13" font-weight="bold">distance directe</text>
+            <circle cx="110" cy="190" r="30" fill="rgba(0,191,255,0.15)" stroke="var(--primary-500)" stroke-width="2" class="city-node"/>
+            <text x="110" y="196" text-anchor="middle" fill="white" font-size="18" font-weight="bold">A</text>
+            <text x="110" y="240" text-anchor="middle" fill="var(--text-tertiary)" font-size="13">Ville A</text>
+            <circle cx="390" cy="190" r="30" fill="rgba(0,191,255,0.15)" stroke="var(--primary-500)" stroke-width="2" class="city-node"/>
+            <text x="390" y="196" text-anchor="middle" fill="white" font-size="18" font-weight="bold">B</text>
+            <text x="390" y="240" text-anchor="middle" fill="var(--text-tertiary)" font-size="13">Ville B</text>
+            <rect x="148" y="290" width="204" height="36" rx="6" fill="rgba(16,185,129,0.2)" stroke="var(--success)" stroke-width="1.5"/>
+            <text x="250" y="313" text-anchor="middle" fill="var(--success)" font-size="14" font-weight="bold">Pas de point de Steiner</text>
+          </svg>
+        </div>
+        <div class="explanation">
+          <span class="slide-number-badge">Étape 5 sur 8 &nbsp;·&nbsp; Algorithme — 2 villes</span>
+          <h3>Pour 2 villes : une ligne droite</h3>
+          <p class="subtitle">La solution est simple et directe</p>
+          <div class="description">
+            <p>Avec seulement 2 villes, l'arbre de Steiner est simplement <strong>la ligne droite</strong> qui les relie directement. Il n'y a pas besoin de point de Steiner.</p>
+          </div>
+          <div class="steps">
+            <div class="step">
+              <div class="step-num">1</div>
+              <div class="step-text">Tracer la ligne droite entre les 2 villes.</div>
+            </div>
+            <div class="step">
+              <div class="step-num">2</div>
+              <div class="step-text">C'est terminé — <strong>aucune amélioration n'est possible.</strong></div>
+            </div>
+          </div>
+          <div class="key-point">
+            <span class="icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            </span>
+            <span>La ligne droite est toujours le chemin le plus court entre 2 points.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SLIDE 6 : Algo 3 points — cas général ── -->
+    <div class="slide" *ngIf="currentSlide === 5">
+      <div class="slide-content">
+        <div class="illustration">
+          <svg viewBox="0 0 500 380" class="diagram">
+            <defs>
+              <radialGradient id="bg6" cx="50%" cy="50%" r="60%">
                 <stop offset="0%" stop-color="rgba(168,85,247,0.08)"/>
                 <stop offset="100%" stop-color="rgba(0,0,0,0)"/>
               </radialGradient>
-              <radialGradient id="fermat-grad" cx="50%" cy="50%" r="50%">
+              <radialGradient id="fermat-grad6" cx="50%" cy="50%" r="50%">
                 <stop offset="0%" stop-color="rgba(168,85,247,0.5)"/>
                 <stop offset="100%" stop-color="rgba(168,85,247,0)"/>
               </radialGradient>
             </defs>
-            <rect width="500" height="380" fill="url(#bg5)"/>
-
-            <!-- Steiner edges -->
+            <rect width="500" height="380" fill="url(#bg6)"/>
             <line x1="100" y1="100" x2="250" y2="185" stroke="var(--success)" stroke-width="4" class="edge-line"/>
             <line x1="400" y1="100" x2="250" y2="185" stroke="var(--success)" stroke-width="4" class="edge-line"/>
             <line x1="250" y1="310" x2="250" y2="185" stroke="var(--success)" stroke-width="4" class="edge-line"/>
-
-            <!-- Angle arcs at Fermat point -->
-            <!-- Arc for angle A-F-B (top) -->
+            <!-- Angle arcs -->
             <path d="M 228 170 A 25 25 0 0 1 272 170" fill="none" stroke="var(--primary-400)" stroke-width="2.5"/>
             <text x="250" y="160" text-anchor="middle" fill="var(--primary-300)" font-size="14" font-weight="bold">120°</text>
-
-            <!-- Arc for angle B-F-C (right) -->
             <path d="M 270 173 A 25 25 0 0 1 255 207" fill="none" stroke="var(--primary-400)" stroke-width="2.5"/>
             <text x="305" y="210" text-anchor="middle" fill="var(--primary-300)" font-size="14" font-weight="bold">120°</text>
-
-            <!-- Arc for angle C-F-A (left) -->
             <path d="M 245 207 A 25 25 0 0 1 230 173" fill="none" stroke="var(--primary-400)" stroke-width="2.5"/>
             <text x="195" y="215" text-anchor="middle" fill="var(--primary-300)" font-size="14" font-weight="bold">120°</text>
-
-            <!-- Cities -->
             <circle cx="100" cy="100" r="26" fill="rgba(0,191,255,0.15)" stroke="var(--primary-500)" stroke-width="2"/>
             <text x="100" y="106" text-anchor="middle" fill="white" font-size="16" font-weight="bold">A</text>
             <circle cx="400" cy="100" r="26" fill="rgba(0,191,255,0.15)" stroke="var(--primary-500)" stroke-width="2"/>
             <text x="400" y="106" text-anchor="middle" fill="white" font-size="16" font-weight="bold">B</text>
             <circle cx="250" cy="310" r="26" fill="rgba(0,191,255,0.15)" stroke="var(--primary-500)" stroke-width="2"/>
             <text x="250" y="316" text-anchor="middle" fill="white" font-size="16" font-weight="bold">C</text>
-
-            <!-- Fermat glow -->
-            <circle cx="250" cy="185" r="45" fill="url(#fermat-grad)" class="fermat-glow"/>
-
-            <!-- Fermat Point -->
+            <circle cx="250" cy="185" r="45" fill="url(#fermat-grad6)" class="fermat-glow"/>
             <circle cx="250" cy="185" r="18" fill="var(--secondary-500)" class="steiner-point"/>
-            <text x="250" y="191" text-anchor="middle" fill="white" font-size="13" font-weight="bold">F</text>
-
-            <!-- Label -->
-            <text x="250" y="30" text-anchor="middle" fill="var(--secondary-400)" font-size="16" font-weight="600">Point de Fermat–Torricelli</text>
-            <text x="250" y="52" text-anchor="middle" fill="var(--text-muted)" font-size="12">Les trois angles égaux à exactement 120°</text>
+            <text x="250" y="191" text-anchor="middle" fill="white" font-size="13" font-weight="bold">S</text>
+            <text x="250" y="30" text-anchor="middle" fill="var(--secondary-400)" font-size="14" font-weight="600">Cas général : tous les angles du triangle &lt; 120°</text>
           </svg>
         </div>
-
         <div class="explanation">
-          <span class="slide-number-badge">Étape 5 sur 5 &nbsp;·&nbsp; Le point de Fermat</span>
-          <h3>La règle des 120° pour 3 villes</h3>
-          <p class="subtitle">Une belle propriété géométrique nous donne la solution exacte</p>
-
+          <span class="slide-number-badge">Étape 6 sur 8 &nbsp;·&nbsp; Algorithme — 3 villes (cas général)</span>
+          <h3>Pour 3 villes : le point de Steiner intérieur</h3>
+          <p class="subtitle">Quand tous les angles du triangle sont inférieurs à 120°</p>
           <div class="description">
-            <p>Pour exactement <strong>3 points terminaux</strong>, le point de Steiner optimal est connu sous le nom de <strong>point de Fermat–Torricelli</strong>, découvert indépendamment par Pierre de Fermat et Evangelista Torricelli au XVII<sup>e</sup> siècle.</p>
-            <p>Sa propriété définissante : <strong>chaque angle entre deux routes est exactement de 120°</strong>. C'est le point unique qui minimise la distance totale aux trois villes.</p>
+            <p>Quand les 3 angles du triangle formé par les villes sont tous <strong>inférieurs à 120°</strong>, il existe un point de Steiner à l'intérieur du triangle.</p>
+            <p>Ce point est appelé <strong>point de Fermat</strong>. À partir de ce point, chaque route vers une ville fait un angle de <strong>120°</strong> avec les deux autres routes.</p>
           </div>
-
-          <div class="formula">
-            <span class="label">Propriété mathématique</span>
-            <span class="math">∠AFB = ∠BFC = ∠CFA = 120°</span>
-          </div>
-
           <div class="steps">
             <div class="step">
               <div class="step-num">1</div>
-              <div class="step-text">Construire un <strong>triangle équilatéral</strong> sur chaque côté du triangle d'origine.</div>
+              <div class="step-text">On vérifie que tous les angles du triangle sont inférieurs à 120°.</div>
             </div>
             <div class="step">
               <div class="step-num">2</div>
-              <div class="step-text">Tracer des lignes depuis chaque nouveau sommet extérieur vers la <strong>ville d'origine opposée</strong>.</div>
+              <div class="step-text">Le point de Steiner <strong>S</strong> se place là où les 3 routes forment des angles de 120° — c'est le point de Fermat.</div>
+            </div>
+          </div>
+          <div class="key-point">
+            <span class="icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            </span>
+            <span>La propriété des 120° n'est valable que dans ce cas général. Pour le cas où un angle est ≥ 120°, voir la page suivante.</span>
+          </div>
+        </div>
+      </div>
+    </div>
 
+    <!-- ── SLIDE 7 : Algo 3 points — cas particulier ── -->
+    <div class="slide" *ngIf="currentSlide === 6">
+      <div class="slide-content">
+        <div class="illustration">
+          <svg viewBox="0 0 500 380" class="diagram">
+            <defs>
+              <radialGradient id="bg7" cx="50%" cy="50%" r="60%">
+                <stop offset="0%" stop-color="rgba(245,158,11,0.08)"/>
+                <stop offset="100%" stop-color="rgba(0,0,0,0)"/>
+              </radialGradient>
+              <radialGradient id="obtuse-glow" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stop-color="rgba(245,158,11,0.5)"/>
+                <stop offset="100%" stop-color="rgba(245,158,11,0)"/>
+              </radialGradient>
+            </defs>
+            <rect width="500" height="380" fill="url(#bg7)"/>
+            <!-- Triangle outline (thin dashed) -->
+            <line x1="250" y1="220" x2="80" y2="140" stroke="rgba(255,255,255,0.1)" stroke-width="1.5" stroke-dasharray="6,4"/>
+            <line x1="250" y1="220" x2="420" y2="140" stroke="rgba(255,255,255,0.1)" stroke-width="1.5" stroke-dasharray="6,4"/>
+            <line x1="80" y1="140" x2="420" y2="140" stroke="rgba(255,255,255,0.1)" stroke-width="1.5" stroke-dasharray="6,4"/>
+            <!-- Optimal routes: A–B and A–C -->
+            <line x1="250" y1="220" x2="80" y2="140" stroke="var(--success)" stroke-width="4" class="edge-line"/>
+            <line x1="250" y1="220" x2="420" y2="140" stroke="var(--success)" stroke-width="4" class="edge-line"/>
+            <!-- Angle arc at A (obtuse, ~130°) -->
+            <path d="M 218 205 A 35 35 0 0 1 282 205" fill="none" stroke="var(--warning)" stroke-width="2.5"/>
+            <text x="250" y="195" text-anchor="middle" fill="var(--warning)" font-size="13" font-weight="bold">≈ 130°</text>
+            <!-- City B -->
+            <circle cx="80" cy="140" r="26" fill="rgba(0,191,255,0.15)" stroke="var(--primary-500)" stroke-width="2"/>
+            <text x="80" y="146" text-anchor="middle" fill="white" font-size="16" font-weight="bold">B</text>
+            <!-- City C -->
+            <circle cx="420" cy="140" r="26" fill="rgba(0,191,255,0.15)" stroke="var(--primary-500)" stroke-width="2"/>
+            <text x="420" y="146" text-anchor="middle" fill="white" font-size="16" font-weight="bold">C</text>
+            <!-- City A = Steiner point -->
+            <circle cx="250" cy="220" r="40" fill="url(#obtuse-glow)"/>
+            <circle cx="250" cy="220" r="26" fill="rgba(245,158,11,0.2)" stroke="var(--warning)" stroke-width="2.5"/>
+            <text x="250" y="226" text-anchor="middle" fill="white" font-size="16" font-weight="bold">A</text>
+            <!-- Label -->
+            <text x="250" y="30" text-anchor="middle" fill="var(--warning)" font-size="14" font-weight="600">Cas particulier : l'angle en A est ≥ 120°</text>
+            <text x="250" y="52" text-anchor="middle" fill="var(--text-muted)" font-size="12">A est lui-même le point de Steiner</text>
+            <!-- Badge -->
+            <rect x="148" y="300" width="204" height="36" rx="6" fill="rgba(245,158,11,0.15)" stroke="var(--warning)" stroke-width="1.5"/>
+            <text x="250" y="323" text-anchor="middle" fill="var(--warning)" font-size="13" font-weight="bold">2 routes seulement, sans point ajouté</text>
+          </svg>
+        </div>
+        <div class="explanation">
+          <span class="slide-number-badge">Étape 7 sur 8 &nbsp;·&nbsp; Algorithme — 3 villes (cas particulier)</span>
+          <h3>Pour 3 villes : cas où un angle est grand</h3>
+          <p class="subtitle">Quand un angle du triangle est supérieur ou égal à 120°</p>
+          <div class="description">
+            <p>Quand l'un des angles du triangle est <strong>supérieur ou égal à 120°</strong>, la ville correspondante est elle-même le point de Steiner. Il n'y a pas besoin d'ajouter un nouveau point.</p>
+            <p>La meilleure solution est de relier directement les deux autres villes à cette ville. On obtient 2 routes et aucun point intermédiaire.</p>
+          </div>
+          <div class="steps">
+            <div class="step">
+              <div class="step-num">1</div>
+              <div class="step-text">On mesure les angles aux 3 villes. Ici, l'angle en <strong>A</strong> est d'environ 130° (≥ 120°).</div>
+            </div>
+            <div class="step">
+              <div class="step-num">2</div>
+              <div class="step-text">La ville <strong>A</strong> est le point de Steiner : on trace simplement les routes A–B et A–C.</div>
             </div>
             <div class="step">
               <div class="step-num">3</div>
-              <div class="step-text">Les trois lignes <strong>se croisent au point de Fermat</strong> — c'est notre jonction optimale.</div>
+              <div class="step-text">La solution comporte <strong>2 routes</strong> et aucun point supplémentaire. C'est la distance minimale pour relier ces 3 villes.</div>
             </div>
           </div>
-
           <div class="key-point">
             <span class="icon">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
             </span>
-            <span>Notre solveur utilise l'<strong>algorithme itératif de Weiszfeld</strong> pour trouver ce point numériquement — convergeant vers le point de Fermat exact en millisecondes.</span>
+            <span>La ville A joue le rôle de carrefour. Ajouter un point supplémentaire ne ferait qu'allonger le réseau.</span>
           </div>
         </div>
+      </div>
+    </div>
 
+    <!-- ── SLIDE 8 : Algo 4 points ── -->
+    <div class="slide" *ngIf="currentSlide === 7">
+      <div class="slide-content">
+        <div class="illustration">
+          <svg viewBox="0 0 500 380" class="diagram">
+            <defs>
+              <radialGradient id="bg8" cx="50%" cy="50%" r="60%">
+                <stop offset="0%" stop-color="rgba(16,185,129,0.08)"/>
+                <stop offset="100%" stop-color="rgba(0,0,0,0)"/>
+              </radialGradient>
+            </defs>
+            <rect width="500" height="380" fill="url(#bg8)"/>
+            <!-- H-shape edges -->
+            <line x1="100" y1="100" x2="205" y2="190" stroke="var(--success)" stroke-width="3.5" class="edge-line"/>
+            <line x1="100" y1="300" x2="205" y2="190" stroke="var(--success)" stroke-width="3.5" class="edge-line"/>
+            <line x1="205" y1="190" x2="295" y2="190" stroke="var(--success)" stroke-width="3.5" class="edge-line"/>
+            <line x1="400" y1="100" x2="295" y2="190" stroke="var(--success)" stroke-width="3.5" class="edge-line"/>
+            <line x1="400" y1="300" x2="295" y2="190" stroke="var(--success)" stroke-width="3.5" class="edge-line"/>
+            <!-- Steiner glows -->
+            <circle cx="205" cy="190" r="28" fill="rgba(168,85,247,0.25)"/>
+            <circle cx="295" cy="190" r="28" fill="rgba(168,85,247,0.25)"/>
+            <!-- Terminal points -->
+            <circle cx="100" cy="100" r="24" fill="rgba(0,191,255,0.15)" stroke="var(--primary-500)" stroke-width="2"/>
+            <text x="100" y="106" text-anchor="middle" fill="white" font-size="15" font-weight="bold">A</text>
+            <circle cx="400" cy="100" r="24" fill="rgba(0,191,255,0.15)" stroke="var(--primary-500)" stroke-width="2"/>
+            <text x="400" y="106" text-anchor="middle" fill="white" font-size="15" font-weight="bold">B</text>
+            <circle cx="100" cy="300" r="24" fill="rgba(0,191,255,0.15)" stroke="var(--primary-500)" stroke-width="2"/>
+            <text x="100" y="306" text-anchor="middle" fill="white" font-size="15" font-weight="bold">C</text>
+            <circle cx="400" cy="300" r="24" fill="rgba(0,191,255,0.15)" stroke="var(--primary-500)" stroke-width="2"/>
+            <text x="400" y="306" text-anchor="middle" fill="white" font-size="15" font-weight="bold">D</text>
+            <!-- Steiner points -->
+            <circle cx="205" cy="190" r="16" fill="var(--secondary-500)" class="steiner-point"/>
+            <text x="205" y="196" text-anchor="middle" fill="white" font-size="12" font-weight="bold">S1</text>
+            <circle cx="295" cy="190" r="16" fill="var(--secondary-500)" class="steiner-point"/>
+            <text x="295" y="196" text-anchor="middle" fill="white" font-size="12" font-weight="bold">S2</text>
+            <text x="250" y="30" text-anchor="middle" fill="var(--text-muted)" font-size="13">Topologie en H — 2 points de Steiner (S1, S2)</text>
+          </svg>
+        </div>
+        <div class="explanation">
+          <span class="slide-number-badge">Étape 8 sur 8 &nbsp;·&nbsp; Algorithme — 4 villes</span>
+          <h3>Pour 4 villes : deux points de Steiner</h3>
+          <p class="subtitle">L'algorithme teste différentes façons de relier les villes</p>
+          <div class="description">
+            <p>Avec 4 villes, on peut placer <strong>jusqu'à 2 points de Steiner</strong>. Il existe plusieurs façons de les connecter — on appelle cela des <em>topologies</em>.</p>
+          </div>
+          <div class="steps">
+            <div class="step">
+              <div class="step-num">1</div>
+              <div class="step-text"><strong>Topologie en H :</strong> 2 points de Steiner au centre, chacun relié à 2 villes et à l'autre point. (Illustré ci-contre)</div>
+            </div>
+            <div class="step">
+              <div class="step-num">2</div>
+              <div class="step-text">Il existe <strong>3 topologies différentes</strong> pour 4 villes. L'algorithme les calcule toutes.</div>
+            </div>
+            <div class="step">
+              <div class="step-num">3</div>
+              <div class="step-text">La topologie avec la <strong>longueur totale la plus courte</strong> est gardée comme solution.</div>
+            </div>
+          </div>
+          <div class="key-point">
+            <span class="icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            </span>
+            <span>Cliquez sur <strong>« Commencer la démo »</strong> pour essayer avec vos propres villes !</span>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -474,11 +533,9 @@
 
   <!-- Bottom Navigation -->
   <div class="modal-footer">
-    <!-- Progress bar -->
     <div class="progress-bar-wrap">
       <div class="progress-bar" [style.width.%]="((currentSlide + 1) / slides.length) * 100"></div>
     </div>
-
     <div class="slide-indicators">
       <button
         *ngFor="let slide of slides; let i = index"
@@ -488,7 +545,6 @@
         [attr.aria-label]="'Aller à la diapositive ' + (i + 1)">
       </button>
     </div>
-
     <div class="nav-buttons">
       <button class="nav-btn" (click)="prevSlide()" [disabled]="currentSlide === 0">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
@@ -502,7 +558,6 @@
         Commencer la démo
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
       </button>
-
     </div>
   </div>
 
@@ -512,5 +567,4 @@
 <button class="help-btn" *ngIf="!isVisible" (click)="open()" aria-label="Afficher le tutoriel">
   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
   <span class="help-btn-label">Tutoriel</span>
-
 </button>

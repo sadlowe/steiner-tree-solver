@@ -1,5 +1,55 @@
-﻿<div class="info-panel">
+<div class="info-panel">
   <h3 class="panel-title">Statistiques</h3>
+
+  <!-- Comparaison des approches -->
+  <div class="info-section comparison-section" *ngIf="hasComparison">
+    <h4 class="section-title">Comparaison des approches</h4>
+
+    <div class="comp-row" [class.comp-active]="selectedMode === 'naive'" *ngIf="naiveLength !== null">
+      <div class="comp-header">
+        <span class="comp-dot naive-comp-dot"></span>
+        <span class="comp-label">Connexion naïve</span>
+        <span class="comp-value naive-val">{{ formatLen(naiveLength) }} px</span>
+      </div>
+      <div class="comp-bar-track">
+        <div class="comp-bar naive-bar" [style.width]="barWidth(naiveLength)"></div>
+      </div>
+    </div>
+
+    <div class="comp-row" [class.comp-active]="selectedMode === 'mst'" *ngIf="mstLength !== null">
+      <div class="comp-header">
+        <span class="comp-dot mst-comp-dot"></span>
+        <span class="comp-label">MST</span>
+        <span class="comp-value mst-val">{{ formatLen(mstLength) }} px</span>
+        <span class="comp-savings" *ngIf="savingsPct(mstLength, naiveLength)">
+          {{ savingsPct(mstLength, naiveLength) }} vs naïve
+        </span>
+      </div>
+      <div class="comp-bar-track">
+        <div class="comp-bar mst-bar" [style.width]="barWidth(mstLength)"></div>
+      </div>
+    </div>
+
+    <div class="comp-row" [class.comp-active]="selectedMode === 'steiner'" *ngIf="steinerLength !== null">
+      <div class="comp-header">
+        <span class="comp-dot steiner-comp-dot"></span>
+        <span class="comp-label">Steiner</span>
+        <span class="comp-value steiner-val">{{ formatLen(steinerLength) }} px</span>
+        <span class="comp-savings" *ngIf="savingsPct(steinerLength, mstLength)">
+          {{ savingsPct(steinerLength, mstLength) }} vs MST
+        </span>
+      </div>
+      <div class="comp-bar-track">
+        <div class="comp-bar steiner-bar" [style.width]="barWidth(steinerLength)"></div>
+      </div>
+    </div>
+
+    <p class="comp-hint" *ngIf="steinerLength === null && terminalCount >= 2">
+      Calculez l'arbre de Steiner pour compléter la comparaison.
+    </p>
+  </div>
+
+  <!-- Points -->
   <div class="info-section">
     <h4 class="section-title">Points</h4>
     <div class="stat-row">
@@ -9,31 +59,31 @@
       </span>
       <span class="stat-value">{{ terminalCount }}</span>
     </div>
-    <div class="stat-row" *ngIf="hasSolution">
+    <div class="stat-row" *ngIf="steinerCount > 0">
       <span class="stat-label">
         <span class="dot steiner-dot"></span>
         Points de Steiner
       </span>
       <span class="stat-value">{{ steinerCount }}</span>
     </div>
-    <div class="stat-row total" *ngIf="hasSolution">
-      <span class="stat-label">Total de points</span>
-      <span class="stat-value">{{ terminalCount + steinerCount }}</span>
-    </div>
   </div>
+
+  <!-- Solution courante -->
   <div class="info-section" *ngIf="hasSolution">
-    <h4 class="section-title">Solution</h4>
+    <h4 class="section-title">Solution affichée</h4>
     <div class="stat-row">
       <span class="stat-label">Nombre d'arêtes</span>
       <span class="stat-value">{{ edgeCount }}</span>
     </div>
     <div class="stat-row highlight">
-      <span class="stat-label">Longueur totale du réseau</span>
+      <span class="stat-label">Longueur totale</span>
       <span class="stat-value length">{{ formattedLength }} px</span>
     </div>
   </div>
+
+  <!-- Liste des points terminaux -->
   <div class="info-section" *ngIf="terminalCount > 0">
-    <h4 class="section-title">Liste des points terminaux</h4>
+    <h4 class="section-title">Points terminaux</h4>
     <div class="points-list">
       <div class="point-item" *ngFor="let point of terminalPoints; let i = index">
         <span class="point-label">P{{ i + 1 }}</span>
@@ -41,8 +91,10 @@
       </div>
     </div>
   </div>
+
+  <!-- Liste des points de Steiner -->
   <div class="info-section" *ngIf="steinerCount > 0">
-    <h4 class="section-title">Liste des points de Steiner</h4>
+    <h4 class="section-title">Points de Steiner</h4>
     <div class="points-list">
       <div class="point-item steiner" *ngFor="let point of steinerPoints; let i = index">
         <span class="point-label">S{{ i + 1 }}</span>
@@ -50,19 +102,29 @@
       </div>
     </div>
   </div>
+
+  <!-- Légende -->
   <div class="info-section legend">
-    <h4 class="section-title">Legend</h4>
+    <h4 class="section-title">Légende</h4>
+    <div class="legend-item">
+      <span class="line" style="background:#ef4444"></span>
+      <span>Connexion naïve</span>
+    </div>
+    <div class="legend-item">
+      <span class="line" style="background:#f59e0b"></span>
+      <span>MST (Arbre couvrant minimal)</span>
+    </div>
+    <div class="legend-item">
+      <span class="line" style="background:#10b981"></span>
+      <span>Arbre de Steiner</span>
+    </div>
     <div class="legend-item">
       <span class="dot terminal-dot"></span>
-      <span>Terminal Point (City)</span>
+      <span>Point terminal (ville)</span>
     </div>
     <div class="legend-item">
       <span class="dot steiner-dot"></span>
-      <span>Steiner Point</span>
-    </div>
-    <div class="legend-item">
-      <span class="line edge-line"></span>
-      <span>Edge (Connection)</span>
+      <span>Point de Steiner</span>
     </div>
   </div>
 </div>

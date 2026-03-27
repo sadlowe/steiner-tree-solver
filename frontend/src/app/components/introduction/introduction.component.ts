@@ -13,31 +13,14 @@ export class IntroductionComponent {
   currentSlide = 0;
 
   slides = [
-    {
-      id: 'problem',
-      title: 'Le problème',
-      subtitle: 'Connecter des villes avec une longueur de route minimale'
-    },
-    {
-      id: 'naive',
-      title: 'Solution naïve',
-      subtitle: 'Connexions directes entre toutes les villes'
-    },
-    {
-      id: 'mst',
-      title: 'Mieux : Arbre couvrant minimal',
-      subtitle: 'Connexion sans cycles, mais pas encore optimal'
-    },
-    {
-      id: 'steiner',
-      title: 'Optimal : Arbre de Steiner',
-      subtitle: 'Ajouter des points de jonction pour minimiser la longueur totale'
-    },
-    {
-      id: 'fermat',
-      title: 'Le point de Fermat',
-      subtitle: 'Pour 3 villes, la jonction optimale a des angles de 120°'
-    }
+    { id: 'problem',    title: 'Le problème',                      subtitle: 'Connecter des villes avec une longueur de route minimale' },
+    { id: 'naive',      title: 'Approche naïve',                   subtitle: 'Connexions directes entre toutes les villes' },
+    { id: 'mst',        title: 'Arbre couvrant minimal',           subtitle: 'Connexion sans cycles' },
+    { id: 'steiner',    title: 'Arbre de Steiner',                 subtitle: 'Les points de Steiner réduisent la longueur totale' },
+    { id: 'algo-2',     title: 'Algorithme — 2 villes',            subtitle: 'La ligne droite' },
+    { id: 'algo-3',     title: 'Algorithme — 3 villes (général)',  subtitle: 'Le point de Fermat, angles < 120°' },
+    { id: 'algo-3-sp',  title: 'Algorithme — 3 villes (particulier)', subtitle: 'Un angle ≥ 120°' },
+    { id: 'algo-4',     title: 'Algorithme — 4 villes',            subtitle: 'Deux points de Steiner' },
   ];
 
   nextSlide(): void {

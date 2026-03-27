@@ -18,6 +18,7 @@ export class CanvasComponent implements AfterViewInit, OnChanges {
   @Input() steinerPoints: Point[] = [];
   @Input() edges: Edge[] = [];
   @Input() isAddingEnabled = true;
+  @Input() edgeColor: string = '#10b981';
 
   @Output() pointAdded = new EventEmitter<Point>();
 
@@ -27,7 +28,6 @@ export class CanvasComponent implements AfterViewInit, OnChanges {
   private readonly STEINER_RADIUS = 6;
   private readonly TERMINAL_COLOR = '#00bfff';
   private readonly STEINER_COLOR = '#a855f7';
-  private readonly EDGE_COLOR = '#10b981';
   private readonly EDGE_WIDTH = 2;
   private readonly BACKGROUND_COLOR = '#0a0e17';
   private readonly GRID_COLOR = 'rgba(148, 163, 184, 0.08)';
@@ -107,7 +107,7 @@ export class CanvasComponent implements AfterViewInit, OnChanges {
 
   private drawEdges(): void {
     for (const edge of this.edges) {
-      this.ctx.strokeStyle = this.EDGE_COLOR + '40';
+      this.ctx.strokeStyle = this.edgeColor + '40';
       this.ctx.lineWidth = this.EDGE_WIDTH + 6;
       this.ctx.lineCap = 'round';
       this.ctx.beginPath();
@@ -115,8 +115,7 @@ export class CanvasComponent implements AfterViewInit, OnChanges {
       this.ctx.lineTo(edge.end.x, edge.end.y);
       this.ctx.stroke();
 
-      // Draw main edge line
-      this.ctx.strokeStyle = this.EDGE_COLOR;
+      this.ctx.strokeStyle = this.edgeColor;
       this.ctx.lineWidth = this.EDGE_WIDTH;
       this.ctx.beginPath();
       this.ctx.moveTo(edge.start.x, edge.start.y);

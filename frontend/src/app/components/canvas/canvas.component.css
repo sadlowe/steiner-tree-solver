@@ -9,16 +9,25 @@
   overflow: hidden;
 
   /* Glassmorphism effect */
-  background: var(--bg-glass);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background: linear-gradient(135deg,
+    rgba(13, 19, 33, 0.95) 0%,
+    rgba(19, 26, 43, 0.95) 100%);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 
-  /* Glowing border effect */
-  border: 1px solid var(--border-default);
+  /* Advanced border with gradient */
+  border: 2px solid;
+  border-image: linear-gradient(135deg,
+    rgba(0, 191, 255, 0.5) 0%,
+    rgba(168, 85, 247, 0.3) 100%);
+  border-image-slice: 1;
+
+  /* Elevated shadow */
   box-shadow:
-    var(--shadow-lg),
-    inset 0 1px 0 rgba(255, 255, 255, 0.05),
-    0 0 40px rgba(0, 191, 255, 0.1);
+    0 0 40px rgba(0, 191, 255, 0.15),
+    0 0 80px rgba(168, 85, 247, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    var(--shadow-xl);
 
   /* Subtle animation on load */
   animation: fade-in 0.6s ease-out;
@@ -29,43 +38,61 @@
 .canvas-container::after {
   content: '';
   position: absolute;
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
   border: 2px solid var(--primary-500);
-  opacity: 0.5;
+  opacity: 0.6;
   pointer-events: none;
   z-index: 10;
+  transition: all var(--transition-base);
 }
 
 .canvas-container::before {
-  top: 8px;
-  left: 8px;
+  top: 12px;
+  left: 12px;
   border-right: none;
   border-bottom: none;
-  border-radius: var(--radius-sm) 0 0 0;
+  border-radius: var(--radius-md) 0 0 0;
 }
 
 .canvas-container::after {
-  bottom: 8px;
-  right: 8px;
+  bottom: 12px;
+  right: 12px;
   border-left: none;
   border-top: none;
-  border-radius: 0 0 var(--radius-sm) 0;
+  border-radius: 0 0 var(--radius-md) 0;
 }
 
 /* The actual canvas element */
 .steiner-canvas {
   display: block;
   transition: opacity var(--transition-base);
+  cursor: crosshair;
+  background: var(--bg-primary);
 }
 
 /* Hover state - subtle glow enhancement */
 .canvas-container:hover {
   box-shadow:
-    var(--shadow-xl),
-    inset 0 1px 0 rgba(255, 255, 255, 0.05),
-    0 0 60px rgba(0, 191, 255, 0.15);
-  border-color: var(--border-glow);
+    0 0 60px rgba(0, 191, 255, 0.25),
+    0 0 120px rgba(168, 85, 247, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    var(--shadow-xl);
+}
+
+.canvas-container:hover::before,
+.canvas-container:hover::after {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+/* Active state when adding points */
+.canvas-container.active {
+  box-shadow:
+    0 0 80px rgba(0, 191, 255, 0.35),
+    0 0 140px rgba(168, 85, 247, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    var(--shadow-xl);
 }
 
 /* ==========================================================================
@@ -78,25 +105,51 @@
   left: 50%;
   transform: translate(-50%, -50%);
 
-  /* Glassmorphism card */
-  background: var(--bg-glass-light);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  /* Premium glassmorphism card */
+  background: linear-gradient(135deg,
+    rgba(13, 19, 33, 0.9) 0%,
+    rgba(26, 34, 53, 0.85) 100%);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
 
-  padding: var(--space-6) var(--space-8);
+  padding: var(--space-8) var(--space-10);
   border-radius: var(--radius-lg);
-  border: 1px solid var(--border-subtle);
-  box-shadow: var(--shadow-lg);
+  border: 1px solid rgba(0, 191, 255, 0.2);
+  box-shadow:
+    0 0 40px rgba(0, 191, 255, 0.15),
+    var(--shadow-lg);
 
   pointer-events: none;
-  animation: fade-in 0.5s ease-out 0.3s backwards;
+  animation: bounce-in 0.6s ease-out;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.instruction-icon {
+  width: 48px;
+  height: 48px;
+  color: var(--primary-500);
+  animation: glow-pulse 2s ease-in-out infinite;
 }
 
 .canvas-instructions p {
+  color: var(--text-primary);
+  font-size: var(--font-size-base);
+  letter-spacing: var(--letter-spacing-normal);
+  margin: 0;
+  line-height: var(--line-height-relaxed);
+  font-weight: var(--font-weight-semibold);
+}
+
+.canvas-instructions small {
   color: var(--text-secondary);
   font-size: var(--font-size-sm);
-  text-align: center;
   letter-spacing: var(--letter-spacing-wide);
+  text-transform: uppercase;
+  margin: 0;
 }
 
 /* Pulsing cursor indicator */
