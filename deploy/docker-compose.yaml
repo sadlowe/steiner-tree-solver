@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  backend:
+    image: ghcr.io/sadlowe/steiner-tree-solver-backend:1.0.0
+    restart: unless-stopped
+    pull_policy: if_not_present
+    env_file:
+      - .env
+    networks:
+      - steiner-net
+    expose:
+      - "8080"
+
+  frontend:
+    image: ghcr.io/sadlowe/steiner-tree-solver-frontend:1.0.0
+    restart: unless-stopped
+    pull_policy: if_not_present
+    ports:
+      - "80:80"
+    networks:
+      - steiner-net
+    depends_on:
+      - backend
+
+networks:
+  steiner-net:
+    driver: bridge
+
