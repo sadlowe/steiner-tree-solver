@@ -1,56 +1,3 @@
-"""
-steiner_4pts.py
-===============================================================================
-Solveur de l'arbre de Steiner euclidien pour exactement 4 points dans le plan.
-
-CONTEXTE DU PROJET
-------------------
-Ce script fait partie du projet "Arbre de Steiner et bulles de savon".
-Il implémente une solution géométrique exacte pour le problème de Steiner
-euclidien à 4 terminaux, en complément du backend Java de l'application.
-
-Il peut servir à :
-  - Valider les résultats du backend Spring Boot
-  - Démontrer les algorithmes lors d'une présentation
-  - Explorer les topologies possibles pour un ensemble de points
-
-PROBLÈME RÉSOLU
----------------
-Étant donné 4 points dans le plan (les "terminaux"), trouver l'arbre de longueur
-minimale qui les connecte tous, en autorisant l'ajout de nouveaux points
-intermédiaires (les "points de Steiner").
-
-Propriété clé : dans la solution optimale, les arêtes se rejoignent toujours
-à exactement 120° aux points de Steiner (Point de Fermat-Torricelli).
-
-STRATÉGIE
----------
-Pour n = 4 terminaux, un arbre de Steiner optimal admet au plus n − 2 = 2
-points de Steiner. On énumère exhaustivement les 16 topologies candidates :
-
-  • 0 Steiner  (  1 topologie) : arbre couvrant minimal (MST) des 4 terminaux
-  • 1 Steiner  ( 12 topologies): triplet de 3 terminaux -> point de Fermat,
-                                  le 4e terminal se raccroche a l'un d'eux
-  • 2 Steiner  (  3 topologies): partition {a,b}|{c,d}, S1 et S2 optimisés
-                                  numériquement par L-BFGS-B (scipy)
-
-DÉPENDANCES
------------
-    pip install numpy scipy matplotlib
-
-UTILISATION RAPIDE
-------------------
-    from steiner_4pts import steiner_tree_4_points
-
-    result = steiner_tree_4_points([(0,0), (1,0), (1,1), (0,1)])
-    print(result['length'])          # 2.73205...  (= 1 + sqrt(3))
-    print(result['steiner_points'])  # [S1, S2]
-    for p1, p2 in result['edges']:   # segments prets a tracer
-        ...
-
-===============================================================================
-"""
-
 from __future__ import annotations
 import math
 import itertools
@@ -60,39 +7,26 @@ import numpy as np
 from scipy.optimize import minimize
 
 
-# ===============================================================================
-# 1. Fonctions de base
-# ===============================================================================
-
 def distance(p, q) -> float:
-    """Distance euclidienne entre deux points 2D."""
+    """Returns the Euclidean distance between two 2D points."""
     return float(np.linalg.norm(np.asarray(p, float) - np.asarray(q, float)))
 
 
 def longueur_totale(edges: list[tuple[int, int]],
                     all_points: list[np.ndarray]) -> float:
     """
-    Longueur totale d'un ensemble de segments.
+    Returns the total length of a set of edges.
 
-    Parameters
-    ----------
-    edges      : liste de paires d'indices (i, j) dans all_points
-    all_points : liste de coordonnées 2D, [terminaux..., steiner_points...]
+    :param edges: list of index pairs (i, j) into all_points
+    :param all_points: list of 2D coordinates [terminals..., steiner_points...]
     """
     return sum(distance(all_points[i], all_points[j]) for i, j in edges)
 
 
 def _cross2d(u: np.ndarray, v: np.ndarray) -> float:
-    """
-    Produit vectoriel 2D (scalaire).
-    Remplace np.cross pour la compatibilité NumPy >= 2.0.
-    """
+    """Returns the 2D scalar cross product of u and v."""
     return float(u[0] * v[1] - u[1] * v[0])
 
-
-# ===============================================================================
-# 2. Point de Fermat-Torricelli — itérations de Weiszfeld
-# ===============================================================================
 
 def fermat_point(a: np.ndarray,
                  b: np.ndarray,
@@ -100,27 +34,21 @@ def fermat_point(a: np.ndarray,
                  tol: float = 1e-11,
                  max_iter: int = 50_000) -> Optional[np.ndarray]:
     """
-    Calcule le point de Fermat-Torricelli F = argmin d(F,a) + d(F,b) + d(F,c).
+    Computes the Fermat-Torricelli point F = argmin d(F,a) + d(F,b) + d(F,c).
 
-    Règle géométrique fondamentale
-    --------------------------------
-    Si un angle du triangle ABC est >= 120 deg, alors F est ce sommet.
-    Ajouter un point de Steiner en ce sommet n'améliorerait pas la longueur.
-    Sinon, F est l'unique point intérieur où les trois arêtes forment 120 deg.
+    If any angle of triangle ABC is >= 120°, that vertex is returned directly.
+    Returns None if the three points are collinear.
+    Uses Weiszfeld iterations starting from the centroid.
 
-    Algorithme : itérations de Weiszfeld (1937)
-    -------------------------------------------
-        F_{k+1} = sum_i (P_i / d(F_k, P_i))
-                  --------------------------
-                  sum_i (1  / d(F_k, P_i))
-
-    Convergence linéaire garantie si F ne coïncide pas avec un P_i.
-
-    Retourne None si les trois points sont colinéaires (triangle dégénéré).
+    :param a: first point
+    :param b: second point
+    :param c: third point
+    :param tol: convergence tolerance
+    :param max_iter: maximum number of iterations
+    :return: Fermat point, or None if degenerate
     """
     a, b, c = np.asarray(a, float), np.asarray(b, float), np.asarray(c, float)
 
-    # Cas dégénéré : triangle plat (aire ≈ 0)
     if abs(_cross2d(b - a, c - a)) < 1e-14:
         return None
 
@@ -129,7 +57,6 @@ def fermat_point(a: np.ndarray,
         denom = np.linalg.norm(u) * np.linalg.norm(v)
         return float(np.dot(u, v) / denom) if denom > 1e-15 else 1.0
 
-    # cos(120 deg) = -0.5 ; angle >= 120 deg  <=>  cosinus <= -0.5
     cos120 = math.cos(math.radians(120.0))
     if _cos_at(a, b, c) <= cos120:
         return a.copy()
@@ -138,7 +65,6 @@ def fermat_point(a: np.ndarray,
     if _cos_at(c, a, b) <= cos120:
         return c.copy()
 
-    # Itérations de Weiszfeld depuis le centroïde
     pts = [a, b, c]
     f = (a + b + c) / 3.0
 
@@ -146,7 +72,6 @@ def fermat_point(a: np.ndarray,
         dists = [distance(f, p) for p in pts]
 
         if min(dists) < 1e-12:
-            # F coincide quasi exactement avec un sommet
             return pts[int(np.argmin(dists))].copy()
 
         w = [1.0 / d for d in dists]
@@ -160,12 +85,12 @@ def fermat_point(a: np.ndarray,
     return f
 
 
-# ===============================================================================
-# 3. Arbre couvrant minimal — algorithme de Prim (O(n²), suffisant pour n=4)
-# ===============================================================================
-
 def _mst_4(terminals: list[np.ndarray]) -> tuple[float, list[tuple[int, int]]]:
-    """MST des 4 terminaux. Renvoie (longueur_totale, liste_aretes)."""
+    """
+    Computes the MST of the 4 terminals using Prim's algorithm.
+
+    :return: (total_length, list_of_edges)
+    """
     in_tree: set[int] = {0}
     edges: list[tuple[int, int]] = []
     total = 0.0
@@ -185,26 +110,15 @@ def _mst_4(terminals: list[np.ndarray]) -> tuple[float, list[tuple[int, int]]]:
     return total, edges
 
 
-# ===============================================================================
-# 4. Topologies avec 1 point de Steiner (12 cas)
-# ===============================================================================
-
 def _eval_one_steiner(terminals: list[np.ndarray],
                       triplet: tuple[int, int, int],
                       lone: int,
                       attach: int) -> Optional[dict]:
     """
-    Évalue la topologie à 1 point de Steiner :
-      S = point de Fermat des 3 terminaux du triplet
-      Le terminal `lone` se raccorde directement au terminal `attach`
+    Evaluates a topology with one Steiner point S = Fermat(triplet).
+    The lone terminal connects directly to the given attach terminal.
 
-    Structure de l'arbre (5 noeuds, 4 aretes) :
-      S -> triplet[0]
-      S -> triplet[1]
-      S -> triplet[2]
-      lone -> attach
-
-    Retourne None si le triplet est colinéaire (Fermat indéfini).
+    :return: result dict, or None if the triplet is collinear
     """
     a, b, c = [terminals[i] for i in triplet]
     s = fermat_point(a, b, c)
@@ -213,7 +127,7 @@ def _eval_one_steiner(terminals: list[np.ndarray],
 
     at_vertex = any(distance(s, terminals[i]) < 1e-8 for i in triplet)
 
-    all_pts = terminals + [s]   # index 4 = S
+    all_pts = terminals + [s]
     edges = [(4, triplet[0]), (4, triplet[1]), (4, triplet[2]), (lone, attach)]
 
     return {
@@ -226,16 +140,15 @@ def _eval_one_steiner(terminals: list[np.ndarray],
     }
 
 
-# ===============================================================================
-# 5. Topologies avec 2 points de Steiner (3 cas) — optimisation numérique
-# ===============================================================================
-
 def _check_120(s: np.ndarray,
                neighbors: list[np.ndarray],
                tol_deg: float = 10.0) -> bool:
     """
-    Vérifie que les 3 arêtes issues du point de Steiner S
-    forment des angles d'environ 120 deg entre elles.
+    Checks that the three edges at Steiner point s form angles of approximately 120°.
+
+    :param s: Steiner point
+    :param neighbors: list of exactly 3 neighboring points
+    :param tol_deg: angle tolerance in degrees
     """
     if len(neighbors) != 3:
         return False
@@ -254,8 +167,9 @@ def _check_120(s: np.ndarray,
 def _two_steiner_starts(a: np.ndarray, b: np.ndarray,
                         c: np.ndarray, d: np.ndarray) -> list[np.ndarray]:
     """
-    Génère 4 points de départ pour l'optimisation (S1, S2).
-    S1 doit être entre a, b et la zone {c,d} ; S2 inversement.
+    Generates 4 starting points for the two-Steiner optimization.
+
+    :return: list of flat arrays [s1x, s1y, s2x, s2y]
     """
     mab  = (a + b) / 2.0
     mcd  = (c + d) / 2.0
@@ -264,16 +178,13 @@ def _two_steiner_starts(a: np.ndarray, b: np.ndarray,
 
     starts = []
 
-    # Init 1 : milieux décalés vers le centroïde
     starts.append(np.r_[(mab * 2 + mcd) / 3.0, (mcd * 2 + mab) / 3.0])
 
-    # Init 2 : Fermat(a, b, mcd) et Fermat(c, d, mab)
     f1 = fermat_point(a, b, mcd)
     f2 = fermat_point(c, d, mab)
     if f1 is not None and f2 is not None:
         starts.append(np.r_[f1, f2])
 
-    # Init 3 : perturbation orthogonale du centroïde
     direction = mcd - mab
     if np.linalg.norm(direction) > 1e-9:
         perp = np.array([-direction[1], direction[0]])
@@ -282,7 +193,6 @@ def _two_steiner_starts(a: np.ndarray, b: np.ndarray,
         perp = np.array([0.1 * span, 0.0])
     starts.append(np.r_[ctr + perp, ctr - perp])
 
-    # Init 4 : décalé vers les paires respectives
     starts.append(np.r_[0.65 * a + 0.35 * ctr, 0.65 * c + 0.35 * ctr])
 
     return starts
@@ -292,15 +202,11 @@ def _eval_two_steiner(terminals: list[np.ndarray],
                       pair1: tuple[int, int],
                       pair2: tuple[int, int]) -> Optional[dict]:
     """
-    Évalue la topologie à 2 points de Steiner :
-      S1 relié à pair1[0], pair1[1] et S2   (angles 120 deg)
-      S2 relié à pair2[0], pair2[1] et S1   (angles 120 deg)
+    Evaluates a topology with two Steiner points S1 and S2.
+    S1 connects to pair1 terminals and S2; S2 connects to pair2 terminals and S1.
+    Positions are optimized by L-BFGS-B with multiple starting points.
 
-    Les positions de S1 et S2 sont optimisées par L-BFGS-B (scipy)
-    avec 4 initialisations pour éviter les minima locaux.
-
-    Retourne None si la solution est géométriquement invalide
-    (Steiner confondu avec un terminal, ou angles trop éloignés de 120 deg).
+    :return: result dict, or None if the topology is geometrically invalid
     """
     a, b = terminals[pair1[0]], terminals[pair1[1]]
     c, d = terminals[pair2[0]], terminals[pair2[1]]
@@ -326,7 +232,6 @@ def _eval_two_steiner(terminals: list[np.ndarray],
     s2 = np.array(best.x[2:])
     all_pts = terminals + [s1, s2]
 
-    # Seuil de dégénérescence = 0.01% de la plus grande distance entre terminaux
     scale = max(
         distance(terminals[i], terminals[j])
         for i, j in itertools.combinations(range(4), 2)
@@ -354,32 +259,16 @@ def _eval_two_steiner(terminals: list[np.ndarray],
     }
 
 
-# ===============================================================================
-# 6. Fonction principale
-# ===============================================================================
-
 def steiner_tree_4_points(points: list[tuple[float, float]]) -> dict:
     """
-    Arbre de Steiner euclidien optimal pour exactement 4 points dans le plan.
+    Computes the optimal Euclidean Steiner tree for exactly 4 points.
 
-    Parameters
-    ----------
-    points : liste de 4 tuples (x, y)
+    Enumerates all 16 candidate topologies (0, 1, or 2 Steiner points)
+    and returns the one with the shortest total length.
 
-    Returns
-    -------
-    dict :
-        'length'         -- float           : longueur totale minimale
-        'edges'          -- list[(arr, arr)]: segments directement tracables
-        'steiner_points' -- list[ndarray]   : coordonnées des points de Steiner
-        'topology'       -- str             : description de la topologie choisie
-        'all_points'     -- list[ndarray]   : [terminaux..., steiner_points...]
-
-    Exemple
-    -------
-        result = steiner_tree_4_points([(0,0), (1,0), (1,1), (0,1)])
-        # result['length']  ->  2.73205080...  (= 1 + sqrt(3))
-        # result['topology'] -> '2 Steiner | paires (0, 1) | (2, 3)'
+    :param points: list of 4 (x, y) tuples
+    :return: dict with keys 'length', 'edges', 'steiner_points', 'topology', 'all_points'
+    :raises ValueError: if the input does not contain exactly 4 points
     """
     if len(points) != 4:
         raise ValueError("Exactement 4 points sont requis.")
@@ -387,7 +276,6 @@ def steiner_tree_4_points(points: list[tuple[float, float]]) -> dict:
     terminals = [np.asarray(p, dtype=float) for p in points]
     candidates: list[dict] = []
 
-    # --- 0 point de Steiner : MST ------------------------------------------
     mst_len, mst_edges = _mst_4(terminals)
     candidates.append({
         'length': mst_len,
@@ -397,7 +285,6 @@ def steiner_tree_4_points(points: list[tuple[float, float]]) -> dict:
         'topology': 'MST (0 point de Steiner)',
     })
 
-    # --- 1 point de Steiner : C(4,3) x 3 = 12 topologies ------------------
     for triplet in itertools.combinations(range(4), 3):
         lone = next(x for x in range(4) if x not in triplet)
         for attach in triplet:
@@ -405,13 +292,11 @@ def steiner_tree_4_points(points: list[tuple[float, float]]) -> dict:
             if res is not None:
                 candidates.append(res)
 
-    # --- 2 points de Steiner : 3 partitions en 2 paires --------------------
     for pair1, pair2 in [((0, 1), (2, 3)), ((0, 2), (1, 3)), ((0, 3), (1, 2))]:
         res = _eval_two_steiner(terminals, pair1, pair2)
         if res is not None:
             candidates.append(res)
 
-    # --- Sélection de la meilleure topologie --------------------------------
     best = min(candidates, key=lambda r: r['length'])
 
     return {
@@ -426,12 +311,8 @@ def steiner_tree_4_points(points: list[tuple[float, float]]) -> dict:
     }
 
 
-# ===============================================================================
-# 7. Affichage
-# ===============================================================================
-
 def afficher_resultat(res: dict, titre: str = '') -> None:
-    """Affiche le résultat de façon lisible dans le terminal."""
+    """Prints the result in a readable format."""
     sep = '-' * 58
     print(sep)
     if titre:
@@ -449,12 +330,8 @@ def afficher_resultat(res: dict, titre: str = '') -> None:
     print(sep)
 
 
-# ===============================================================================
-# 8. Visualisation (optionnelle, nécessite matplotlib)
-# ===============================================================================
-
 def visualiser(points: list[tuple], res: dict, titre: str = '') -> None:
-    """Trace la solution avec matplotlib."""
+    """Plots the solution using matplotlib."""
     try:
         import matplotlib.pyplot as plt
     except ImportError:
@@ -483,32 +360,22 @@ def visualiser(points: list[tuple], res: dict, titre: str = '') -> None:
     plt.show()
 
 
-# ===============================================================================
-# 9. Exemples d'utilisation
-# ===============================================================================
-
 if __name__ == '__main__':
-
-    # Exemple 1 : carre unite
-    # Solution exacte : 1 + sqrt(3) = 2.73205080...
     afficher_resultat(
         steiner_tree_4_points([(0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0)]),
         'Ex 1 -- Carre unite  (ref: 1+sqrt(3) = 2.73205080)'
     )
 
-    # Exemple 2 : points quelconques
     afficher_resultat(
         steiner_tree_4_points([(1.0, 2.0), (4.0, 6.0), (7.0, 1.0), (3.0, 8.0)]),
         'Ex 2 -- Points quelconques'
     )
 
-    # Exemple 3 : losange allonge (MST probablement optimal)
     afficher_resultat(
         steiner_tree_4_points([(0.0, 0.0), (10.0, 0.0), (5.0, 0.2), (5.0, -0.2)]),
         'Ex 3 -- Losange allonge'
     )
 
-    # Exemple 4 : rectangle 3x1
     afficher_resultat(
         steiner_tree_4_points([(0.0, 0.0), (3.0, 0.0), (3.0, 1.0), (0.0, 1.0)]),
         'Ex 4 -- Rectangle 3x1'

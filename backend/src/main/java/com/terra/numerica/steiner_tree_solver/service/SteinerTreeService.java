@@ -12,31 +12,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Service de calcul de l'arbre de Steiner euclidien.
- *
- * ALGORITHME POUR 4 POINTS
- * ─────────────────────────
- * Un arbre de Steiner sur n terminaux peut contenir au plus n−2 points de Steiner.
- * Pour n=4, on énumère exhaustivement les 16 topologies candidates :
- *
- *   • 0 point de Steiner  ( 1 topologie) : arbre couvrant minimal (MST)
- *   • 1 point de Steiner  (12 topologies): triplet → point de Fermat,
- *                                          le 4e terminal se raccorde à l'un des 3 autres
- *   • 2 points de Steiner ( 3 topologies): partition {a,b}|{c,d},
- *                                          S1 et S2 optimisés par Weiszfeld alterné
- *
- * La topologie de longueur minimale valide est retournée.
- *
- * ALGORITHME POUR N >= 5 POINTS
- * ──────────────────────────────
- * Heuristique d'insertion itérative de points de Fermat :
- * Partir du MST puis insérer des points de Steiner (Fermat) là où ils
- * réduisent la longueur totale, jusqu'à convergence.
- */
 @Service
 public class SteinerTreeService {
 
+    /**
+     * Computes the Euclidean Steiner tree for the given terminal points.
+     *
+     * @param points list of terminal points (minimum 2)
+     * @return the Steiner tree result containing edges and optional Steiner points
+     * @throws IllegalArgumentException if fewer than 2 points are provided
+     */
     public SteinerResult solve(List<Point> points) {
         if (points == null || points.size() < 2) {
             throw new IllegalArgumentException("At least 2 points are required");
@@ -50,10 +35,9 @@ public class SteinerTreeService {
         }
     }
 
-    // =========================================================================
-    // 2 POINTS : segment direct
-    // =========================================================================
-
+    /**
+     * Returns a direct edge between the two terminal points.
+     */
     private SteinerResult solveForTwoPoints(List<Point> points) {
         SteinerResult result = new SteinerResult();
         result.setTerminalPoints(points);
@@ -61,12 +45,10 @@ public class SteinerTreeService {
         return result;
     }
 
-    // =========================================================================
-    // 3 POINTS : point de Fermat-Torricelli
-    // Si un angle >= 120°, ce sommet est le point optimal (pas de Steiner utile).
-    // Sinon, le point de Fermat divise les 3 arêtes à exactement 120°.
-    // =========================================================================
-
+    /**
+     * Computes the Steiner tree for 3 points using the Fermat-Torricelli point.
+     * If any angle is at least 120°, that vertex is used directly as the hub.
+     */
     private SteinerResult solveForThreePoints(List<Point> points) {
         SteinerResult result = new SteinerResult();
         result.setTerminalPoints(points);
@@ -97,10 +79,10 @@ public class SteinerTreeService {
         return result;
     }
 
-    // =========================================================================
-    // 4 POINTS : énumération complète des 16 topologies
-    // =========================================================================
-
+    /**
+     * Computes the Steiner tree for 4 points by exhaustive enumeration of all
+     * valid topologies (0, 1, or 2 Steiner points) and returns the shortest one.
+     */
     private SteinerResult solveForFourPoints(List<Point> points) {
         Point[] p = {
             points.get(0), points.get(1),
@@ -111,14 +93,6 @@ public class SteinerTreeService {
         best.setTerminalPoints(points);
         double bestLength = best.getTotalLength();
 
-        // ── 1 point de Steiner : 4 triplets × 3 attaches = 12 topologies ────
-        //
-        // Structure :
-        //   S = Fermat(triplet[0], triplet[1], triplet[2])
-        //   terminal lone → terminal attach  (attach ∈ triplet)
-        //
-        // IMPORTANT : le terminal lone se connecte à UN TERMINAL du triplet,
-        // PAS au point de Steiner. Un point de Steiner n'a que 3 arêtes (120°).
         int[][] triplets = { {0,1,2}, {0,1,3}, {0,2,3}, {1,2,3} };
         int[]   lones    = {  3,       2,       1,       0       };
 
@@ -128,7 +102,7 @@ public class SteinerTreeService {
 
             Point ta = p[tri[0]], tb = p[tri[1]], tc = p[tri[2]];
             Point fermat = computeFermatPoint(ta, tb, tc);
-            if (fermat == null) continue;   // triplet colinéaire, topologie invalide
+            if (fermat == null) continue;
 
             boolean atVertex = fermat.distanceTo(ta) < 1e-8
                             || fermat.distanceTo(tb) < 1e-8
@@ -153,13 +127,6 @@ public class SteinerTreeService {
             }
         }
 
-        // ── 2 points de Steiner : 3 partitions en 2 paires ──────────────────
-        //
-        // Structure (exemple partition {0,1}|{2,3}) :
-        //   S1 connecté à T0, T1, S2   (angles 120°)
-        //   S2 connecté à T2, T3, S1   (angles 120°)
-        //
-        // Optimisation par itérations de Weiszfeld alternées (sans dépendance externe).
         int[][][] partitions = {
             {{0, 1}, {2, 3}},
             {{0, 2}, {1, 3}},
@@ -183,21 +150,13 @@ public class SteinerTreeService {
         return best;
     }
 
-    // =========================================================================
-    // OPTIMISATION DES 2 POINTS DE STEINER
-    //
-    // Topologie : S1 ↔ {Ta, Tb, S2}    S2 ↔ {Tc, Td, S1}
-    //
-    // On minimise f(S1,S2) = d(S1,Ta)+d(S1,Tb)+d(S1,S2)+d(S2,Tc)+d(S2,Td)
-    //
-    // Algorithme : Weiszfeld alterné (coordinate descent).
-    //   1. Fixer S2, mettre à jour S1 = Weber({Ta, Tb, S2}) par Weiszfeld
-    //   2. Fixer S1, mettre à jour S2 = Weber({Tc, Td, S1}) par Weiszfeld
-    //   3. Répéter jusqu'à convergence
-    //
-    // Plusieurs initialisations pour éviter les minima locaux.
-    // =========================================================================
-
+    /**
+     * Evaluates a topology with two Steiner points S1 and S2 where
+     * S1 connects to {Ta, Tb, S2} and S2 connects to {Tc, Td, S1}.
+     * Uses alternating Weiszfeld iterations with multiple starting points.
+     *
+     * @return the best result found, or {@code null} if the topology is invalid
+     */
     private SteinerResult evalTwoSteinerTopology(Point[] p, int a, int b, int c, int d) {
         Point ta = p[a], tb = p[b], tc = p[c], td = p[d];
 
@@ -208,17 +167,12 @@ public class SteinerTreeService {
         double mcdX = (tc.getX() + td.getX()) / 2.0;
         double mcdY = (tc.getY() + td.getY()) / 2.0;
 
-        // 4 points de départ différents
         double[][] inits = {
-            // Init 1 : milieux des deux paires
             { mabX, mabY, mcdX, mcdY },
-            // Init 2 : milieux décalés vers le centroïde
             { (mabX * 2 + mcdX) / 3.0, (mabY * 2 + mcdY) / 3.0,
               (mcdX * 2 + mabX) / 3.0, (mcdY * 2 + mabY) / 3.0 },
-            // Init 3 : centroïde ± perturbation vers chaque paire
             { (ta.getX() + tb.getX() + cx) / 3.0, (ta.getY() + tb.getY() + cy) / 3.0,
               (tc.getX() + td.getX() + cx) / 3.0, (tc.getY() + td.getY() + cy) / 3.0 },
-            // Init 4 : décalé vers les terminaux respectifs
             { 0.65 * ta.getX() + 0.35 * cx, 0.65 * ta.getY() + 0.35 * cy,
               0.65 * tc.getX() + 0.35 * cx, 0.65 * tc.getY() + 0.35 * cy }
         };
@@ -252,7 +206,6 @@ public class SteinerTreeService {
         double s1x = bestCoords[0], s1y = bestCoords[1];
         double s2x = bestCoords[2], s2y = bestCoords[3];
 
-        // Validation : points de Steiner non confondus avec terminaux/entre eux
         double scale = maxPairDistance(ta, tb, tc, td);
         double eps   = Math.max(1e-8, 1e-4 * scale);
 
@@ -262,7 +215,6 @@ public class SteinerTreeService {
             if (dist(s2x, s2y, t.getX(), t.getY()) < eps) return null;
         }
 
-        // Validation des angles ≈ 120° aux deux points de Steiner
         Point s1 = new Point(s1x, s1y);
         Point s2 = new Point(s2x, s2y);
         if (!checkAngles120(s1, ta, tb, s2)) return null;
@@ -280,12 +232,9 @@ public class SteinerTreeService {
     }
 
     /**
-     * Optimise S1 et S2 par itérations de Weiszfeld alternées.
+     * Optimizes S1 and S2 using alternating Weiszfeld (coordinate descent) iterations.
      *
-     * Chaque étape :
-     *   S1 ← Weber({Ta, Tb, S2}) :  S1 = (Ta/d(S1,Ta) + Tb/d(S1,Tb) + S2/d(S1,S2))
-     *                                     / (1/d(S1,Ta) + 1/d(S1,Tb) + 1/d(S1,S2))
-     *   S2 ← Weber({Tc, Td, S1}) :  même formule avec Tc, Td, S1
+     * @return {@code double[]{s1x, s1y, s2x, s2y}} after convergence
      */
     private double[] optimizeTwoSteiner(
             Point ta, Point tb, Point tc, Point td,
@@ -295,7 +244,6 @@ public class SteinerTreeService {
             double ps1x = s1x, ps1y = s1y;
             double ps2x = s2x, ps2y = s2y;
 
-            // Mise à jour de S1 : Weber({Ta, Tb, S2})
             double d1a  = dist(s1x, s1y, ta.getX(), ta.getY());
             double d1b  = dist(s1x, s1y, tb.getX(), tb.getY());
             double d1s2 = dist(s1x, s1y, s2x, s2y);
@@ -306,7 +254,6 @@ public class SteinerTreeService {
             s1x = (ta.getX() * w1a + tb.getX() * w1b + s2x * w1s2) / ws1;
             s1y = (ta.getY() * w1a + tb.getY() * w1b + s2y * w1s2) / ws1;
 
-            // Mise à jour de S2 : Weber({Tc, Td, S1})
             double d2c  = dist(s2x, s2y, tc.getX(), tc.getY());
             double d2d  = dist(s2x, s2y, td.getX(), td.getY());
             double d2s1 = dist(s2x, s2y, s1x, s1y);
@@ -317,7 +264,6 @@ public class SteinerTreeService {
             s2x = (tc.getX() * w2c + td.getX() * w2d + s1x * w2s1) / ws2;
             s2y = (tc.getY() * w2c + td.getY() * w2d + s1y * w2s1) / ws2;
 
-            // Critère de convergence
             if (Math.abs(s1x - ps1x) < 1e-10 && Math.abs(s1y - ps1y) < 1e-10
              && Math.abs(s2x - ps2x) < 1e-10 && Math.abs(s2y - ps2y) < 1e-10) {
                 break;
@@ -327,14 +273,10 @@ public class SteinerTreeService {
         return new double[]{ s1x, s1y, s2x, s2y };
     }
 
-    // =========================================================================
-    // UTILITAIRES GÉOMÉTRIQUES
-    // =========================================================================
-
     /**
-     * Point de Fermat-Torricelli de trois points par itérations de Weiszfeld.
-     * Retourne null si les points sont colinéaires.
-     * Retourne directement le sommet si son angle est >= 120°.
+     * Computes the Fermat-Torricelli point of three points using Weiszfeld iterations.
+     * Returns the vertex directly if one of its angles is at least 120°.
+     * Returns {@code null} if the points are collinear.
      */
     private Point computeFermatPoint(Point p1, Point p2, Point p3) {
         double threshold = Math.toRadians(120.0) - 1e-9;
@@ -342,7 +284,6 @@ public class SteinerTreeService {
         if (calculateAngle(p1, p2, p3) >= threshold) return p2;
         if (calculateAngle(p1, p3, p2) >= threshold) return p3;
 
-        // Triangle plat → pas de point de Fermat défini
         double cross = (p2.getX() - p1.getX()) * (p3.getY() - p1.getY())
                      - (p2.getY() - p1.getY()) * (p3.getX() - p1.getX());
         if (Math.abs(cross) < 1e-10) return null;
@@ -373,7 +314,9 @@ public class SteinerTreeService {
         return new Point(x, y);
     }
 
-    /** Angle en b dans le triangle (a, b, c). */
+    /**
+     * Returns the angle at vertex {@code b} in the triangle (a, b, c), in radians.
+     */
     private double calculateAngle(Point a, Point b, Point c) {
         double bax = a.getX() - b.getX(), bay = a.getY() - b.getY();
         double bcx = c.getX() - b.getX(), bcy = c.getY() - b.getY();
@@ -384,8 +327,8 @@ public class SteinerTreeService {
     }
 
     /**
-     * Vérifie que les 3 arêtes du point de Steiner s (vers n1, n2, n3)
-     * forment des angles d'environ 120° (tolérance ± 10°).
+     * Checks that the three edges at Steiner point {@code s} form angles of approximately 120°
+     * (tolerance ±10°).
      */
     private boolean checkAngles120(Point s, Point n1, Point n2, Point n3) {
         double tol    = Math.toRadians(10.0);
@@ -400,6 +343,7 @@ public class SteinerTreeService {
         return Math.sqrt(dx * dx + dy * dy);
     }
 
+    /** Returns the maximum pairwise distance among the four given points. */
     private double maxPairDistance(Point ta, Point tb, Point tc, Point td) {
         Point[] pts = { ta, tb, tc, td };
         double max = 0;
@@ -409,18 +353,10 @@ public class SteinerTreeService {
         return max;
     }
 
-    // =========================================================================
-    // 5 POINTS : énumération complète de toutes les topologies candidates
-    //
-    // Au plus k = n-2 = 3 points de Steiner. Structures explorées :
-    //
-    //   k=0  MST (1 topologie)
-    //   k=1  Fermat(triplet) + 2 terminaux restants raccordés (~150 topologies)
-    //   k=2  Type I  : S0–S1 directs + queue (~60 topologies)
-    //        Type II : S0–T_milieu–S1 indépendants (15 topologies, Fermat exact)
-    //   k=3  Chaîne S0–S1–S2 (15 topologies, seule structure valide pour n=5,k=3)
-    // =========================================================================
-
+    /**
+     * Computes the Steiner tree for 5 points by exhaustive enumeration of all
+     * topologies with 0, 1, 2, or 3 Steiner points.
+     */
     private SteinerResult solveForFivePoints(List<Point> points) {
         Point[] p = {
             points.get(0), points.get(1), points.get(2),
@@ -431,21 +367,17 @@ public class SteinerTreeService {
         best.setTerminalPoints(points);
         double bestLen = best.getTotalLength();
 
-        // Tous les triplets C(5,3) = 10
         int[][] triplets = {
             {0,1,2},{0,1,3},{0,1,4},
             {0,2,3},{0,2,4},{0,3,4},
             {1,2,3},{1,2,4},{1,3,4},
             {2,3,4}
         };
-        // 3 partitions non ordonnées de {core[0..3]} en 2 paires
-        // PP[t] = {a,b,c,d} → paire1=(core[a],core[b]), paire2=(core[c],core[d])
         int[][] PP = {{0,1,2,3},{0,2,1,3},{0,3,1,2}};
 
         double scale5 = maxPairDist5(p);
         double eps5   = Math.max(1e-6, 1e-3 * scale5);
 
-        // ── k=1 ─────────────────────────────────────────────────────────────
         for (int[] tri : triplets) {
             int ti0=tri[0], ti1=tri[1], ti2=tri[2];
             int[] ln = lonesOf5(tri);
@@ -458,7 +390,6 @@ public class SteinerTreeService {
                          || fermat.distanceTo(p[ti1]) < 1e-6
                          || fermat.distanceTo(p[ti2]) < 1e-6;
 
-            // l0 → n0 ∈ triplet, l1 → n1 ∈ {triplet ∪ {l0}}
             for (int a0 : tri) {
                 for (int a1 : new int[]{ti0, ti1, ti2, l0}) {
                     SteinerResult c = new SteinerResult();
@@ -472,7 +403,6 @@ public class SteinerTreeService {
                     if (c.getTotalLength() < bestLen) { best=c; bestLen=c.getTotalLength(); }
                 }
             }
-            // Variante chaîne inversée : l1 → triplet, l0 → l1
             for (int a1 : tri) {
                 SteinerResult c = new SteinerResult();
                 c.setTerminalPoints(points);
@@ -486,9 +416,6 @@ public class SteinerTreeService {
             }
         }
 
-        // ── k=2 Type I : S0–S1 directs + queue ──────────────────────────────
-        // S0 voisins : {pa, pb, S1}  ; S1 voisins : {pc, pd, S0}
-        // Le terminal "tail" se raccorde à un terminal "att" du cœur.
         for (int tail = 0; tail < 5; tail++) {
             int[] core = coreOf5(tail);
             for (int[] pp : PP) {
@@ -512,7 +439,6 @@ public class SteinerTreeService {
                 if (bestCoords == null) continue;
                 double s0x=bestCoords[0],s0y=bestCoords[1];
                 double s1x=bestCoords[2],s1y=bestCoords[3];
-                // Validation : Steiner points non confondus
                 if (dist(s0x,s0y,s1x,s1y) < eps5) continue;
                 boolean s0Bad=false, s1Bad=false;
                 for (int idx : new int[]{pa,pb,pc,pd,tail}) {
@@ -520,7 +446,6 @@ public class SteinerTreeService {
                     if (dist(s1x,s1y,p[idx].getX(),p[idx].getY()) < eps5) s1Bad=true;
                 }
                 if (s0Bad || s1Bad) continue;
-                // Essayer chaque point d'attache pour la queue
                 for (int att : core) {
                     double totalLen = bestSubLen + p[tail].distanceTo(p[att]);
                     if (totalLen < bestLen) {
@@ -539,9 +464,6 @@ public class SteinerTreeService {
             }
         }
 
-        // ── k=2 Type II : S0–T_milieu–S1 ────────────────────────────────────
-        // S0 = Fermat(pa, pb, mid)  et  S1 = Fermat(pc, pd, mid) sont indépendants
-        // car ils ne partagent que T_mid, un terminal fixé.
         for (int mid = 0; mid < 5; mid++) {
             int[] oth = coreOf5(mid);
             for (int[] pp : PP) {
@@ -567,9 +489,6 @@ public class SteinerTreeService {
             }
         }
 
-        // ── k=3 : chaîne S0–S1–S2 (15 topologies) ───────────────────────────
-        // Seule structure arborescente à 3 Steiner sur 5 terminaux.
-        // 5 choix pour le terminal milieu T_tc × C(4,2)/2 = 3 partitions.
         for (int tc = 0; tc < 5; tc++) {
             int[] lv = coreOf5(tc);
             for (int[] pp : PP) {
@@ -583,8 +502,12 @@ public class SteinerTreeService {
         return best;
     }
 
-    // ── Évaluation de la topologie k=3 (chaîne S0–S1–S2) ────────────────────
-    // S0 ↔ {pa, pb, S1}  ;  S1 ↔ {S0, tc, S2}  ;  S2 ↔ {S1, pd, pe}
+    /**
+     * Evaluates the chain topology S0–S1–S2 for 5 terminals where
+     * S0 connects to {Ta, Tb, S1}, S1 connects to {S0, Tc, S2}, and S2 connects to {S1, Td, Te}.
+     *
+     * @return the optimized result, or {@code null} if the topology is invalid
+     */
     private SteinerResult evalThreeSteiner5(Point[] p,
             int pa, int pb, int tc, int pd, int pe,
             List<Point> allPoints, double eps) {
@@ -599,13 +522,10 @@ public class SteinerTreeService {
         Point f2 = computeFermatPoint(td, te, tmid);
 
         double[][] inits = {
-            // Init 1 : milieux des paires + centroïde global pour S1
             {mabx,maby,  gx,gy,  mdex,mdey},
-            // Init 2 : Fermat des sous-problèmes
             {f0!=null?f0.getX():mabx, f0!=null?f0.getY():maby,
              gx, gy,
              f2!=null?f2.getX():mdex, f2!=null?f2.getY():mdey},
-            // Init 3 : décalé vers les terminaux respectifs depuis le centroïde
             {(ta.getX()+gx)/2,(ta.getY()+gy)/2,
              (tmid.getX()+gx)/2,(tmid.getY()+gy)/2,
              (td.getX()+gx)/2,(td.getY()+gy)/2}
@@ -635,7 +555,6 @@ public class SteinerTreeService {
         double s1x=bestCoords[2],s1y=bestCoords[3];
         double s2x=bestCoords[4],s2y=bestCoords[5];
 
-        // Validation : aucun Steiner confondu
         if (dist(s0x,s0y,s1x,s1y)<eps || dist(s1x,s1y,s2x,s2y)<eps
          || dist(s0x,s0y,s2x,s2y)<eps) return null;
         for (Point t : new Point[]{ta,tb,tmid,td,te}) {
@@ -657,8 +576,9 @@ public class SteinerTreeService {
     }
 
     /**
-     * Weiszfeld alterné pour la chaîne S0–S1–S2 :
-     *   S0 ← Weber(ta, tb, S1)   S1 ← Weber(S0, tc, S2)   S2 ← Weber(S1, td, te)
+     * Optimizes the three Steiner points S0, S1, S2 using alternating Weiszfeld iterations.
+     *
+     * @return {@code double[]{s0x, s0y, s1x, s1y, s2x, s2y}} after convergence
      */
     private double[] optimizeThreeSteiner(
             Point ta, Point tb, Point tc, Point td, Point te,
@@ -667,7 +587,6 @@ public class SteinerTreeService {
         for (int iter = 0; iter < 50_000; iter++) {
             double ps0x=s0x,ps0y=s0y,ps1x=s1x,ps1y=s1y,ps2x=s2x,ps2y=s2y;
 
-            // S0 ← Weber(ta, tb, S1)
             double d0a=dist(s0x,s0y,ta.getX(),ta.getY());
             double d0b=dist(s0x,s0y,tb.getX(),tb.getY());
             double d0s1=dist(s0x,s0y,s1x,s1y);
@@ -676,7 +595,6 @@ public class SteinerTreeService {
             s0x=(ta.getX()/d0a+tb.getX()/d0b+s1x/d0s1)/wt0;
             s0y=(ta.getY()/d0a+tb.getY()/d0b+s1y/d0s1)/wt0;
 
-            // S1 ← Weber(S0, tc, S2)
             double d1s0=dist(s1x,s1y,s0x,s0y);
             double d1c=dist(s1x,s1y,tc.getX(),tc.getY());
             double d1s2=dist(s1x,s1y,s2x,s2y);
@@ -685,7 +603,6 @@ public class SteinerTreeService {
             s1x=(s0x/d1s0+tc.getX()/d1c+s2x/d1s2)/wt1;
             s1y=(s0y/d1s0+tc.getY()/d1c+s2y/d1s2)/wt1;
 
-            // S2 ← Weber(S1, td, te)
             double d2s1=dist(s2x,s2y,s1x,s1y);
             double d2d=dist(s2x,s2y,td.getX(),td.getY());
             double d2e=dist(s2x,s2y,te.getX(),te.getY());
@@ -701,7 +618,7 @@ public class SteinerTreeService {
         return new double[]{s0x,s0y,s1x,s1y,s2x,s2y};
     }
 
-    /** Retourne les 2 indices de {0..4} non présents dans le triplet. */
+    /** Returns the 2 indices in {0..4} not present in the given triplet. */
     private int[] lonesOf5(int[] triplet) {
         int[] lones = new int[2]; int k=0;
         outer: for (int i=0; i<5; i++) {
@@ -711,14 +628,14 @@ public class SteinerTreeService {
         return lones;
     }
 
-    /** Retourne les 4 indices de {0..4} différents de excl. */
+    /** Returns the 4 indices in {0..4} that are not equal to {@code excl}. */
     private int[] coreOf5(int excl) {
         int[] core = new int[4]; int k=0;
         for (int i=0; i<5; i++) if (i!=excl) core[k++]=i;
         return core;
     }
 
-    /** Plus grande distance entre deux points du tableau. */
+    /** Returns the maximum pairwise distance among the given points. */
     private double maxPairDist5(Point[] p) {
         double max=0;
         for (int i=0; i<p.length; i++)
@@ -727,7 +644,7 @@ public class SteinerTreeService {
         return max;
     }
 
-    /** Initialisations pour l'optimisation de 2 points de Steiner. */
+    /** Returns multiple starting points for the two-Steiner optimization. */
     private double[][] twoSteinerInits(Point ta, Point tb, Point tc, Point td) {
         double mabX=(ta.getX()+tb.getX())/2, mabY=(ta.getY()+tb.getY())/2;
         double mcdX=(tc.getX()+td.getX())/2, mcdY=(tc.getY()+td.getY())/2;
@@ -743,61 +660,28 @@ public class SteinerTreeService {
         };
     }
 
-    // =========================================================================
-    // N >= 6 POINTS : heuristique de Steiner par insertion itérative de points
-    // de Fermat
-    //
-    // Algorithme déterministe en trois phases :
-    //
-    //   Phase 1 – Initialisation par le MST
-    //     Construire l'arbre couvrant minimal des n terminaux.
-    //     Le MST est une 2-approximation de l'arbre de Steiner.
-    //
-    //   Phase 2 – Insertion itérative de points de Steiner
-    //     Pour chaque paire d'arêtes (v,a) et (v,b) partageant un nœud v :
-    //       a. Calculer F = point de Fermat de (a, v, b)
-    //       b. Si d(F,a) + d(F,v) + d(F,b) < d(v,a) + d(v,b)
-    //          → Retirer arêtes (v,a) et (v,b)
-    //          → Ajouter arêtes (F,a), (F,v), (F,b)
-    //          → Enregistrer F comme point de Steiner
-    //     Répéter jusqu'à convergence (aucune amélioration possible).
-    //
-    //   Phase 3 – Construction du résultat
-    //     Retourner les arêtes et les points de Steiner insérés.
-    //
-    // Propriétés :
-    //   • Déterministe — pas de hasard, convergence garantie
-    //   • Longueur résultante ≤ longueur MST
-    //   • La propriété 120° est satisfaite aux points de Steiner insérés
-    //   • Complexité : O(n² × passes) — pratique pour n ≤ quelques centaines
-    // =========================================================================
-
+    /**
+     * Heuristic Steiner tree for n ≥ 6 points.
+     * Starts from the MST and iteratively inserts Fermat points where they reduce total length.
+     */
     private SteinerResult solveWithSteinerHeuristic(List<Point> points) {
         int n = points.size();
 
-        // Représentation de travail (les terminaux occupent les indices 0..n-1)
         List<double[]> nodes = new ArrayList<>();
         for (Point p : points) nodes.add(new double[]{p.getX(), p.getY()});
 
-        // Échelle du problème = plus grande distance entre deux terminaux.
-        // Sert à définir des seuils relatifs à la géométrie réelle.
         double scale = 0;
         for (int i = 0; i < n; i++)
             for (int j = i + 1; j < n; j++)
                 scale = Math.max(scale, distXY(nodes.get(i), nodes.get(j)));
         if (scale < 1e-9) scale = 1.0;
 
-        // Séparation minimale entre deux points de Steiner (1 % de l'échelle,
-        // minimum 1 unité). En-dessous de ce seuil, deux points sont
-        // considérés comme confondus → on évite les doublons visuels.
         final double minSep = Math.max(1.0, scale * 0.01);
 
-        // Phase 1 : MST initial
         List<int[]> edges = buildMSTEdgeIndices(nodes);
 
-        // Phase 2 : Insertion itérative de points de Fermat
         boolean improved = true;
-        int maxPasses = 5 * n; // Limite de sécurité
+        int maxPasses = 5 * n;
 
         while (improved && maxPasses-- > 0) {
             improved = false;
@@ -825,15 +709,8 @@ public class SteinerTreeService {
                         double newCost    = distXY(F, pa)  + distXY(F, pv) + distXY(F, pb);
                         double improvement = oldCost - newCost;
 
-                        // Seuil absolu ET relatif : l'amélioration doit
-                        // représenter au moins 0,05 % du coût courant.
                         if (improvement < Math.max(1e-6, oldCost * 5e-4)) continue;
 
-                        // F ne doit pas être confondu avec un AUTRE POINT DE STEINER
-                        // existant. On tolère que F soit près d'un terminal (cela
-                        // correspond à un Steiner dégénéré → topologie sous-optimale,
-                        // mais la longueur est correcte). On refuse uniquement les
-                        // doublons de points de Steiner (indices >= n).
                         boolean tooClose = false;
                         for (int ndIdx = n; ndIdx < nodes.size(); ndIdx++) {
                             if (distXY(F, nodes.get(ndIdx)) < minSep) {
@@ -857,7 +734,6 @@ public class SteinerTreeService {
             }
         }
 
-        // Phase 3 : Construction du résultat
         SteinerResult result = new SteinerResult();
         result.setTerminalPoints(points);
 
@@ -875,9 +751,6 @@ public class SteinerTreeService {
         return result;
     }
 
-    // ── Helpers pour l'heuristique ────────────────────────────────────────────
-
-    /** MST de Prim sur une liste de nœuds. Retourne les arêtes comme paires d'indices. */
     private List<int[]> buildMSTEdgeIndices(List<double[]> nodes) {
         int n = nodes.size();
         boolean[] inMST  = new boolean[n];
@@ -907,7 +780,6 @@ public class SteinerTreeService {
         return edgeList;
     }
 
-    /** Construit la liste d'adjacence à partir d'une liste d'arêtes (paires d'indices). */
     private Map<Integer, List<Integer>> buildAdj(int n, List<int[]> edges) {
         Map<Integer, List<Integer>> adj = new HashMap<>();
         for (int[] e : edges) {
@@ -917,24 +789,15 @@ public class SteinerTreeService {
         return adj;
     }
 
-    /** Supprime l'arête non-orientée (u, v) de la liste. */
     private void removeEdgeFromList(List<int[]> edges, int u, int v) {
         edges.removeIf(e -> (e[0] == u && e[1] == v) || (e[0] == v && e[1] == u));
     }
 
-    /** Distance euclidienne entre deux points 2D (tableaux double[2]). */
     private double distXY(double[] a, double[] b) {
         double dx = a[0] - b[0], dy = a[1] - b[1];
         return Math.sqrt(dx * dx + dy * dy);
     }
 
-    /**
-     * Point de Fermat-Torricelli de trois points 2D (tableaux double[2]).
-     *
-     * Si un angle du triangle est >= 120°, ce sommet est retourné.
-     * Si le triangle est dégénéré, retourne null.
-     * Sinon, calcule par itérations de Weiszfeld depuis le centroïde.
-     */
     private double[] fermat2D(double[] a, double[] b, double[] c) {
         if (angleDeg2D(b, a, c) >= 120.0 - 1e-6) return a.clone();
         if (angleDeg2D(a, b, c) >= 120.0 - 1e-6) return b.clone();
@@ -961,7 +824,6 @@ public class SteinerTreeService {
         return f;
     }
 
-    /** Angle en degrés au sommet {@code vertex} dans le triangle (a, vertex, c). */
     private double angleDeg2D(double[] a, double[] vertex, double[] c) {
         double[] va = {a[0]-vertex[0], a[1]-vertex[1]};
         double[] vc = {c[0]-vertex[0], c[1]-vertex[1]};
@@ -970,10 +832,6 @@ public class SteinerTreeService {
         if (mag < 1e-15) return 0;
         return Math.toDegrees(Math.acos(Math.max(-1.0, Math.min(1.0, dot / mag))));
     }
-
-    // =========================================================================
-    // MST — algorithme de Prim pour n >= 5 points (utilisé en interne)
-    // =========================================================================
 
     private SteinerResult solveWithMST(List<Point> points) {
         SteinerResult result = new SteinerResult();
