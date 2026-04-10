@@ -1,5 +1,10 @@
+<app-presentation
+  *ngIf="showPresentation"
+  (closePres)="showPresentation = false">
+</app-presentation>
+
 <div class="app-container">
-  <app-header></app-header>
+  <app-header (openPresentation)="showPresentation = true"></app-header>
   <main class="main-content">
     <div class="content-wrapper">
       <!-- Canvas Principal -->

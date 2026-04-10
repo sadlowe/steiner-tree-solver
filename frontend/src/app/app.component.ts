@@ -9,6 +9,7 @@ import { ControlsComponent } from './components/controls/controls.component';
 import { InfoPanelComponent } from './components/info-panel/info-panel.component';
 import { HeaderComponent } from './components/header/header.component';
 import { FooterComponent } from './components/footer/footer.component';
+import { PresentationComponent } from './components/presentation/presentation.component';
 
 export type ConnectionMode = 'naive' | 'mst' | 'steiner';
 
@@ -22,6 +23,7 @@ export type ConnectionMode = 'naive' | 'mst' | 'steiner';
     InfoPanelComponent,
     HeaderComponent,
     FooterComponent,
+    PresentationComponent,
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
@@ -29,6 +31,7 @@ export type ConnectionMode = 'naive' | 'mst' | 'steiner';
 export class AppComponent implements OnDestroy {
 
   title = 'Steiner Tree Solver';
+  showPresentation = false;
 
   terminalPoints: Point[] = [];
   selectedMode: ConnectionMode = 'steiner';
