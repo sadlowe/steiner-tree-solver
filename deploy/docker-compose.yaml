@@ -1,12 +1,8 @@
-version: '3.8'
-
 services:
   backend:
     image: ghcr.io/sadlowe/steiner-tree-solver-backend:1.0.0
     restart: unless-stopped
     pull_policy: if_not_present
-    env_file:
-      - .env
     networks:
       - steiner-net
     expose:
