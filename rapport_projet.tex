@@ -1,0 +1,453 @@
+\documentclass[11pt, a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{geometry}
+\usepackage{amsmath, amssymb}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{parskip}
+\usepackage{tcolorbox}
+\usepackage{colortbl}
+\usepackage{titletoc}
+
+\geometry{margin=1.8cm, top=2.2cm, bottom=2.2cm}
+
+% ── Couleurs ────────────────────────────────────────────────────
+\definecolor{bleu}{RGB}{20, 90, 180}
+\definecolor{bleuClair}{RGB}{220, 232, 255}
+\definecolor{bleuFonce}{RGB}{12, 60, 130}
+\definecolor{vert}{RGB}{25, 130, 70}
+\definecolor{vertClair}{RGB}{215, 248, 228}
+\definecolor{gris}{RGB}{65, 65, 65}
+\definecolor{grisClair}{RGB}{246, 246, 246}
+\definecolor{orange}{RGB}{195, 95, 15}
+\definecolor{orangeClair}{RGB}{255, 238, 215}
+\definecolor{violet}{RGB}{110, 35, 155}
+\definecolor{violetClair}{RGB}{240, 225, 255}
+
+\hypersetup{colorlinks=true, linkcolor=bleuFonce, urlcolor=bleu, citecolor=vert}
+
+% ── Titres ──────────────────────────────────────────────────────
+\titleformat{\section}{\normalsize\bfseries\color{bleuFonce}}{\thesection.}{0.5em}{}[\color{bleu}\titlerule]
+\titleformat{\subsection}{\small\bfseries\color{gris}}{\textcolor{bleu}{\thesubsection}}{0.4em}{}
+\titlespacing{\section}{0pt}{7pt}{3pt}
+\titlespacing{\subsection}{0pt}{5pt}{1pt}
+
+% ── En-tête / pied de page ──────────────────────────────────────
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{\scriptsize\color{gris} Arbre de Steiner — Rapport de projet}
+\lhead{\scriptsize\color{gris} Algorithmes 2 — Polytech Nice Sophia — SI4}
+\rfoot{\scriptsize\color{gris} \thepage}
+\lfoot{\scriptsize\color{gris} AMEDIAZ $\cdot$ BENAQA $\cdot$ ALAOUI KASMI}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+
+\setlist[itemize]{itemsep=1pt, topsep=2pt, leftmargin=*}
+\setlength{\parskip}{3pt}
+
+% ── Boîtes légères ──────────────────────────────────────────────
+\tcbuselibrary{skins}
+\newtcolorbox{cadre}[2]{
+  colback=#2, colframe=#1,
+  left=4pt, right=4pt, top=3pt, bottom=3pt, arc=3pt,
+  fontupper=\small
+}
+
+% ================================================================
+\begin{document}
+% ================================================================
+%  PAGE DE TITRE
+% ================================================================
+\thispagestyle{empty}
+\vspace*{0.5cm}
+
+\noindent
+\begin{tcolorbox}[
+  enhanced, arc=0pt,
+  colback=bleuFonce, colframe=bleuFonce,
+  left=10pt, right=10pt, top=7pt, bottom=7pt
+]
+  \centering
+  {\small\bfseries\color{white} POLYTECH NICE SOPHIA}\\[2pt]
+  {\footnotesize\color{bleuClair} Département Sciences Informatiques — SI4}
+\end{tcolorbox}
+
+\vspace{2.2cm}
+\begin{center}
+  \textcolor{bleu}{\rule{0.12\textwidth}{0.5pt}}\;
+  \textcolor{bleu}{$\blacklozenge$}\;
+  \textcolor{bleu}{\rule{0.12\textwidth}{0.5pt}}\\[1em]
+  {\fontsize{21}{25}\selectfont\bfseries\color{bleuFonce} Arbre de Steiner et Bulles de Savon}\\[0.5em]
+  {\large\color{gris} Application web interactive de calcul et visualisation}\\[0.4em]
+  \textcolor{bleu}{\rule{0.12\textwidth}{0.5pt}}\;
+  \textcolor{bleu}{$\blacklozenge$}\;
+  \textcolor{bleu}{\rule{0.12\textwidth}{0.5pt}}\\[1.8em]
+
+  \begin{tcolorbox}[
+    enhanced, arc=5pt,
+    colback=grisClair, colframe=bleu,
+    width=0.7\textwidth, halign=center,
+    left=8pt, right=8pt, top=8pt, bottom=8pt
+  ]
+    \centering
+    {\normalsize\bfseries\color{bleuFonce} AMEDIAZ Hamid}\\[5pt]
+    {\normalsize\bfseries\color{bleuFonce} BENAQA Saad}\\[5pt]
+    {\normalsize\bfseries\color{bleuFonce} ALAOUI KASMI Anass}
+  \end{tcolorbox}
+
+  \vspace{1.8em}
+  \begin{tcolorbox}[
+    enhanced, arc=4pt,
+    colback=bleuClair, colframe=bleu,
+    width=0.7\textwidth, halign=center,
+    left=8pt, right=8pt, top=6pt, bottom=6pt
+  ]
+    \centering
+    {\small\bfseries Rapport de projet — Cours \textit{Algorithmes 2}}\\[4pt]
+    {\small Polytech Nice Sophia — SI4, Sciences Informatiques}\\[4pt]
+    {\small Année universitaire 2025/2026 \quad — \quad \today}
+  \end{tcolorbox}
+\end{center}
+
+\vspace{1.5em}
+\noindent\small{\bfseries Résumé.}\;
+Réalisation d'une application web interactive résolvant le problème de l'arbre de Steiner
+euclidien. Backend Java/Spring Boot avec algorithmes exacts pour 2 à 5 points et approximation
+MST pour $n \geq 6$ ; frontend Angular 19 pour la visualisation et la comparaison des solutions.
+
+\vspace{0.3em}
+\noindent\textcolor{bleu}{\rule{\textwidth}{0.5pt}}
+
+% ================================================================
+\newpage
+\thispagestyle{fancy}
+{\hypersetup{linkcolor=bleuFonce}\tableofcontents}
+
+% ================================================================
+\newpage
+\section{Présentation du projet et contexte}
+% ================================================================
+
+\subsection{Problème posé}
+
+Étant donné un ensemble de \textbf{villes dans le plan}, il s'agit de construire un
+\textbf{réseau routier de longueur totale minimale} reliant toutes les villes.
+On autorise l'ajout de \textbf{points de Steiner} — points intermédiaires sans ville correspondante —
+qui permettent de réduire la longueur totale du réseau.
+
+\begin{cadre}{bleu}{bleuClair}
+\textbf{Propriété fondamentale :} dans la solution optimale, chaque point de Steiner est
+à la jonction d'\textbf{exactement trois arêtes formant des angles de 120°}
+(point de Fermat-Torricelli — Gilbert \& Pollak, 1968~\cite{gilbert1968}).
+\end{cadre}
+
+\vspace{2pt}
+\textbf{Exemple :} pour 4 points en carré de côté 1, le MST donne une longueur de 3.
+La solution Steiner optimale atteint $1+\sqrt{3} \approx 2{,}732$, soit 9\,\% de mieux.
+
+\subsection{Lien avec les bulles de savon}
+
+Lorsqu'on plonge un cadre métallique avec des piques (représentant les villes) dans de l'eau
+savonneuse, les films de savon minimisent spontanément leur surface — ce qui revient, en 2D,
+à minimiser la longueur totale des lignes. Ils trouvent ainsi \textit{physiquement} les points
+de Steiner en respectant la règle des 120° (principe de Plateau). Ce lien entre physique,
+mathématiques et informatique est au cœur du sujet.
+
+\subsection{Formulation sur graphe}
+
+\textbf{Entrées :} graphe $G=(V,E)$, poids $\omega : E \to \mathbb{R}^+$, terminaux $T \subseteq V$.
+\textbf{Sortie :} sous-graphe connexe $H$ de $G$ avec $T \subseteq V(H)$ minimisant $\sum_{e \in E(H)} \omega(e)$.
+Ce problème est \textbf{NP-complet}. L'application implémente le MST (Prim, $O(n^2)$)
+comme approximation de facteur $\leq 2$ pour $n \geq 6$.
+
+% ================================================================
+\section{Organisation et gestion de projet}
+% ================================================================
+
+\subsection{Répartition du travail}
+
+Les trois membres ont contribué à \textbf{toutes les phases} du projet (algorithmes, frontend,
+rapport, slides). Des responsabilités principales ont structuré le travail.
+
+\vspace{3pt}
+\begin{center}
+\small\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}>{\bfseries\color{bleuFonce}}p{3.0cm} p{5.4cm} p{4.8cm}@{}}
+\toprule
+\rowcolor{bleuClair}
+\multicolumn{1}{@{}c}{\textbf{Membre}} &
+\multicolumn{1}{c}{\textbf{Responsabilité principale}} &
+\multicolumn{1}{c@{}}{\textbf{Contributions communes}} \\
+\midrule
+AMEDIAZ Hamid
+  & Algorithme 4 pts (16 topologies, Weiszfeld alterné) ;
+    intégration backend-frontend ; architecture ; gestion Git.
+  & Frontend Angular, algorithme 5 pts, rapport, slides. \\[3pt]
+\rowcolor{grisClair}
+BENAQA Saad
+  & Algorithme 5 pts ($\sim$241 topologies, chaîne S0--S1--S2) ;
+    scripts Python de validation ; présentation orale.
+  & Frontend Angular, algorithme 4 pts, rapport, slides. \\[3pt]
+ALAOUI KASMI Anass
+  & Frontend Angular — canvas, controls, info-panel, header, footer ;
+    design visuel et UX ; modes naïf/MST/Steiner ;
+    co-implémentation des algorithmes Weiszfeld (cas 3 pts).
+  & Algorithmes 4 et 5 pts, backend, rapport, slides. \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Rôle de l'intelligence artificielle}
+
+\textbf{ChatGPT} a été utilisé comme assistant de développement, jamais comme auteur.
+Les idées, les choix technologiques (Angular, Spring Boot, Weiszfeld) et la conception
+algorithmique viennent entièrement de l'équipe. ChatGPT a accéléré l'implémentation de
+code répétitif (composants Angular, documentation) et servi de vérificateur lors du
+débogage. Tous les algorithmes ont été étudiés et validés manuellement avant intégration.
+
+\subsection{Méthodologie}
+
+Workflow Git structuré — une branche par fonctionnalité, pull requests avec revues croisées,
+fichier \texttt{ROADMAP.md} comme backlog partagé. Décisions techniques prises en sessions
+communes pour garantir la compréhension collective du projet.
+
+% ================================================================
+\section{Partie algorithmique}
+% ================================================================
+
+\subsection{Vue d'ensemble}
+
+\begin{center}
+\small\setlength{\tabcolsep}{5pt}
+\begin{tabular}{@{}cllc@{}}
+\toprule
+\rowcolor{bleuClair}
+$n$ & \textbf{Méthode} & \textbf{Type} & \textbf{Complexité} \\
+\midrule
+2 & Segment direct & Exact & $O(1)$ \\
+3 & Fermat-Torricelli (Weiszfeld) & Exact & $O(I)$ \\
+4 & Énumération — 16 topologies & Exact & $O(16 \cdot I)$ \\
+5 & Énumération — $\sim$241 topologies & Exact & $O(241 \cdot I)$ \\
+$\geq 6$ & MST — algorithme de Prim & Approx. ($\leq 2$) & $O(n^2)$ \\
+\bottomrule
+\end{tabular}\\[3pt]
+\scriptsize $I$ = itérations Weiszfeld (max 50\,000, critère $\|\Delta F\| < 10^{-10}$).
+\end{center}
+
+\subsection{Algorithme de Weiszfeld — 3 points}
+
+Pour trois terminaux $A, B, C$, le point $F^*$ minimisant $f(F) = d(F,A)+d(F,B)+d(F,C)$
+est le \textbf{point de Fermat-Torricelli}. Deux cas sont distingués :
+
+\begin{itemize}
+  \item \textbf{Cas dégénéré :} si un angle du triangle $ABC$ est $\geq 120°$,
+        le sommet correspondant est retourné directement (aucune itération nécessaire).
+  \item \textbf{Cas général :} l'itération de Weiszfeld part du centroïde et converge vers $F^*$ :
+\end{itemize}
+\[
+  F^{(k+1)}
+  = \frac{A/d_A^{(k)} + B/d_B^{(k)} + C/d_C^{(k)}}
+         {1/d_A^{(k)} + 1/d_B^{(k)} + 1/d_C^{(k)}}
+  \qquad d_i^{(k)} = \|F^{(k)} - P_i\|.
+\]
+La convergence est linéaire et garantie lorsque $F$ ne coïncide avec aucun terminal~\cite{weiszfeld1937}.
+En pratique, le critère d'arrêt $\|F^{(k+1)} - F^{(k)}\| < 10^{-10}$ est atteint en quelques
+centaines d'itérations pour des configurations non dégénérées.
+
+\subsection{Cas 4 points — 16 topologies}
+
+\begin{center}
+\small\setlength{\tabcolsep}{5pt}
+\begin{tabular}{@{}p{2.2cm} p{6cm} cc@{}}
+\toprule
+\textbf{Famille} & \textbf{Structure} & \textbf{Topologies} & \textbf{Méthode} \\
+\midrule
+0 Steiner & MST (Prim) & 1 & Prim \\
+1 Steiner & Fermat d'un triplet + terminal isolé & 12 & Weiszfeld \\
+2 Steiner & 2 paires de terminaux : $S_1 \leftrightarrow S_2$ & 3 & Weiszfeld alterné \\
+\midrule
+\textbf{Total} && \textbf{16} & \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Pour la famille 2 Steiner, les deux points sont optimisés par \textbf{descente de coordonnées alternée} :
+\[
+  S_1^{(k+1)} = \mathrm{Weber}(T_a,\, T_b,\, S_2^{(k)}),
+  \qquad
+  S_2^{(k+1)} = \mathrm{Weber}(T_c,\, T_d,\, S_1^{(k+1)}).
+\]
+Quatre initialisations distinctes sont testées pour éviter les minima locaux.
+Une topologie est rejetée si les angles aux points de Steiner s'écartent de plus de $10°$ de $120°$.
+\textbf{Validation numérique :} pour le carré unité $(0,0),(1,0),(1,1),(0,1)$,
+la longueur optimale $1+\sqrt{3}\approx2{,}732$ est retrouvée exactement par le backend Java,
+confirmée par le script Python indépendant.
+
+\subsection{Cas 5 points — $\sim$241 topologies}
+
+La borne $k \leq n-2 = 3$ (Gilbert \& Pollak) impose au plus 3 Steiner.
+L'unique structure valide à $k=3$ est la \textbf{chaîne} $S_0$–$S_1$–$S_2$.
+
+\begin{center}
+\small\setlength{\tabcolsep}{5pt}
+\begin{tabular}{@{}p{2.8cm} p{4.8cm} cc@{}}
+\toprule
+\textbf{Famille} & \textbf{Structure} & \textbf{Topologies} & \textbf{Méthode} \\
+\midrule
+0 Steiner & MST & 1 & Prim \\
+1 Steiner & Fermat(triplet) + 2 terminaux raccordés & $\approx$150 & Weiszfeld \\
+2 Steiner — Type I & $S_0$–$S_1$ + queue terminale & 60 & Weiszfeld alterné \\
+2 Steiner — Type II & Terminal intercalé entre $S_0, S_1$ & 15 & Fermat exact \\
+3 Steiner & Chaîne $S_0$–$S_1$–$S_2$ & 15 & Weiszfeld 3 blocs \\
+\midrule
+\textbf{Total} && $\bm{\approx 241}$ & \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+L'optimisation de la chaîne se fait en \textbf{trois passes en cascade} :
+\[
+  S_0 \leftarrow \mathrm{Weber}(T_a,\, T_b,\, S_1),\quad
+  S_1 \leftarrow \mathrm{Weber}(S_0,\, T_c,\, S_2),\quad
+  S_2 \leftarrow \mathrm{Weber}(S_1,\, T_d,\, T_e).
+\]
+Plusieurs initialisations sont testées et la meilleure solution (longueur totale minimale,
+angles à $120°$ vérifiés) est retenue.
+
+\subsection{Cas $n \geq 6$ — MST}
+
+Pour $n \geq 6$, le problème de Steiner est NP-difficile.
+L'application retourne le \textbf{MST via l'algorithme de Prim} ($O(n^2)$),
+garantissant un facteur d'approximation $\leq 2$ par rapport à l'optimal.
+Une heuristique d'insertion itérative de points de Fermat avait été développée, mais
+produisait des points de Steiner superposés dans certaines configurations dégénérées ;
+elle a été remplacée par le MST pour garantir la robustesse et la stabilité visuelle.
+
+\subsection{Validation Python}
+
+Les scripts \texttt{steiner\_4pts.py} et \texttt{steiner\_5pts.py} (dossier \texttt{algorithms/})
+utilisent \texttt{scipy.optimize.minimize} (L-BFGS-B) comme solveur indépendant du backend Java.
+Ils confirment les résultats sur un ensemble de cas tests couvrant configurations génériques,
+dégénérées et limites, validant la correction des implémentations Java.
+
+% ================================================================
+\section{Architecture de l'application}
+% ================================================================
+
+\begin{center}
+\small\setlength{\tabcolsep}{5pt}
+\begin{tabular}{@{}lll@{}}
+\toprule
+\rowcolor{violetClair}
+\textbf{Couche} & \textbf{Technologie} & \textbf{Rôle} \\
+\midrule
+Frontend    & Angular 19 (standalone) & Canvas interactif, modes naïf/MST/Steiner \\
+API         & REST JSON / HTTP        & \texttt{POST /api/steiner/solve} · \texttt{GET /api/steiner/health} \\
+Backend     & Spring Boot 3.5 / Java 17 & Algorithmes, calcul, validation des entrées \\
+Validation  & Python 3 + Scipy        & Scripts de référence indépendants \\
+Déploiement & Docker + Compose        & Conteneurisation des deux services \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Frontend Angular}
+
+Le frontend comprend \textbf{5 composants standalone} :
+\texttt{canvas} (rendu HTML5, placement interactif des points, affichage des arêtes et
+points de Steiner avec couleurs distinctives),
+\texttt{controls} (sélection du mode de calcul, boutons lancer/réinitialiser),
+\texttt{info-panel} (longueurs comparées des trois modes en temps réel),
+\texttt{header} et \texttt{footer}.
+Le service \texttt{steiner.service.ts} centralise tous les appels REST et gère la
+sérialisation des objets \texttt{Point}, \texttt{Edge} et \texttt{SteinerResult}.
+
+\subsection{Backend Java et API REST}
+
+Le backend s'organise en trois couches : \texttt{SteinerController} (exposition REST,
+validation des entrées, gestion des codes HTTP 200/400/500),
+\texttt{SteinerTreeService} (dispatch selon $n$, implémentation de tous les algorithmes),
+et les modèles \texttt{Point / Edge / SteinerResult} (sérialisation JSON).
+
+L'endpoint principal \texttt{POST /api/steiner/solve} reçoit une liste de points en JSON
+et retourne les terminaux, les points de Steiner calculés, les arêtes et la longueur totale.
+Un endpoint \texttt{GET /api/steiner/health} permet de vérifier la disponibilité du service.
+
+% ================================================================
+\section{Prise de recul}
+% ================================================================
+
+\subsection{Bilan}
+
+L'application atteint les objectifs du sujet : solutions exactes et validées pour 2 à 5 points
+(propriété des 120° respectée dans tous les cas), approximation MST robuste pour $n \geq 6$,
+interface interactive avec comparaison simultanée des trois modes (naïf, MST, Steiner),
+et confirmation des résultats par scripts Python indépendants.
+L'architecture frontend/backend est propre, extensible et documentée.
+
+\subsection{Perspective — Extension à un grand nombre de points}
+
+La limite principale identifiée est l'absence d'un algorithme Steiner pour $n \geq 6$ :
+seul le MST est retourné. La prochaine étape naturelle serait d'implémenter
+l'algorithme de \textbf{Zelikovsky} (11/6-approximation~\cite{zelikovsky1993}),
+qui permettrait d'obtenir des solutions de bien meilleure qualité pour 6, 8, 10 points
+ou plus, tout en restant calculable en temps polynomial.
+
+% ================================================================
+\section{Références bibliographiques}
+% ================================================================
+
+\begin{thebibliography}{9}
+\setlength{\itemsep}{2pt}
+
+\bibitem{weiszfeld1937}
+\textbf{Weiszfeld, E.} (1937).
+\textit{Sur le point pour lequel la somme des distances de $n$ points donnés est minimum.}
+Tôhoku Mathematical Journal, 43, 355--386.
+
+\bibitem{gilbert1968}
+\textbf{Gilbert, E.\,N. \& Pollak, H.\,O.} (1968).
+\textit{Steiner Minimal Trees.}
+SIAM Journal on Applied Mathematics, 16(1), 1--29.
+
+\bibitem{smith1992}
+\textbf{Smith, W.\,D.} (1992).
+\textit{How to find Steiner minimal trees in Euclidean $d$-space.}
+Algorithmica, 7(1--6), 137--177.
+
+\bibitem{zelikovsky1993}
+\textbf{Zelikovsky, A.} (1993).
+\textit{An 11/6-approximation algorithm for the network Steiner problem.}
+Algorithmica, 9(5), 463--470.
+
+\bibitem{hwang1992}
+\textbf{Hwang, F.\,K., Richards, D.\,S. \& Winter, P.} (1992).
+\textit{The Steiner Tree Problem.}
+Annals of Discrete Mathematics, 53. Elsevier.
+
+\bibitem{geosteiner2018}
+\textbf{Juhl, D. et al.} (2018).
+\textit{The GeoSteiner software package for computing Steiner trees in the plane.}
+Mathematical Programming Computation, 10, 487--532.
+
+\bibitem{druet}
+\textbf{Druet, O.}
+\textit{Vidéos pédagogiques — Arbre de Steiner et bulles de savon.} YouTube.
+\url{https://www.youtube.com/watch?v=YsuhZ61zvLo}
+
+\end{thebibliography}
+
+\vspace{0.6em}
+\noindent\textcolor{bleu}{\rule{\textwidth}{0.7pt}}
+\begin{center}
+\scriptsize\textit{Dépôt GitHub : \texttt{https://github.com/hamidamediaz/steiner-tree-solver}}
+\end{center}
+
+\end{document}
