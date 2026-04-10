@@ -1,0 +1,523 @@
+\documentclass[12pt, a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, positioning, calc}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{float}
+
+\geometry{margin=2.5cm}
+
+\definecolor{bleu}{RGB}{30, 100, 200}
+\definecolor{rouge}{RGB}{200, 50, 50}
+\definecolor{vert}{RGB}{30, 150, 80}
+\definecolor{gris}{RGB}{100, 100, 100}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=bleu,
+    urlcolor=bleu,
+    citecolor=bleu
+}
+
+\newtheorem{definition}{Définition}
+\newtheorem{propriete}{Propriété}
+\newtheorem{theoreme}{Théorème}
+\newcommand{\dist}[2]{d\!\left(#1,\,#2\right)}
+
+\title{
+    \textbf{Arbre de Steiner euclidien pour 4 points}\\[0.4em]
+    \large Fonctionnement complet de l'algorithme —\\
+    du clic utilisateur au résultat affiché
+}
+\author{Projet Algorithmes 2}
+\date{\today}
+
+% ------------------------------------------------------------------
+\begin{document}
+\maketitle
+\tableofcontents
+\newpage
+
+% ==================================================================
+\section{Vue d'ensemble du système}
+% ==================================================================
+
+L'application est composée de deux parties qui communiquent via HTTP :
+
+\begin{center}
+\begin{tikzpicture}[
+    box/.style={draw, rounded corners, minimum width=3.2cm, minimum height=1cm,
+                fill=#1!10, draw=#1!60, font=\small},
+    arr/.style={-{Stealth}, thick}
+]
+    \node[box=bleu] (front) {Frontend Angular};
+    \node[box=rouge, right=3.5cm of front] (back) {Backend Spring Boot};
+    \node[box=vert, right=3.5cm of back] (algo) {SteinerTreeService};
+
+    \draw[arr] (front) -- node[above, font=\footnotesize]{POST /api/steiner/solve} (back);
+    \draw[arr] (back)  -- node[above, font=\footnotesize]{solve(points)} (algo);
+    \draw[arr] (algo)  to[bend right=30] node[below, font=\footnotesize]{SteinerResult} (back);
+    \draw[arr] (back)  to[bend right=30] node[below, font=\footnotesize]{JSON} (front);
+\end{tikzpicture}
+\end{center}
+
+\bigskip
+
+Lorsque l'utilisateur place exactement \textbf{4 points} sur le canvas et clique sur
+\emph{Calculer l'arbre de Steiner}, la séquence suivante se déclenche :
+
+\begin{enumerate}
+    \item Le composant Angular \texttt{AppComponent} collecte les coordonnées $(x_i, y_i)$.
+    \item \texttt{SteinerService.solve()} envoie un \texttt{POST} au backend avec la liste JSON des 4 points.
+    \item \texttt{SteinerController} reçoit la requête et délègue à \texttt{SteinerTreeService.solve()}.
+    \item Le service détecte $n = 4$ et appelle \texttt{solveForFourPoints()}.
+    \item Le résultat (arêtes + points de Steiner) est renvoyé en JSON et affiché sur le canvas.
+\end{enumerate}
+
+% ==================================================================
+\section{Problème résolu — définition mathématique}
+% ==================================================================
+
+\begin{definition}[Arbre de Steiner euclidien]
+Étant donnés $n$ points terminaux $T_1, \ldots, T_n \in \mathbb{R}^2$, l'arbre de Steiner
+euclidien est l'arbre connexe de longueur minimale qui les relie tous, en autorisant
+l'ajout de nouveaux points intermédiaires appelés \textbf{points de Steiner}.
+\end{definition}
+
+\begin{propriete}[Angles à 120°]
+Dans tout arbre de Steiner euclidien optimal, les arêtes se rejoignent à exactement
+$120°$ en chaque point de Steiner.
+\end{propriete}
+
+\begin{proof}
+Soit $S$ un point de Steiner de degré 3 relié à $A$, $B$, $C$. On minimise
+$f(S) = \dist{S}{A} + \dist{S}{B} + \dist{S}{C}$.
+Le gradient est $\nabla f(S) = \dfrac{S-A}{\|S-A\|} + \dfrac{S-B}{\|S-B\|} + \dfrac{S-C}{\|S-C\|}$.
+À l'optimum, $\nabla f = \mathbf{0}$, donc les trois vecteurs unitaires sortants
+se compensent, ce qui impose des angles de $120°$ entre chaque paire.
+\end{proof}
+
+\begin{propriete}[Nombre maximal de points de Steiner]
+Pour $n$ terminaux, un arbre de Steiner optimal contient \textbf{au plus $n-2$}
+points de Steiner.
+\end{propriete}
+
+\begin{proof}
+Un arbre sur $n + k$ nœuds possède exactement $n + k - 1$ arêtes.
+Chaque point de Steiner est de degré~3 (sinon on peut le supprimer ou le scinder
+pour raccourcir l'arbre).
+La somme des degrés vaut $2(n + k - 1)$.
+Les $n$ terminaux ont degré $\geq 1$, les $k$ points de Steiner contribuent $3k$ :
+\[
+    2(n + k - 1) \;\geq\; n + 3k
+    \;\Longrightarrow\; n \;\geq\; k + 2
+    \;\Longrightarrow\; k \;\leq\; n - 2.
+\]
+Pour $n = 4$ : \textbf{au plus 2 points de Steiner}.
+\end{proof}
+
+% ==================================================================
+\section{Stratégie globale pour 4 points}
+% ==================================================================
+
+Puisqu'il y a au plus 2 points de Steiner, on distingue trois familles de topologies :
+
+\begin{center}
+\begin{tabular}{clcc}
+\toprule
+\textbf{Famille} & \textbf{Structure} & \textbf{Nb. topologies} & \textbf{Méthode} \\
+\midrule
+0 Steiner & Arbre couvrant minimal (MST) & 1 & Algorithme de Prim \\
+1 Steiner & Triplet + terminal isolé & 12 & Point de Fermat-Torricelli \\
+2 Steiner & Partition en deux paires & 3 & Weiszfeld alterné \\
+\midrule
+& \textbf{Total} & \textbf{16} & \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\medskip
+
+L'algorithme évalue toutes les topologies valides et retourne celle de longueur minimale.
+
+% ==================================================================
+\section{Famille 0 — Arbre couvrant minimal (MST)}
+% ==================================================================
+
+\subsection{Définition}
+
+L'arbre couvrant minimal connecte les 4 terminaux sans point de Steiner supplémentaire.
+Il constitue une \textbf{borne supérieure} : toute solution avec des points de Steiner
+doit être strictement plus courte pour être retenue.
+
+\subsection{Algorithme de Prim}
+
+On initialise l'arbre avec $T_1$ et on ajoute itérativement l'arête de poids minimum
+vers un sommet non encore visité.
+
+\begin{align}
+&\text{inMST} = \{T_1\},\quad \text{parent}[i] = -1,\quad \text{minDist}[i] = +\infty \\
+&\text{minDist}[1] = 0 \nonumber\\[4pt]
+&\textbf{Répéter 3 fois :} \nonumber\\
+&\quad u \leftarrow \arg\min_{i \notin \text{inMST}} \text{minDist}[i] \nonumber\\
+&\quad \text{inMST} \leftarrow \text{inMST} \cup \{u\} \nonumber\\
+&\quad \forall v \notin \text{inMST} :
+       \quad \text{si } \dist{T_u}{T_v} < \text{minDist}[v]
+       \;\text{ alors }\; \text{minDist}[v] \leftarrow \dist{T_u}{T_v},\;
+       \text{parent}[v] \leftarrow u \nonumber
+\end{align}
+
+\textbf{Complexité :} $O(n^2)$, négligeable pour $n = 4$.
+
+% ==================================================================
+\section{Famille 1 — Un point de Steiner (12 topologies)}
+% ==================================================================
+
+\subsection{Structure}
+
+On choisit un sous-ensemble de 3 terminaux (\emph{triplet}) et un terminal restant
+(\emph{lone}). Le point de Steiner $S$ est le point de Fermat-Torricelli du triplet.
+Le terminal \emph{lone} se raccorde directement à l'un des 3 terminaux du triplet
+(3 choix).
+
+\medskip
+
+Il y a $\binom{4}{3} = 4$ triplets possibles, chacun donnant 3 attaches, soit
+$4 \times 3 = 12$ topologies.
+
+\begin{center}
+\begin{tikzpicture}[
+    pt/.style={circle, fill=bleu!80, minimum size=6pt, inner sep=0pt},
+    st/.style={circle, fill=rouge!80, minimum size=6pt, inner sep=0pt},
+    edge/.style={thick, gris}
+]
+    \node[pt, label=above left:$T_1$] (T1) at (0, 1.5) {};
+    \node[pt, label=above right:$T_2$] (T2) at (2, 1.5) {};
+    \node[pt, label=below:$T_3$] (T3) at (1, 0) {};
+    \node[pt, label=right:$T_4$ (lone)] (T4) at (3.5, 0.7) {};
+    \node[st, label=above:$S$] (S) at (1, 0.9) {};
+
+    \draw[edge] (S) -- (T1);
+    \draw[edge] (S) -- (T2);
+    \draw[edge] (S) -- (T3);
+    \draw[edge, dashed] (T4) -- (T2) node[midway, above, font=\footnotesize]{attache};
+\end{tikzpicture}
+\end{center}
+
+\subsection{Point de Fermat-Torricelli}
+
+\begin{definition}[Point de Fermat-Torricelli]
+Étant donnés trois points $A$, $B$, $C$, le point de Fermat-Torricelli est le point
+$F$ qui minimise :
+\[
+    f(F) = \dist{F}{A} + \dist{F}{B} + \dist{F}{C}.
+\]
+\end{definition}
+
+\begin{propriete}[Cas du sommet obtus]
+Si l'angle en un sommet du triangle $ABC$ est supérieur ou égal à $120°$, alors
+$F$ coïncide avec ce sommet.
+\end{propriete}
+
+\begin{proof}
+Notons $\alpha$ l'angle en $A$. On a $f(A) = \dist{A}{B} + \dist{A}{C}$.
+Déplacer $F$ au voisinage de $A$ ne peut qu'augmenter $f$, car le gradient de
+$\dist{F}{B} + \dist{F}{C}$ en $F = A$ vaut $\dfrac{A-B}{\|A-B\|} + \dfrac{A-C}{\|A-C\|}$,
+dont la norme est $2\cos(\alpha/2) \leq 1$ pour $\alpha \geq 120°$.
+\end{proof}
+
+\subsection{Algorithme de Weiszfeld (1937)}
+
+Lorsqu'aucun angle n'atteint $120°$, le point de Fermat est calculé par itérations :
+
+\begin{equation}
+\label{eq:weiszfeld}
+    F^{(k+1)} \;=\;
+    \frac{\displaystyle\frac{A}{\dist{F^{(k)}}{A}}
+        + \frac{B}{\dist{F^{(k)}}{B}}
+        + \frac{C}{\dist{F^{(k)}}{C}}}
+         {\displaystyle\frac{1}{\dist{F^{(k)}}{A}}
+        + \frac{1}{\dist{F^{(k)}}{B}}
+        + \frac{1}{\dist{F^{(k)}}{C}}}
+\end{equation}
+
+\textbf{Interprétation :} $F^{(k+1)}$ est la \emph{moyenne pondérée} de $A$, $B$, $C$
+avec des poids $w_i = 1/\dist{F^{(k)}}{P_i}$ (les points éloignés ont moins de poids).
+
+\medskip
+
+\textbf{Convergence :} La suite $(F^{(k)})$ converge vers le minimum global si $F^{(0)}$
+n'est pas confondu avec l'un des $P_i$. On démarre depuis le centroïde
+$F^{(0)} = (A + B + C)/3$.
+
+\medskip
+
+\textbf{Critère d'arrêt :}
+\[
+    \|F^{(k+1)} - F^{(k)}\| \;<\; \varepsilon = 10^{-10}
+    \quad \text{(ou au bout de 50\,000 itérations)}
+\]
+
+\subsection{Cas particuliers dans l'implémentation}
+
+\begin{enumerate}
+    \item \textbf{Triangle dégénéré (colinéaire) :}
+          $|\overrightarrow{AB} \times \overrightarrow{AC}| < 10^{-10}$ $\Rightarrow$
+          retourne \texttt{null}, topologie ignorée.
+    \item \textbf{Angle $\geq 120°$ en $A$ :} $\cos(\angle BAC) \leq -\tfrac{1}{2}$
+          $\Rightarrow$ $F = A$, pas de point de Steiner utile.
+    \item \textbf{$F$ proche d'un sommet :} $\dist{F}{T_i} < 10^{-8}$
+          $\Rightarrow$ pas de point de Steiner ajouté au résultat.
+\end{enumerate}
+
+% ==================================================================
+\section{Famille 2 — Deux points de Steiner (3 topologies)}
+% ==================================================================
+
+\subsection{Structure}
+
+On partitionne les 4 terminaux en deux paires :
+\[
+    \{T_a, T_b\} \;|\; \{T_c, T_d\}.
+\]
+Les trois partitions non ordonnées sont :
+$\{0,1\}|\{2,3\}$,\quad $\{0,2\}|\{1,3\}$,\quad $\{0,3\}|\{1,2\}$.
+
+La topologie est :
+\[
+    S_1 \;\leftrightarrow\; T_a,\; T_b,\; S_2
+    \qquad \text{et} \qquad
+    S_2 \;\leftrightarrow\; T_c,\; T_d,\; S_1.
+\]
+
+\begin{center}
+\begin{tikzpicture}[
+    pt/.style={circle, fill=bleu!80, minimum size=6pt, inner sep=0pt},
+    st/.style={circle, fill=rouge!80, minimum size=6pt, inner sep=0pt},
+    edge/.style={thick, gris}
+]
+    \node[pt, label=above left:$T_a$] (Ta) at (0, 1.5) {};
+    \node[pt, label=below left:$T_b$] (Tb) at (0, 0) {};
+    \node[pt, label=above right:$T_c$] (Tc) at (4, 1.5) {};
+    \node[pt, label=below right:$T_d$] (Td) at (4, 0) {};
+    \node[st, label=above:$S_1$] (S1) at (1.3, 0.75) {};
+    \node[st, label=above:$S_2$] (S2) at (2.7, 0.75) {};
+
+    \draw[edge] (S1) -- (Ta);
+    \draw[edge] (S1) -- (Tb);
+    \draw[edge] (S1) -- (S2);
+    \draw[edge] (S2) -- (Tc);
+    \draw[edge] (S2) -- (Td);
+\end{tikzpicture}
+\end{center}
+
+\subsection{Problème d'optimisation}
+
+On minimise la longueur totale de l'arbre en fonction de $(S_1, S_2) \in \mathbb{R}^4$ :
+\begin{equation}
+\label{eq:objective}
+    \min_{S_1, S_2} f(S_1, S_2) \;=\;
+    \dist{S_1}{T_a} + \dist{S_1}{T_b} + \dist{S_1}{S_2}
+    + \dist{S_2}{T_c} + \dist{S_2}{T_d}.
+\end{equation}
+
+Ce problème est \textbf{convexe} (somme de normes), donc tout minimum local est global.
+
+\subsection{Weiszfeld alterné (coordinate descent)}
+
+On alterne la mise à jour de $S_1$ et $S_2$, chacune étant un sous-problème de
+Weber (point de Fermat de 3 points) :
+
+\bigskip
+
+\textbf{Étape 1 — Mise à jour de $S_1$ en fixant $S_2$}
+
+$S_1$ est le point de Fermat de $\{T_a, T_b, S_2^{(k)}\}$ :
+\begin{equation}
+\label{eq:update_s1}
+    S_1^{(k+1)} \;=\;
+    \frac{\dfrac{T_a}{\dist{S_1^{(k)}}{T_a}}
+        + \dfrac{T_b}{\dist{S_1^{(k)}}{T_b}}
+        + \dfrac{S_2^{(k)}}{\dist{S_1^{(k)}}{S_2^{(k)}}}}
+         {\dfrac{1}{\dist{S_1^{(k)}}{T_a}}
+        + \dfrac{1}{\dist{S_1^{(k)}}{T_b}}
+        + \dfrac{1}{\dist{S_1^{(k)}}{S_2^{(k)}}}}
+\end{equation}
+
+\textbf{Étape 2 — Mise à jour de $S_2$ en fixant $S_1$}
+
+\begin{equation}
+\label{eq:update_s2}
+    S_2^{(k+1)} \;=\;
+    \frac{\dfrac{T_c}{\dist{S_2^{(k)}}{T_c}}
+        + \dfrac{T_d}{\dist{S_2^{(k)}}{T_d}}
+        + \dfrac{S_1^{(k+1)}}{\dist{S_2^{(k)}}{S_1^{(k+1)}}}}
+         {\dfrac{1}{\dist{S_2^{(k)}}{T_c}}
+        + \dfrac{1}{\dist{S_2^{(k)}}{T_d}}
+        + \dfrac{1}{\dist{S_2^{(k)}}{S_1^{(k+1)}}}}
+\end{equation}
+
+\textbf{Critère d'arrêt :}
+\[
+    \max\!\left(
+        \|S_1^{(k+1)} - S_1^{(k)}\|,\;
+        \|S_2^{(k+1)} - S_2^{(k)}\|
+    \right) \;<\; 10^{-10}
+    \quad \text{(ou 50\,000 itérations)}
+\]
+
+\subsection{Initialisations multiples}
+
+Pour éviter les mauvais points de départ, on lance l'optimisation depuis 4 positions
+initiales différentes et on conserve la meilleure :
+
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+\textbf{Init} & \textbf{Position initiale $(S_1^{(0)}, S_2^{(0)})$} \\
+\midrule
+1 & Milieux $\overline{T_a T_b}$ et $\overline{T_c T_d}$ \\
+2 & Milieux décalés de $\tfrac{1}{3}$ vers le centroïde global \\
+3 & Barycentre de $\{T_a, T_b, \mathrm{centroïde}\}$ et de $\{T_c, T_d, \mathrm{centroïde}\}$ \\
+4 & $0{,}65\,T_a + 0{,}35\,\mathrm{centroïde}$ et $0{,}65\,T_c + 0{,}35\,\mathrm{centroïde}$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Validation géométrique}
+
+Après optimisation, on rejette la solution si :
+
+\begin{enumerate}
+    \item $\dist{S_1}{S_2} < \varepsilon$ \quad (les deux Steiner sont confondus),
+    \item $\dist{S_i}{T_j} < \varepsilon$ pour un terminal quelconque \quad (Steiner sur terminal),
+    \item Les angles en $S_1$ ou $S_2$ s'écartent de $120°$ de plus de $10°$.
+\end{enumerate}
+
+\noindent La valeur $\varepsilon = \max(10^{-8},\; 10^{-4} \times \Delta)$ où
+$\Delta = \max_{i < j} \dist{T_i}{T_j}$ est l'échelle du problème.
+
+\textbf{Vérification des angles :} pour le point $S_1$ relié à $T_a$, $T_b$, $S_2$,
+on calcule les trois angles :
+\[
+    \theta_{ab} = \angle(T_a, S_1, T_b),\quad
+    \theta_{aS} = \angle(T_a, S_1, S_2),\quad
+    \theta_{bS} = \angle(T_b, S_1, S_2),
+\]
+où $\angle(P, Q, R) = \arccos\!\left(\dfrac{\overrightarrow{QP} \cdot \overrightarrow{QR}}
+{\|\overrightarrow{QP}\|\,\|\overrightarrow{QR}\|}\right)$.
+
+La topologie est valide si et seulement si chacun de ces angles est dans $[110°, 130°]$.
+
+% ==================================================================
+\section{Sélection de la meilleure topologie}
+% ==================================================================
+
+Après avoir évalué toutes les topologies valides, l'algorithme sélectionne celle
+de longueur totale minimale :
+
+\[
+    \text{best} \;=\; \arg\min_{\text{topologie valide}} \ell(\text{topologie}),
+\]
+
+où $\ell$ est la somme des longueurs de toutes les arêtes.
+
+\medskip
+
+\textbf{Note :} la topologie MST (0 Steiner) est toujours valide et sert de borne
+supérieure. L'algorithme retourne donc toujours un résultat.
+
+% ==================================================================
+\section{Récapitulatif du flux de données}
+% ==================================================================
+
+\begin{center}
+\begin{tikzpicture}[
+    step/.style={draw, rounded corners, fill=#1!10, draw=#1!60,
+                 minimum width=6cm, minimum height=0.8cm, font=\small},
+    arr/.style={-{Stealth}, thick}
+]
+    \node[step=bleu] (A) {Utilisateur clique sur le canvas (4 points)};
+    \node[step=bleu, below=0.4cm of A] (B) {AppComponent.onPointAdded()};
+    \node[step=bleu, below=0.4cm of B] (C) {SteinerService.solve() — POST JSON};
+    \node[step=rouge, below=0.4cm of C] (D) {SteinerController.solve()};
+    \node[step=rouge, below=0.4cm of D] (E) {SteinerTreeService.solveForFourPoints()};
+    \node[step=vert, below=0.4cm of E] (F1) {Évaluation MST (Prim)};
+    \node[step=vert, below=0.4cm of F1] (F2) {12 topologies 1-Steiner (Fermat-Weiszfeld)};
+    \node[step=vert, below=0.4cm of F2] (F3) {3 topologies 2-Steiner (Weiszfeld alterné)};
+    \node[step=rouge, below=0.4cm of F3] (G) {Sélection du minimum — SteinerResult};
+    \node[step=bleu, below=0.4cm of G] (H) {Affichage sur le canvas Angular};
+
+    \foreach \x/\y in {A/B, B/C, C/D, D/E, E/F1, F1/F2, F2/F3, F3/G, G/H}
+        \draw[arr] (\x) -- (\y);
+\end{tikzpicture}
+\end{center}
+
+% ==================================================================
+\section{Exemple numérique — carré unité}
+% ==================================================================
+
+Soit les 4 terminaux $T_1=(0,0)$, $T_2=(1,0)$, $T_3=(1,1)$, $T_4=(0,1)$.
+
+\subsection{MST}
+La longueur du MST vaut $3$ (trois côtés du carré).
+
+\subsection{1 Steiner — triplet $\{T_1, T_2, T_4\}$, lone $= T_3$}
+Les angles intérieurs du triangle rectangle isocèle valent $90°, 45°, 45°$.
+Aucun n'atteint $120°$, donc on calcule le point de Fermat par Weiszfeld.
+La convergence donne $S \approx (0{,}5, 0{,}211)$.
+Longueur totale $\approx 2{,}866$.
+
+\subsection{2 Steiner — partition $\{T_1, T_4\}|\{T_2, T_3\}$}
+Par symétrie, $S_1 = (0, 0{,}5)$ et $S_2 = (1, 0{,}5)$ ne conviennent pas
+(angles de $90°$ seulement). L'optimisation converge vers
+$S_1 \approx (0{,}211, 0{,}5)$ et $S_2 \approx (0{,}789, 0{,}5)$.
+Longueur totale $= 1 + \sqrt{3} \approx 2{,}7321$.
+
+\subsection{Partition $\{T_1, T_2\}|\{T_3, T_4\}$}
+Par symétrie horizontale, la solution est $S_1 \approx (0{,}5, 0{,}211)$
+et $S_2 \approx (0{,}5, 0{,}789)$.
+Longueur totale $= 1 + \sqrt{3} \approx 2{,}7321$.
+
+\subsection{Résultat}
+\[
+    \ell_{\min} \;=\; 1 + \sqrt{3} \;\approx\; 2{,}73205,
+\]
+obtenu avec 2 points de Steiner. C'est la valeur exacte connue pour le carré unité.
+
+% ==================================================================
+\section{Complexité et convergence}
+% ==================================================================
+
+\begin{center}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Phase} & \textbf{Complexité} & \textbf{Convergence} \\
+\midrule
+MST (Prim) & $O(n^2) = O(16)$ & Exacte \\
+Fermat par Weiszfeld & $O(\text{max\_iter})$ & Linéaire garantie \\
+2-Steiner Weiszfeld alterné & $O(4 \times \text{max\_iter})$ & Linéaire (convexe) \\
+Sélection du minimum & $O(16)$ & — \\
+\midrule
+\textbf{Total} & $O(\text{max\_iter})$ & Globalement optimal \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\medskip
+
+La limite de \textbf{50\,000 itérations} est largement suffisante en pratique :
+la convergence est typiquement atteinte en quelques centaines d'itérations pour
+des coordonnées d'écran (ordre de grandeur : pixels).
+
+\end{document}
