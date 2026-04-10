@@ -33,23 +33,19 @@ export class AppComponent implements OnDestroy {
   terminalPoints: Point[] = [];
   selectedMode: ConnectionMode = 'steiner';
 
-  // Steiner solution (backend)
   steinerPoints: Point[] = [];
   steinerEdges: Edge[] = [];
   steinerLength: number | null = null;
 
-  // Connexion naïve (chaîne dans l'ordre de placement)
   naiveEdges: Edge[] = [];
   naiveLength: number | null = null;
 
-  // MST (algorithme de Prim, côté client)
   mstEdges: Edge[] = [];
   mstLength: number | null = null;
 
   isLoading = false;
   errorMessage: string | null = null;
 
-  // RxJS cleanup
   private destroy$ = new Subject<void>();
   private errorTimeoutId: any = null;
 
