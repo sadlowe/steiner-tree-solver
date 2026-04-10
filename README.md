@@ -226,14 +226,6 @@ print(result['topology'])  # '2 Steiner | paires (0, 1) | (2, 3)'
 
 ---
 
-## Documentation mathématique
-
-Les fichiers LaTeX détaillant les algorithmes sont disponibles à la racine :
-
-| Fichier | Contenu |
-|---------|---------|
-| `explication_algo_4_points.tex` | Algorithme complet pour 4 points avec preuves |
-| `explication_algo_5_points.tex` | Algorithme complet pour 5 points avec preuves |
 
 ---
 
