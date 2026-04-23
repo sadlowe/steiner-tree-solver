@@ -1,4 +1,4 @@
-# Environment variables — ne jamais committer
+# Environment
 deploy/.env
 .env
 *.env

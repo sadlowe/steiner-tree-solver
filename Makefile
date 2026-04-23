@@ -1,4 +1,4 @@
-.PHONY: help build push up down logs clean
+.PHONY: help setup login build push up down logs clean
 
 REGISTRY_URL ?= ghcr.io/sadlowe
 BACKEND_IMAGE := steiner-tree-solver-backend:1.0.0
@@ -12,6 +12,8 @@ help:
 	@echo ""
 	@echo "Usage:"
 	@echo "  make help        Show this help message"
+	@echo "  make setup       Create deploy/.env from .env.example (first-time setup)"
+	@echo "  make login       Log in to the Docker registry (ghcr.io)"
 	@echo "  make build       Build Docker images (tagged for local use and registry)"
 	@echo "  make push        Push Docker images to the registry"
 	@echo "  make up          Start the application stack using Docker Compose"
@@ -19,6 +21,17 @@ help:
 	@echo "  make logs        Show logs for the application stack"
 	@echo "  make clean       Remove Docker images and stop the stack"
 	@echo ""
+
+setup:
+	@if [ ! -f deploy/.env ]; then \
+		cp deploy/.env.example deploy/.env; \
+		echo "deploy/.env created — edit it before running make up."; \
+	else \
+		echo "deploy/.env already exists, skipping."; \
+	fi
+
+login:
+	docker login ghcr.io
 
 build:
 	@echo "Building backend Docker image..."

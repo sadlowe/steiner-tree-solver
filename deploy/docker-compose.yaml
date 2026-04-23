@@ -3,7 +3,9 @@ services:
     image: ghcr.io/sadlowe/steiner-tree-solver-backend:1.0.0
     restart: unless-stopped
     pull_policy: if_not_present
-    env_file: .env
+    env_file:
+      - path: .env
+        required: false
     networks:
       - steiner-net
     expose:
