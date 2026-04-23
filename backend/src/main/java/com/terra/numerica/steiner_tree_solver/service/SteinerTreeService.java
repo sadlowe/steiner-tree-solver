@@ -33,7 +33,7 @@ public class SteinerTreeService {
             case 3:  return solveForThreePoints(points);
             case 4:  return solveForFourPoints(points);
             case 5:  return solveForFivePoints(points);
-            default: return solveWithMST(points);
+            default: return solveWithSteinerHeuristic(points);
         }
     }
 

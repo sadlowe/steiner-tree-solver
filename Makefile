@@ -12,7 +12,7 @@ help:
 	@echo ""
 	@echo "Usage:"
 	@echo "  make help        Show this help message"
-	@echo "  make build       Build Docker images for backend and frontend"
+	@echo "  make build       Build Docker images (tagged for local use and registry)"
 	@echo "  make push        Push Docker images to the registry"
 	@echo "  make up          Start the application stack using Docker Compose"
 	@echo "  make down        Stop the application stack"
@@ -22,16 +22,14 @@ help:
 
 build:
 	@echo "Building backend Docker image..."
-	docker build -t $(BACKEND_IMAGE) ./backend
+	docker build -t $(BACKEND_IMAGE) -t $(BACKEND_REMOTE) ./backend
 	@echo "Building frontend Docker image..."
-	docker build -t $(FRONTEND_IMAGE) ./frontend
+	docker build -t $(FRONTEND_IMAGE) -t $(FRONTEND_REMOTE) ./frontend
 
 push:
 	@echo "Pushing backend Docker image..."
-	docker tag $(BACKEND_IMAGE) $(BACKEND_REMOTE)
 	docker push $(BACKEND_REMOTE)
 	@echo "Pushing frontend Docker image..."
-	docker tag $(FRONTEND_IMAGE) $(FRONTEND_REMOTE)
 	docker push $(FRONTEND_REMOTE)
 
 up:
@@ -50,4 +48,3 @@ clean:
 	@echo "Stopping stack and removing images..."
 	$(MAKE) down RMI="--rmi all"
 	@echo "Cleanup complete."
-
