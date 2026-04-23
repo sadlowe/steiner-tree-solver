@@ -111,6 +111,74 @@
   box-shadow: 0 0 12px rgba(168, 85, 247, 0.4);
 }
 
+/* Navigation principale (onglets) */
+.page-nav {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 3px;
+}
+
+.nav-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-secondary);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: all var(--transition-fast);
+}
+
+.nav-btn:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+/* Onglet actif — page Calculateur */
+.nav-btn.nav-active:first-child {
+  background: var(--primary-500);
+  color: white;
+  box-shadow: var(--glow-primary);
+}
+
+/* Onglet actif — page Vérification */
+.nav-btn.nav-active:last-child {
+  background: #f97316;
+  color: white;
+  box-shadow: 0 0 12px rgba(249, 115, 22, 0.4);
+}
+
+/* Verification Button (ancien, gardé pour compatibilité) */
+.verif-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-md);
+  background: transparent;
+  border: 1px solid #f97316;
+  color: #fb923c;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: all var(--transition-fast);
+}
+
+.verif-btn:hover,
+.verif-btn.active {
+  background: rgba(249, 115, 22, 0.15);
+  color: white;
+  box-shadow: 0 0 12px rgba(249, 115, 22, 0.4);
+}
+
 /* Tutorial Button */
 .tutorial-btn {
   display: flex;

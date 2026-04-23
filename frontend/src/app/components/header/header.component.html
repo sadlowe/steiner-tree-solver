@@ -6,14 +6,34 @@
       </span>
       <h1 class="app-title">Résolveur d'Arbre de Steiner</h1>
     </div>
+
     <p class="app-subtitle">
       Visualisation interactive du problème de l'arbre de Steiner
     </p>
+
     <div class="header-actions">
-      <a class="demo-btn" href="/demo.html" target="_blank" rel="noopener" aria-label="Ouvrir la démo pédagogique">
+      <!-- Démo externe -->
+      <a class="demo-btn" href="/demo.html" target="_blank" rel="noopener">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-        Démo interactive
+        Démo
       </a>
+
+      <!-- Navigation principale : deux onglets -->
+      <nav class="page-nav">
+        <a class="nav-btn"
+           routerLink="/"
+           routerLinkActive="nav-active"
+           [routerLinkActiveOptions]="{ exact: true }">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"></path></svg>
+          Mode Algorithme
+        </a>
+        <a class="nav-btn"
+           routerLink="/verification"
+           routerLinkActive="nav-active">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          Points Steiner par utilisateur
+        </a>
+      </nav>
     </div>
   </div>
 </header>
