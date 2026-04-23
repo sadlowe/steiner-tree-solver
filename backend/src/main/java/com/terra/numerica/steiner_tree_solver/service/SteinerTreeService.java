@@ -17,8 +17,8 @@ public class SteinerTreeService {
 
     /**
      * Computes the Euclidean Steiner tree for the given terminal points.
-     * For 2 to 5 points, an exact algorithm is used.
-     * For 6 or more points, the minimum spanning tree (MST) is returned.
+     * For 2 to 5 points, an exact Steiner algorithm is used.
+     * For 6 or more points, the MST (Prim's algorithm) is returned.
      *
      * @param points list of terminal points (minimum 2)
      * @return the Steiner tree result containing edges and optional Steiner points
@@ -33,7 +33,7 @@ public class SteinerTreeService {
             case 3:  return solveForThreePoints(points);
             case 4:  return solveForFourPoints(points);
             case 5:  return solveForFivePoints(points);
-            default: return solveWithSteinerHeuristic(points);
+            default: return solveWithMST(points);
         }
     }
 

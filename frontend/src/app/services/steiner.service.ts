@@ -7,7 +7,8 @@ import { Point, SteinerResult } from '../models';
   providedIn: 'root'
 })
 export class SteinerService {
-  private readonly apiUrl = 'http://localhost:8080/api/steiner';
+  // URL relative : nginx proxifie /api vers le backend en production
+  private readonly apiUrl = '/api/steiner';
 
   constructor(private http: HttpClient) {}
 

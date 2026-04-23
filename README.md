@@ -1,211 +1,216 @@
 # Steiner Tree Solver
 
-Une application web interactive pour calculer et visualiser l'**arbre de Steiner euclidien** — le réseau de longueur minimale reliant un ensemble de points dans le plan.
+> Application web interactive pour calculer et visualiser l'arbre de Steiner euclidien — le réseau de longueur minimale reliant un ensemble de points dans le plan.
 
 ---
 
-## Présentation
+## Démarrage rapide
 
-Le problème de l'arbre de Steiner consiste à connecter $n$ points terminaux en utilisant le moins de longueur possible, en autorisant l'ajout de nouveaux points intermédiaires appelés **points de Steiner**. Dans la solution optimale, les arêtes se rejoignent toujours à exactement **120°** en chaque point de Steiner (point de Fermat-Torricelli).
+```bash
+git clone https://github.com/hamidamediaz/steiner-tree-solver.git
+cd steiner-tree-solver
+make build
+make up
+```
+
+Application disponible sur **http://localhost**
+
+---
+
+## 1. Présentation du projet
+
+Le problème de l'arbre de Steiner consiste à connecter N points terminaux avec la distance totale minimale, en autorisant l'ajout de points intermédiaires appelés **points de Steiner**.
 
 L'application permet de :
 - Placer des points sur un canvas interactif
-- Calculer l'arbre de Steiner optimal (2 à 5 points) ou une heuristique Steiner (6 points et plus)
+- Calculer l'arbre de Steiner optimal (2 à 5 points) ou le MST (6 points et plus)
 - Comparer visuellement trois modes : **Naïf**, **MST**, **Steiner**
 - Voir la longueur totale de chaque solution en temps réel
 
----
-
-## Stack technique
+**Stack technique :**
 
 | Couche | Technologie | Version |
 |--------|-------------|---------|
 | Frontend | Angular | 19 |
 | Backend | Spring Boot (Java) | 3.5 / Java 17 |
-| Build backend | Maven | 3.8+ |
-| Build frontend | Angular CLI | 19 |
-| Communication | REST API JSON | HTTP |
+| Reverse proxy | Nginx | stable-alpine |
+| Conteneurisation | Docker + Compose | 24+ / 2.24+ |
 
 ---
 
-## Architecture
+## 2. Prérequis
 
-```
-steiner-tree-solver/
-├── backend/
-│   └── src/main/java/.../
-│       ├── controller/
-│       │   └── SteinerController.java      # POST /api/steiner/solve
-│       ├── service/
-│       │   └── SteinerTreeService.java     # Algorithmes principaux
-│       └── model/
-│           ├── Point.java
-│           ├── Edge.java
-│           └── SteinerResult.java
-│
-├── frontend/
-│   └── src/app/
-│       ├── components/
-│       │   ├── canvas/                     # Canvas interactif
-│       │   ├── controls/                   # Boutons et modes
-│       │   ├── info-panel/                 # Longueur et statistiques
-│       │   ├── header/
-│       │   └── footer/
-│       ├── services/
-│       │   └── steiner.service.ts          # Appels HTTP vers le backend
-│       └── models/                         # Point, Edge, SteinerResult
-│
-├── deploy/
-│   ├── docker-compose.yaml                 # Stack de production
-│   ├── .env.example                        # Modèle de configuration
-│   └── .env                               # Configuration locale (non commité)
-│
-└── algorithms/                             # Scripts Python de référence
-    ├── steiner_4pts.py                     # Solveur exact 4 points (scipy)
-    └── steiner_5pts.py                     # Solveur exact 5 points (scipy)
-```
+| Outil | Version minimale | Vérification |
+|-------|-----------------|--------------|
+| Docker | 24+ | `docker --version` |
+| Docker Compose | 2.24+ | `docker compose version` |
+| Make | - | `make --version` |
+
+> Sur Windows, utiliser **WSL 2** avec Docker Desktop (activer l'intégration WSL dans les paramètres Docker Desktop → Resources → WSL Integration).
 
 ---
 
-## Algorithmes
-
-### 2 points
-Segment direct entre les deux terminaux.
-
-### 3 points — Point de Fermat-Torricelli
-Si un angle du triangle est ≥ 120°, ce sommet est le hub optimal.
-Sinon, le point de Fermat est calculé par **itérations de Weiszfeld** jusqu'à convergence.
-
-### 4 points — Énumération exhaustive (16 topologies)
-
-| Famille | Structure | Nb. topologies | Méthode |
-|---------|-----------|----------------|---------|
-| 0 Steiner | MST (Prim) | 1 | Exact |
-| 1 Steiner | Fermat(triplet) + terminal isolé | 12 | Weiszfeld |
-| 2 Steiner | Partition en 2 paires | 3 | Weiszfeld alterné |
-
-### 5 points — Énumération exhaustive (~241 topologies)
-
-| Famille | Structure | Nb. topologies | Méthode |
-|---------|-----------|----------------|---------|
-| 0 Steiner | MST | 1 | Prim |
-| 1 Steiner | Fermat(triplet) + 2 terminaux raccrochés | ~150 | Weiszfeld |
-| 2 Steiner Type I | S0–S1 directs + queue | 60 | Weiszfeld alterné |
-| 2 Steiner Type II | Terminal milieu entre S0 et S1 | 15 | Fermat exact |
-| 3 Steiner | Chaîne S0–S1–S2 (unique structure valide) | 15 | Weiszfeld 3 blocs |
-
-### 6 points et plus — Heuristique Steiner
-Le MST est calculé puis amélioré itérativement par insertion de points de Fermat aux angles > 120°.
-
----
-
-## Prérequis
-
-| Outil | Version minimale |
-|-------|-----------------|
-| Docker | 24+ |
-| Docker Compose | 2.24+ |
-| make | - |
-
-Pour le développement local sans Docker :
-
-| Outil | Version minimale |
-|-------|-----------------|
-| Java | 17 |
-| Maven | 3.8 |
-| Node.js | 18 |
-| npm | 9 |
-
----
-
-## Lancement en développement
-
-### 1. Cloner le dépôt
+## 3. Récupération du projet
 
 ```bash
 git clone https://github.com/hamidamediaz/steiner-tree-solver.git
 cd steiner-tree-solver
 ```
 
-### 2. Lancer le backend
+---
+
+## 4. Build
+
+Construit les images Docker du backend et du frontend :
 
 ```bash
-cd backend
-./mvnw spring-boot:run
+make build
 ```
 
-Le serveur démarre sur **http://localhost:8080**.
-
-### 3. Lancer le frontend
+Commandes équivalentes sans Make :
 
 ```bash
-cd frontend
-npm install
-npm start
+docker build -t steiner-tree-solver-backend:1.0.0 ./backend
+docker build -t steiner-tree-solver-frontend:1.0.0 ./frontend
 ```
-
-L'application est accessible sur **http://localhost:4200**.
 
 ---
 
-## Déploiement avec Docker
-
-### Cas 1 — Build local puis lancement (développeur)
+## 5. Lancement en production
 
 ```bash
-# 1. Construire les images localement
-make build
-
-# 2. Démarrer la stack
 make up
 ```
 
-L'application est disponible sur **http://localhost**.
-
-### Cas 2 — Déploiement sur un serveur distant
+Commande équivalente sans Make :
 
 ```bash
-# 1. Cloner le dépôt sur le serveur
+docker compose -f ./deploy/docker-compose.yaml up -d
+```
+
+**Ports exposés :**
+
+| Service | Port | URL |
+|---------|------|-----|
+| Frontend (Nginx) | 80 | http://localhost |
+| Backend (Spring Boot) | interne uniquement | non accessible directement |
+
+> Le backend n'est pas exposé publiquement. Toutes les requêtes `/api` passent par Nginx.
+
+---
+
+## 6. Configuration
+
+Le fichier de configuration se trouve dans `deploy/.env`.  
+Il n'est pas commité — créer le depuis le modèle :
+
+```bash
+make setup
+# ou manuellement :
+cp deploy/.env.example deploy/.env
+```
+
+| Variable | Description | Valeur par défaut |
+|----------|-------------|-------------------|
+| `CORS_ALLOWED_ORIGINS` | Origines autorisées par le backend | `*` (toutes) |
+
+> Sans fichier `.env`, l'application fonctionne avec les valeurs par défaut.
+
+---
+
+## 7. Structure de déploiement
+
+Fichiers nécessaires pour déployer sur un serveur :
+
+```
+deploy/
+├── docker-compose.yaml   # stack de production
+├── .env.example          # modèle de configuration
+└── .env                  # configuration locale (à créer)
+```
+
+**Workflow pour un déploiement sur serveur distant :**
+
+```bash
+# 1. Cloner le projet
 git clone https://github.com/hamidamediaz/steiner-tree-solver.git
 cd steiner-tree-solver
 
-# 2. Créer le fichier de configuration
+# 2. Créer la configuration
 make setup
-# Puis éditer deploy/.env si nécessaire :
-# CORS_ALLOWED_ORIGINS=https://votre-domaine.com
 
 # 3. Se connecter au registry Docker
 make login
-# Saisir votre nom d'utilisateur et token GHCR quand demandé
 
-# 4. Démarrer la stack (les images sont pullées depuis le registry)
+# 4. Lancer la stack (pull automatique des images)
 make up
 ```
 
-L'application est disponible sur **http://IP-DU-SERVEUR**.
+---
 
-### Référence des commandes Make
+## 8. Vérification
+
+**Voir les logs en temps réel :**
 
 ```bash
-make help    # Afficher l'aide
-make setup   # Créer deploy/.env depuis .env.example
-make login   # Se connecter à ghcr.io
-make build   # Construire les images Docker
-make push    # Pousser les images vers le registry
-make up      # Démarrer la stack
-make down    # Arrêter la stack
-make logs    # Afficher les logs en temps réel
-make clean   # Arrêter et supprimer les images
+make logs
+# ou :
+docker compose -f ./deploy/docker-compose.yaml logs -f
 ```
 
-### Configuration
+**Tester l'application dans le navigateur :**
 
-La variable `CORS_ALLOWED_ORIGINS` dans `deploy/.env` contrôle les origines autorisées par le backend.
-Par défaut (sans `.env`), toutes les origines sont acceptées (`*`).
+```
+http://localhost
+```
 
-| Variable | Description | Exemple |
-|----------|-------------|---------|
-| `CORS_ALLOWED_ORIGINS` | Origine(s) autorisée(s) par le backend | `https://mon-domaine.com` |
+**Vérifier que le backend répond :**
+
+```
+http://localhost/api/steiner/health
+```
+
+Réponse attendue : `Steiner Tree Solver API is running`
+
+---
+
+## 9. Arrêt et redémarrage
+
+```bash
+# Arrêter la stack
+make down
+
+# Redémarrer
+make up
+
+# Supprimer les images
+make clean
+```
+
+---
+
+## 10. Remarques importantes
+
+- **Port 80** doit être libre sur la machine hôte
+- Le backend démarre en **~30 secondes** (JVM) — le frontend attend automatiquement qu'il soit prêt (`healthcheck`)
+- **6 points et plus** : l'algorithme utilisé est le MST (Prim), pas un Steiner exact
+- Les images Docker sont hébergées sur `ghcr.io/sadlowe` — un `docker login ghcr.io` est requis si les images ne sont pas construites localement
+
+---
+
+## Référence des commandes Make
+
+```bash
+make help     # afficher l'aide
+make setup    # créer deploy/.env depuis .env.example
+make login    # connexion à ghcr.io
+make build    # construire les images Docker
+make push     # publier les images sur le registry
+make up       # démarrer la stack
+make down     # arrêter la stack
+make logs     # afficher les logs
+make clean    # arrêter et supprimer les images
+```
 
 ---
 
@@ -213,25 +218,19 @@ Par défaut (sans `.env`), toutes les origines sont acceptées (`*`).
 
 ### `POST /api/steiner/solve`
 
-Calcule l'arbre de Steiner pour une liste de points.
-
-**Corps de la requête :**
 ```json
+// Corps de la requête
 [
   { "x": 100, "y": 200 },
   { "x": 400, "y": 100 },
   { "x": 300, "y": 450 }
 ]
-```
 
-**Réponse :**
-```json
+// Réponse
 {
-  "terminalPoints": [{ "x": 100, "y": 200 }, ...],
-  "steinerPoints":  [{ "x": 267, "y": 284 }],
-  "edges": [
-    { "start": { "x": 267, "y": 284 }, "end": { "x": 100, "y": 200 } }
-  ],
+  "terminalPoints": [...],
+  "steinerPoints": [...],
+  "edges": [...],
   "totalLength": 523.41
 }
 ```
@@ -245,26 +244,6 @@ Calcule l'arbre de Steiner pour une liste de points.
 ### `GET /api/steiner/health`
 
 Vérifie que le backend est actif.
-
----
-
-## Scripts Python (référence)
-
-Les scripts dans `algorithms/` permettent de valider les résultats du backend avec une implémentation indépendante utilisant `scipy`.
-
-**Prérequis :**
-```bash
-pip install numpy scipy matplotlib
-```
-
-**Exemple :**
-```python
-from algorithms.steiner_4pts import steiner_tree_4_points
-
-result = steiner_tree_4_points([(0,0), (1,0), (1,1), (0,1)])
-print(result['length'])    # 2.73205...  (= 1 + √3)
-print(result['topology'])  # '2 Steiner | paires (0, 1) | (2, 3)'
-```
 
 ---
 
