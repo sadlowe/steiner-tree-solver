@@ -1,9 +1,9 @@
 .PHONY: help setup login build push up down logs clean
 
 REGISTRY_URL ?= ghcr.io/sadlowe
-BACKEND_IMAGE := steiner-tree-solver-backend:1.0.0
+BACKEND_IMAGE  := steiner-tree-solver-backend:1.0.0
 FRONTEND_IMAGE := steiner-tree-solver-frontend:1.0.0
-BACKEND_REMOTE := $(REGISTRY_URL)/steiner-tree-solver-backend:1.0.0
+BACKEND_REMOTE  := $(REGISTRY_URL)/steiner-tree-solver-backend:1.0.0
 FRONTEND_REMOTE := $(REGISTRY_URL)/steiner-tree-solver-frontend:1.0.0
 COMPOSE_FILE := ./deploy/docker-compose.yaml
 
@@ -22,6 +22,7 @@ help:
 	@echo "  make clean       Remove Docker images and stop the stack"
 	@echo ""
 
+# Crée deploy/.env depuis l'exemple si le fichier n'existe pas encore
 setup:
 	@if [ ! -f deploy/.env ]; then \
 		cp deploy/.env.example deploy/.env; \
@@ -33,6 +34,7 @@ setup:
 login:
 	docker login ghcr.io
 
+# Double tag : local (pour docker compose) + remote (pour le push)
 build:
 	@echo "Building backend Docker image..."
 	docker build -t $(BACKEND_IMAGE) -t $(BACKEND_REMOTE) ./backend

@@ -2,12 +2,15 @@ services:
   backend:
     image: ghcr.io/sadlowe/steiner-tree-solver-backend:1.0.0
     restart: unless-stopped
+    # Ne pull que si l'image n'est pas déjà présente localement
     pull_policy: if_not_present
+    # .env optionnel : si absent, les valeurs par défaut de l'application s'appliquent
     env_file:
       - path: .env
         required: false
     networks:
       - steiner-net
+    # Port interne uniquement, non exposé à l'extérieur (accès via Nginx)
     expose:
       - "8080"
     healthcheck:
@@ -15,6 +18,7 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5
+      # Délai étendu pour laisser la JVM démarrer
       start_period: 60s
     deploy:
       resources:
@@ -30,6 +34,7 @@ services:
       - "80:80"
     networks:
       - steiner-net
+    # Attend que le backend soit healthy avant de démarrer
     depends_on:
       backend:
         condition: service_healthy
