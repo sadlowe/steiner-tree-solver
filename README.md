@@ -148,9 +148,23 @@ make up
 
 ---
 
-## 8. Vérification
+## 8. Vérification et accès à l'application
 
-**Voir les logs en temps réel :**
+### Étape 1 — Vérifier que les conteneurs sont bien démarrés
+
+```bash
+docker compose -f ./deploy/docker-compose.yaml ps
+```
+
+Les deux services doivent afficher le statut `running` ou `healthy` :
+
+```
+NAME                STATUS
+deploy-backend-1    running (healthy)
+deploy-frontend-1   running
+```
+
+### Étape 2 — Voir les logs en temps réel
 
 ```bash
 make logs
@@ -158,19 +172,37 @@ make logs
 docker compose -f ./deploy/docker-compose.yaml logs -f
 ```
 
-**Tester l'application dans le navigateur :**
+> Le backend (Spring Boot) prend environ **30 secondes** à démarrer. Attendre la ligne :
+> `Started SteinerTreeSolverApplication in XX seconds`
+
+### Étape 3 — Ouvrir l'application dans le navigateur
+
+Ouvrir n'importe quel navigateur (Chrome, Firefox, Edge…) et aller à :
 
 ```
 http://localhost
 ```
 
-**Vérifier que le backend répond :**
+L'interface de l'application Steiner Tree Solver s'affiche. Vous pouvez :
+1. **Cliquer sur le canvas** pour placer des points
+2. **Cliquer sur "Solve"** pour calculer l'arbre de Steiner
+3. **Voir le résultat** dessiné sur le canvas avec la longueur totale
+
+### Étape 4 — Vérifier que le backend répond
+
+Dans le navigateur ou avec curl :
 
 ```
 http://localhost/api/steiner/health
 ```
 
-Réponse attendue : `Steiner Tree Solver API is running`
+Réponse attendue dans le navigateur :
+
+```
+Steiner Tree Solver API is running
+```
+
+> Si cette page répond, le backend est bien actif et l'application est entièrement fonctionnelle.
 
 ---
 
