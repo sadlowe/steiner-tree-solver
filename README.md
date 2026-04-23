@@ -247,6 +247,55 @@ Vérifie que le backend est actif.
 
 ---
 
+## Structure du projet
+
+```
+steiner-tree-solver/
+│
+├── backend/                        # API Spring Boot (Java 17)
+│   ├── src/main/java/.../
+│   │   ├── controller/             # Endpoints REST
+│   │   ├── service/                # Algorithmes Steiner et MST
+│   │   └── model/                  # Point, Edge, SteinerResult
+│   ├── Dockerfile
+│   └── pom.xml
+│
+├── frontend/                       # Application Angular 19
+│   ├── src/app/
+│   │   ├── components/             # Canvas, contrôles, header, footer
+│   │   ├── services/               # Appels HTTP vers le backend
+│   │   └── models/                 # Interfaces TypeScript
+│   ├── nginx.conf                  # Config reverse proxy
+│   └── Dockerfile
+│
+├── deploy/                         # Fichiers de déploiement production
+│   ├── docker-compose.yaml
+│   ├── .env.example
+│   └── .env                        # À créer (non commité)
+│
+├── algorithms/                     # Scripts Python de référence (scipy)
+│   ├── steiner_4pts.py
+│   └── steiner_5pts.py
+│
+├── docs/                           # Documentation du projet
+│   ├── Rapport_algo_2_arbre_de_steinner-2026.pdf
+│   └── fiche-technique.pdf
+│
+├── Makefile                        # Commandes de build et déploiement
+└── README.md
+```
+
+---
+
+## Documentation
+
+| Document | Description | Lien |
+|----------|-------------|------|
+| Rapport | Rapport complet du projet Algorithmes 2 | [`docs/Rapport_algo_2_arbre_de_steinner-2026.pdf`](docs/Rapport_algo_2_arbre_de_steinner-2026.pdf) |
+| Fiche technique | Fiche technique de l'application | [`docs/fiche-technique.pdf`](docs/fiche-technique.pdf) |
+
+---
+
 ## Auteurs
 
 Projet réalisé dans le cadre du cours **Algorithmes 2**.
