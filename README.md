@@ -53,7 +53,7 @@ L'application permet de :
 ## 3. Récupération du projet
 
 ```bash
-git clone https://github.com/hamidamediaz/steiner-tree-solver.git
+git clone https://github.com/sadlowe/steiner-tree-solver.git
 cd steiner-tree-solver
 ```
 
