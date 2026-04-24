@@ -10,9 +10,9 @@
 	</parent>
 	<groupId>com.terra.numerica</groupId>
 	<artifactId>steiner-tree-solver</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0.0</version>
 	<name>steiner-tree-solver</name>
-	<description>Demo project for Spring Boot</description>
+	<description>Application web de calcul et visualisation de l'arbre de Steiner euclidien</description>
 	<url/>
 	<licenses>
 		<license/>

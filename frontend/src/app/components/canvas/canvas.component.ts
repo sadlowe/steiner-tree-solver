@@ -16,6 +16,7 @@ export class CanvasComponent implements AfterViewInit, OnChanges {
   @Input() height = 600;
   @Input() terminalPoints: Point[] = [];
   @Input() steinerPoints: Point[] = [];
+  @Input() userSteinerPoints: Point[] = [];
   @Input() edges: Edge[] = [];
   @Input() isAddingEnabled = true;
   @Input() edgeColor: string = '#10b981';
@@ -28,6 +29,7 @@ export class CanvasComponent implements AfterViewInit, OnChanges {
   private readonly STEINER_RADIUS = 6;
   private readonly TERMINAL_COLOR = '#00bfff';
   private readonly STEINER_COLOR = '#a855f7';
+  private readonly USER_STEINER_COLOR = '#f97316';
   private readonly EDGE_WIDTH = 2;
   private readonly BACKGROUND_COLOR = '#0a0e17';
   private readonly GRID_COLOR = 'rgba(148, 163, 184, 0.08)';
@@ -77,6 +79,7 @@ export class CanvasComponent implements AfterViewInit, OnChanges {
     this.clearCanvas();
     this.drawGrid();
     this.drawEdges();
+    this.drawUserSteinerPoints();
     this.drawSteinerPoints();
     this.drawTerminalPoints();
   }
@@ -133,8 +136,13 @@ export class CanvasComponent implements AfterViewInit, OnChanges {
 
   private drawSteinerPoints(): void {
     for (let i = 0; i < this.steinerPoints.length; i++) {
-      const point = this.steinerPoints[i];
-      this.drawPoint(point, this.STEINER_RADIUS, this.STEINER_COLOR, `S${i + 1}`);
+      this.drawPoint(this.steinerPoints[i], this.STEINER_RADIUS, this.STEINER_COLOR, `S${i + 1}`);
+    }
+  }
+
+  private drawUserSteinerPoints(): void {
+    for (let i = 0; i < this.userSteinerPoints.length; i++) {
+      this.drawPoint(this.userSteinerPoints[i], this.STEINER_RADIUS, this.USER_STEINER_COLOR, `U${i + 1}`);
     }
   }
 

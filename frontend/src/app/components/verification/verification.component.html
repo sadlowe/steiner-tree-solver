@@ -1,0 +1,143 @@
+<div class="verif-page">
+
+  <!-- En-tête de la page -->
+  <div class="verif-topbar">
+    <div class="verif-title-block">
+      <h2 class="verif-title">Mode Vérification — Placez vos points de Steiner</h2>
+      <p class="verif-subtitle" *ngIf="!isVerified">
+        <span class="step"><span class="step-num">1</span> Sélectionnez <strong>Point terminal</strong> et cliquez pour placer vos villes à relier</span>
+        <span class="step-sep">·</span>
+        <span class="step"><span class="step-num">2</span> Sélectionnez <strong>Point de Steiner</strong> et placez vos points intermédiaires supposés</span>
+        <span class="step-sep">·</span>
+        <span class="step"><span class="step-num">3</span> Cliquez sur <strong>Vérifier</strong> pour comparer avec la solution exacte</span>
+      </p>
+      <p class="verif-subtitle verified" *ngIf="isVerified">
+        <span class="legend-item"><span class="dot cyan"></span> Points terminaux</span>
+        <span class="legend-item"><span class="dot orange"></span> Vos points de Steiner</span>
+        <span class="legend-item"><span class="dot purple"></span> Points de Steiner réels (solution exacte)</span>
+      </p>
+    </div>
+  </div>
+
+  <!-- Contenu principal -->
+  <main class="verif-layout">
+
+    <!-- Canvas -->
+    <section class="canvas-section">
+      <div class="mode-badge-row" *ngIf="!isVerified">
+        <div class="mode-badge" [class.steiner-mode]="placingMode === 'steiner'">
+          <span class="mode-dot"></span>
+          Mode actuel :
+          <strong>{{ placingMode === 'terminal' ? 'Point terminal (cyan)' : 'Point de Steiner (orange)' }}</strong>
+        </div>
+      </div>
+
+      <app-canvas
+        [width]="950"
+        [height]="540"
+        [terminalPoints]="terminalPoints"
+        [userSteinerPoints]="userSteinerPoints"
+        [steinerPoints]="realSteinerPoints"
+        [edges]="realEdges"
+        [edgeColor]="'#10b981'"
+        [isAddingEnabled]="!isVerified && !isLoading"
+        (pointAdded)="onPointAdded($event)">
+      </app-canvas>
+    </section>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+
+      <!-- Mode selector -->
+      <div class="mode-selector" *ngIf="!isVerified">
+        <button
+          class="mode-btn"
+          [class.active-terminal]="placingMode === 'terminal'"
+          (click)="placingMode = 'terminal'">
+          <span class="btn-dot cyan"></span>
+          Point terminal
+        </button>
+        <button
+          class="mode-btn"
+          [class.active-steiner]="placingMode === 'steiner'"
+          (click)="placingMode = 'steiner'">
+          <span class="btn-dot orange"></span>
+          Point de Steiner
+        </button>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-panel">
+        <div class="stat-item">
+          <span class="stat-label">Terminaux</span>
+          <span class="stat-value cyan">{{ terminalPoints.length }}</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Vos Steiner</span>
+          <span class="stat-value orange">{{ userSteinerPoints.length }}</span>
+        </div>
+        <div class="stat-item" *ngIf="isVerified">
+          <span class="stat-label">Vrais Steiner</span>
+          <span class="stat-value purple">{{ realSteinerPoints.length }}</span>
+        </div>
+      </div>
+
+      <!-- Controls -->
+      <div class="controls-panel" *ngIf="!isVerified">
+        <button class="btn-secondary" (click)="removeLastPoint()" [disabled]="isLoading">
+          ↩ Annuler dernier
+        </button>
+        <button class="btn-verify" (click)="onVerify()" [disabled]="!canVerify">
+          <span *ngIf="!isLoading">✓ Vérifier ma solution</span>
+          <span *ngIf="isLoading">Calcul en cours...</span>
+        </button>
+        <button class="btn-ghost" (click)="onReset()">Réinitialiser</button>
+      </div>
+
+      <!-- Résultats -->
+      <div class="results-panel" *ngIf="isVerified">
+        <div class="score-header">
+          <span class="score-label">Score</span>
+          <span class="score-value" [style.color]="scoreColor">
+            {{ correctCount }}/{{ realSteinerPoints.length }}
+            <span class="score-percent">({{ scorePercent }}%)</span>
+          </span>
+        </div>
+
+        <div class="no-steiner-msg" *ngIf="realSteinerPoints.length === 0">
+          <span class="check-icon">✅</span>
+          <p>La solution optimale ne nécessite aucun point de Steiner pour cette configuration.</p>
+        </div>
+
+        <div class="feedback-list" *ngIf="realSteinerPoints.length > 0">
+          <div class="feedback-item" *ngFor="let f of feedback"
+               [class.correct]="f.isCorrect"
+               [class.wrong]="!f.isCorrect">
+            <span class="fb-icon">{{ f.isCorrect ? '✅' : '❌' }}</span>
+            <div class="fb-detail">
+              <span class="fb-label">Votre point U{{ f.index }}</span>
+              <span class="fb-dist" *ngIf="f.nearestReal">
+                à {{ f.distance | number:'1.0-0' }}px du point réel
+              </span>
+              <span class="fb-dist" *ngIf="!f.nearestReal">aucun point réel correspondant</span>
+            </div>
+          </div>
+
+          <div class="missing-msg" *ngIf="userSteinerPoints.length < realSteinerPoints.length">
+            <span class="fb-icon">ℹ️</span>
+            <span>{{ realSteinerPoints.length - userSteinerPoints.length }} point(s) manquant(s)</span>
+          </div>
+        </div>
+
+        <button class="btn-verify" (click)="onReset()">Recommencer</button>
+        <button class="btn-back-inline" (click)="goHome()">← Retour à l'application</button>
+      </div>
+
+      <!-- Erreur -->
+      <div class="error-msg" *ngIf="errorMessage">
+        ⚠️ {{ errorMessage }}
+      </div>
+
+    </aside>
+  </main>
+</div>
